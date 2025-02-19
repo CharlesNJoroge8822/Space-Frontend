@@ -7,10 +7,14 @@ export default function Footer() {
   return (
     <div className="footer">
       <img src={logoPhoto} alt="Logo" />
-      <p>Ivy Court</p>
-      <p>Come as a guest, leave as a friend</p>
+      <div className="header">
+         <p>Ivy Court</p>
+      </div>
+      <div className="para-graph">
+        <p>Come as a guest, leave as a friend</p>
+      </div>
       <br />
-      {/* For the icons. I installed them ---> Check chatgpt */}
+      {/* For the icons. I installed them */}
       <div className="social-icons">
         <a href="https://tiktok.com/yourprofile" target="_blank" rel="noopener noreferrer">
           <FontAwesomeIcon icon={faTiktok} size="2x" />
