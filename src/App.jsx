@@ -11,6 +11,8 @@ import NoPage from './pages/NoPage'
 import Profile from './pages/Profile'
 import Register from './pages/Register'
 import About from './pages/About'
+import AdminForm from './pages/AdminForm'
+import AddSpace from './pages/AddSpace'
 
 function App() {
 
@@ -25,6 +27,8 @@ function App() {
                 <Route path="/about" element={<About />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/bookings" element={<Bookings />} />
+                <Route path="/AdminForm" element={<AdminForm />} />
+                <Route path="/addspace" element={<AddSpace />} />
                 <Route path="*" element={<NoPage />} />
             </Route>
           </Routes>

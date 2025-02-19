@@ -1,9 +1,8 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import { useState } from "react";
 // import { UserContext } from "../context/UserContext";
 
-export default function Login() {
+export default function AdminForm() {
 
     // const {login} = useContext(UserContext)
 
@@ -17,7 +16,6 @@ export default function Login() {
     // login(email, password)
 
     // };
-
     return (
         <div className="login-container">
             <div className="form-box">
@@ -30,20 +28,7 @@ export default function Login() {
                     <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
                     <br></br>
                     <br></br>
-                    <p>Forgot password?</p>
-                    <br></br>
                     <button type="submit">LOGIN</button>
-                    <br></br>
-                    <br></br>
-                    <button type="submit">Sign in with Google</button>
-                    <br></br>
-                    <br></br>
-                    <button type="submit">Sign in with Facebook</button>
-                    <br></br>
-                    <br></br>
-                    <p>Don't have an account?<Link to="/Register"><strong> Register</strong></Link></p>
-                    <p><strong>Or</strong></p>
-                    <p>Are you an admin?<Link to="/AdminForm"><strong> Sign in here!</strong></Link></p>
                 </form>
             </div>
         </div>

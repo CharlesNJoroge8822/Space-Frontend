@@ -110,7 +110,7 @@ body {
 
 .text h4 {
   font-family: 'Red Hat Display';
-  font-weight: light;
+  font-weight: 400;
   color:#104436;
 }
 
@@ -128,6 +128,207 @@ body {
   color: black;
 }
 
+.second-container p {
+  font-family: 'Red Hat Display';
+  font-weight: light;
+  color:#104436;
+  margin-left: 45px;
+}
+
+.second-container h3 {
+  font-family: 'Red Hat Display';
+  font-size: 50px;
+  color:#104436;
+  font-weight:500;
+  margin-left: 40px;
+}
+
+/* SINGLE PAGES */
+.product-grid {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.product-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 200px; /* Set a fixed width for consistency */
+}
+
+.product-item img {
+  width: 200%;
+  height: auto;
+  transition: opacity 0.5s ease;
+  border-radius: 20px;
+  border-bottom-right-radius: 20px;
+}
+
+.product-item img:hover {
+  transform: scale(0.8);
+}
+
+.product-item p {
+  font-family: 'Red Hat Display';
+  font-size: 18px;
+  color:#104436;
+}
+
+.product-item a {
+  background-color: #104436;
+  color: white;
+  font-family: Inria Serif;
+  width: 200%; /* Match the image width */
+  height: auto; /* Adjust the height based on content */
+  padding: 10px; /* Add padding for a consistent look */
+  padding-top: 20px;
+  padding-bottom: 20px;
+  border: none; /* Optional: Remove border */
+  border-radius: 15px; /* Optional: Add border-radius to match the image */
+  margin-top: 10px; /* Add spacing between image and button */
+  cursor: pointer; /* Add a pointer cursor for better UX */
+  margin-bottom: 20px;
+  text-decoration: none;
+  font-size: 20px;
+}
+
+.product-item a:hover {
+  background-color: #256a57;
+  color: white;
+  text-decoration: none;
+}
+
+.third-container {
+  display: flex;
+  padding: 30px;
+  position: relative; 
+  margin-top: 50px;
+}
+
+.third-container img {
+  width: 500px;
+  border-radius: 15px;
+  margin-right: 70px;
+  margin-left: 70px;
+  /* transition: opacity 0.5s ease; */
+}
+
+.text-third h4 {
+  font-family: 'Red Hat Display';
+  font-weight: 400;
+  color:#104436;
+  margin-left: 45px;
+}
+
+.text-third h3 {
+  font-family: 'Red Hat Display';
+  font-size: 50px;
+  color:#104436;
+  font-weight:500;
+}
+
+.text-third p {
+  color: black;
+  margin-bottom: 30px;
+}
+
+.icons p {
+  display: flex;
+  align-items: center;
+}
+
+.icons p .svg-inline--fa {
+  margin-right: 10px; /* Adjust the value as needed */
+}
+
+
+/* END OF HOME ============================================================== */
+
+
+/* REGISTER FORM ============================================================ */
+
+.register-container {
+  justify-items: center;
+  text-align: center;
+}
+
+.form-box {
+  background-color: #F1EDE5;
+  padding: 40px;
+  padding-top:10px;
+  border-radius: 12px;
+  border-bottom: 8px solid #104436;
+  border-right: 8px solid #104436;
+  border-radius: 20px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 400px;
+  margin-bottom: 40px;
+}
+
+.form-box h2 {
+  font-family: Inria Serif;
+  font-weight: light;
+  font-size: 35px;
+}
+
+input {
+  width: 80%;
+  padding: 20px;
+  border-radius: 20px;
+  background-color: #F1EDE5;
+  font-family: 'Red Hat Display';
+  font-size: 15px;
+}
+
+input::placeholder {
+  font-family: 'Red Hat Display';
+  background-color: #F1EDE5;
+}
+
+.form-box button {
+  width: 90%;
+  padding: 20px;
+  border-radius: 20px;
+  background-color: #104436;
+  color:#F0EEE2;
+  font-family: Inria Serif;
+  font-weight: lighter;
+  font-size: 18px;
+}
+
+.form-box button:hover {
+  background-color: #256a57;
+  color: white;
+  border: none;
+}
+
+.form-box p {
+  font-family: Inria Serif;
+}
+
+.form-box a {
+  font-family: Inria Serif;
+  text-decoration: none;
+  color: black;
+}
+
+.form p, a:hover {
+  color:#104436;
+  text-decoration: underline;
+}
+
+/* END OF REGISTER ========================================================= */
+
+/* LOGIN =================================================================== */
+.login-container {
+  justify-items: center;
+  text-align: center;
+}
 
 /* FOOTER =================================================================== */
 .footer {
@@ -150,6 +351,15 @@ body {
   color: white;
   font-weight: lighter;
   font-size: 28px;
+}
+
+.header a {
+  color: white;
+  text-decoration: none;
+}
+
+.header a:hover {
+  color:#f7aac3;
 }
 
 .para-graph p {
