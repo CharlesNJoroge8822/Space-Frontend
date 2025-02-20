@@ -1,52 +1,82 @@
-import React from "react";
+import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
-// import { UserContext } from "../context/UserContext";
+import { UserContext } from "../context/UserContext"; // Import UserContext
+import { toast, ToastContainer } from 'react-toastify'; // Import Toastify functions  
+import 'react-toastify/dist/ReactToastify.css'; // Import Toastify CSS  
 
 export default function Login() {
-
-    // const {login} = useContext(UserContext)
+    const { login } = useContext(UserContext); // Destructure login function from context
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [role, setRole] = useState('Client'); // Added role state
+    const [isLoggedIn, setIsLoggedIn] = useState(false); // Added isLoggedIn state
 
-    // ====> To Handle form submission
-    const handleSubmit = (e) => {
-        e.preventDefault(); 
+    // ====> Handle form submission
+    const handleSubmit = async (e) => {  
+        e.preventDefault();   
 
-    // login(email, password)
-
-    // };
+        try {  
+            await login(email, password, role); // Include role in login function if needed  
+            setIsLoggedIn(true); // Update state on successful login
+            toast.success(`Login successful as ${role}!`); // Display success notification  
+        } catch (error) {  
+            setIsLoggedIn(false); // Ensure state is updated on failure
+            toast.error("Login failed! Please check your credentials."); // Display error notification  
+        }  
+    };  
 
     return (
         <div className="login-container">
             <div className="form-box">
                 <h2>Welcome back!</h2>
                 <form onSubmit={handleSubmit}>
-                    <br></br>
-                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email"/>
-                    <br></br>
-                    <br></br>
-                    <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
-                    <br></br>
-                    <br></br>
+                    <br />
+                    <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Email"
+                        required
+                    />
+                    <br /><br />
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Password"
+                        required
+                    />
+                    <br /><br />
+                    {/* Role Selection Dropdown */}
+                    <select value={role} onChange={(e) => setRole(e.target.value)}>
+                        <option value="Client">Client</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                    <br /><br />
                     <p>Forgot password?</p>
-                    <br></br>
+                    <br />
                     <button type="submit">LOGIN</button>
-                    <br></br>
-                    <br></br>
-                    <button type="submit">Sign in with Google</button>
-                    <br></br>
-                    <br></br>
-                    <button type="submit">Sign in with Facebook</button>
-                    <br></br>
-                    <br></br>
-                    <p>Don't have an account?<Link to="/Register"><strong> Register</strong></Link></p>
+                    <br /><br />
+                    <button type="button">Sign in with Google</button>
+                    <br /><br />
+                    <button type="button">Sign in with Facebook</button>
+                    <br /><br />
+                    <p>
+                        Don't have an account?
+                        <Link to="/Register"><strong> Register</strong></Link>
+                    </p>
                     <p><strong>Or</strong></p>
-                    <p>Are you an admin?<Link to="/AdminForm"><strong> Sign in here!</strong></Link></p>
+                    <p>
+                        Are you an admin?
+                        <Link to="/AdminForm"><strong> Sign in here!</strong></Link>
+                    </p>
                 </form>
+                {/* Show message when logged in */}
+                {isLoggedIn && <p>You are logged in as {role}!</p>}
             </div>
+            {/* Add ToastContainer here */}
+            <ToastContainer />
         </div>
-    )
-}
+    );
 }

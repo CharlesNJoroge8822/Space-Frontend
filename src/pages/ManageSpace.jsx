@@ -10,7 +10,7 @@ export default function AddSpace() {
         // Add login logic here
         
         // Redirect to the AddSpace page after successful login
-        navigate("/addspace");
+        navigate("/manage-space");
     };
 
     return (
