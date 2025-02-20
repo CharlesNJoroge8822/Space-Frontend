@@ -1,56 +1,121 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
-// import { UserContext } from "../context/UserContext";
+import { UserContext } from "../context/UserContext";
 
 export default function Register() {
+    const { addUser } = useContext(UserContext);
 
-    // const {addUser} = useContext(UserContext)
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [role, setRole] = useState('Client'); // Default role as Client
+    const [passwordError, setPasswordError] = useState('');
+    const [confirmError, setConfirmError] = useState('');
 
-    const [name, setName] = useState('')
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
+    // Password validation function
+    const validatePassword = (pwd) => {
+        const regex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+        return regex.test(pwd);
+    };
 
-    // ---> Handle form submission 
+    // Handle form submission
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        // addUser(name, email, password)
+        if (!validatePassword(password)) {
+            setPasswordError("Password must have at least 6 characters, one uppercase letter, one number, and one special character.");
+            return;
+        }
 
-        console.log('name:', name)
-        console.log('email:', email)
-        console.log('password:', password)
-    }
+        if (password !== confirmPassword) {
+            setConfirmError("Passwords do not match.");
+            return;
+        }
+
+        setPasswordError('');
+        setConfirmError('');
+
+        // Call addUser function from context to register the user
+        addUser(name, email, password, role);
+    };
 
     return (
         <div className="register-container">
             <div className="form-box">
-                <h2>Create an account</h2>
+                <h2>Create an Account</h2>
                 <form onSubmit={handleSubmit}>
-                    <br></br>
-                    <input type="text" value = {name} onChange={(e) => setName(e.target.value)} placeholder="Name"/>
-                    <br></br>
-                    <br></br>
-                    <input type="email" value = {email} onChange={(e) => setEmail(e.target.value)}  placeholder="Email"/>
-                    <br></br>
-                    <br></br>
-                    <input type="password" value = {password} onChange={(e) => setPassword(e.target.value)}  placeholder="Password" />
-                    <br></br>
-                    <br></br>
-                    <p>Forgot password?</p>
-                    <br></br>
+                    <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Full Name"
+                        required
+                    />
+                    <br /><br />
+                    
+                    <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Email Address"
+                        required
+                    />
+                    <br /><br />
+
+                    {/* Password Input */}
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => {
+                            setPassword(e.target.value);
+                            setPasswordError(''); // Clear error when typing
+                        }}
+                        placeholder="Password"
+                        required
+                    />
+                    {password && !validatePassword(password) && (
+                        <p className="error">⚠️ Password must have at least 6 characters, one uppercase letter, one number, and one special character.</p>
+                    )}
+                    <br /><br />
+
+                    {/* Confirm Password Input */}
+                    <input
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => {
+                            setConfirmPassword(e.target.value);
+                            setConfirmError('');
+                        }}
+                        placeholder="Confirm Password"
+                        required
+                    />
+                    {confirmError && <p className="error">⚠️ {confirmError}</p>}
+                    <br /><br />
+
+                    {/* Role Selection */}
+
+                    <br /><br />
+
+                    <p className="forgot-password">Forgot password?</p>
+                    <br />
+
+                    {/* Register Button */}
                     <button type="submit">REGISTER</button>
-                    <br></br>
-                    <br></br>
-                    <button type="submit">Sign up with Google</button>
-                    <br></br>
-                    <br></br>
-                    <button type="submit">Sign up with Facebook</button>
-                    <br></br>
-                    <br></br>
-                    <p>Do you already have an account?<Link to="/Login"><strong> Sign in!</strong></Link></p>
+                    <br /><br />
+
+                    {/* Social Sign-up Options */}
+                    <button type="button">Sign up with Google</button>
+                    <br /><br />
+                    <button type="button">Sign up with Facebook</button>
+                    <br /><br />
+
+                    <p>
+                        Already have an account?
+                        <Link to="/login"><strong> Sign in!</strong></Link>
+                    </p>
                 </form>
             </div>
         </div>
-    )
+    );
 }
