@@ -1,13 +1,13 @@
-import React from "react";
+import React, { useContext } from "react";
 import { UserContext } from "../context/UserContext";
 
+export default function Settings() {
+  const { logout } = useContext(UserContext);
 
-export default function Settings(){
-const { current_user, logout } = useContext(UserContext);
-    
-    return (
-        <li className="nav-item">
-        <button onClick={logout} className="btn btn-danger ms-3">Logout</button>
-      </li>
-    )
+  return (
+    <div className="settings-container">
+      <h2>Settings</h2>
+      <button onClick={logout} className="btn btn-danger mt-3">Logout</button>
+    </div>
+  );
 }

@@ -12,17 +12,6 @@ export const UserProvider = ({ children }) => {
 
     console.log("Current user:", current_user);
 
-    // This effect will handle the redirection after login based on role
-    useEffect(() => {
-        if (current_user) {
-            if (current_user.role === "Client") {
-                navigate("/bookings"); // After the Client login will be directed to the bookings
-            } else if (current_user.role === "Admin") {
-                navigate("/manage-bookings"); // After the Admin login will be directed to the admin dashboard or home
-            }
-        }
-    }, [current_user, navigate]); // Will trigger when current_user is updated
-
     const login = async (email, password, role) => {
         toast.loading("Logging you in ... ");
         try {
@@ -51,6 +40,14 @@ export const UserProvider = ({ children }) => {
                 if (user.email) {
                     setCurrentUser(user);
                     toast.success("Successfully Logged in!");
+
+
+                    // ✅ Redirect based on role
+                    if (user.role === "Client") {
+                        navigate("/spaces");
+                    } else if (user.role === "Admin") {
+                        navigate("/manage-bookings");
+                    }
                 }
             } else {
                 toast.dismiss();
@@ -61,63 +58,52 @@ export const UserProvider = ({ children }) => {
             toast.error("An error occurred. Please try again.");
         }
     };
-
-    const logout = () => 
-        {
     
-            toast.loading("Logging out ... ")
-            fetch("http://127.0.0.1:5000/logout",{
-                method:"DELETE",
-                headers: {
-                    'Content-type': 'application/json',
-                    Authorization: `Bearer ${authToken}`
-                  },
-           
-            })
-            .then((resp)=>resp.json())
-            .then((response)=>{
-               console.log(response);
-               
-                if(response.success)
-                {
-                    sessionStorage.removeItem("token");
-                    setAuthToken(null)
-                    setCurrentUser(null)
+    const logout = () => {
+        console.log("Logout function triggered"); // Check if logout function is being triggered
     
-                    toast.dismiss()
-                    toast.success("Successfully Logged out")
+        // Show loading toast
+        toast.loading("Logging out ... ");
+        
+        fetch("http://127.0.0.1:5000/logout", {
+            method: "DELETE",
+            headers: {
+                "Content-type": "application/json",
+                Authorization: `Bearer ${authToken}`,
+            },
+        })
+        .then((resp) => resp.json())
+        .then((response) => {
+            console.log("Logout response:", response); // Check server response structure
     
-                    navigate("/login")
-                }
-            })
+            // Check if the response indicates success
+            if (response.success) {
+                // Remove token and user data
+                sessionStorage.removeItem("token");
+                setAuthToken(null);
+                setCurrentUser(null);
     
-        };
-
-        const fetchCurrentUser = async () => {
-            if (!authToken) return;
-            try {
-                const response = await fetch("http://127.0.0.1:5000/current_user", {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${authToken}`,
-                    },
-                });
+                // Dismiss the loading toast and show the success message
+                toast.dismiss(); // Dismiss loading toast
+                setTimeout(() => {
+                    toast.success("Successfully Logged out"); // Delay to ensure toast is shown after dismiss
+                }, 100);
     
-                const user = await response.json();
-                if (user.email) {
-                    setCurrentUser(user);
-                } else {
-                    logout();
-                }
-            } catch (error) {
-                logout();
+                // Navigate to the login page
+                navigate("/login");
+            } else {
+                // If logout failed, show error toast
+                toast.dismiss();
+                toast.error("Logout failed. Please try again.");
             }
-        };
-    
-        useEffect(() => {
-            fetchCurrentUser();
-        }, [authToken]);
+        })
+        .catch((error) => {
+            // Handle network errors
+            toast.dismiss();
+            toast.error("An error occurred while logging out. Please try again.");
+            console.error("Logout error:", error); // Log error for debugging
+        });
+    };
     
 
     const updateProfile = async (userId, newProfileData) => {
@@ -156,25 +142,25 @@ export const UserProvider = ({ children }) => {
             toast.error("All fields are required!");
             return;
         }
-    
+
         toast.loading("Registering...");
-    
+
         try {
             const payload = JSON.stringify({
                 name: name.trim(),
                 email: email.trim(),
                 password: password.trim(),
-                role: role === "Admin" ? "Admin" : "Client", // ✅ Ensures valid role
+                role: role === "Admin" ? "Admin" : "Client", // Ensures valid role
             });
-    
+
             const response = await fetch("http://127.0.0.1:5000/users", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: payload,
             });
-    
+
             const data = await response.json();
-    
+
             toast.dismiss();
             if (response.ok) {
                 toast.success(data.message || "Registration successful!");
@@ -188,7 +174,7 @@ export const UserProvider = ({ children }) => {
             toast.error("Network error, please try again.");
         }
     };
-    
+
     return (
         <UserContext.Provider value={{ authToken, login, current_user, setCurrentUser, logout, addUser, updateProfile }}>
             {children}
