@@ -9,7 +9,7 @@ export default function Footer() {
     <div className="footer">
       <img src={logoPhoto} alt="Logo" />
       <div className="header">
-         <p><Link to="/About">Ivy Court</Link></p>
+         <p><Link to="/About">About Us</Link></p>
       </div>
       <div className="para-graph">
         <p>Come as a guest, leave as a friend</p>
