@@ -105,9 +105,21 @@ export default function Register() {
                     <br /><br />
 
                     {/* Social Sign-up Options */}
-                    <button type="button">Sign up with Google</button>
-                    <br /><br />
-                    <button type="button">Sign up with Facebook</button>
+                    <button 
+                        type="button" 
+                        onClick={() => window.location.href = "http://127.0.0.1:5000/google_login"} 
+                        style={{ cursor: 'pointer' }}
+                    >
+                        Sign up with Google
+                    </button>
+                        <br></br>
+                        <br></br>
+                    <button 
+                        type="button" 
+                        style={{ cursor: 'pointer' }}
+                    >
+                        Sign up with Facebook
+                    </button>
                     <br /><br />
 
                     <p>
