@@ -299,6 +299,18 @@ input::placeholder {
   background-color: #F1EDE5;
 }
 
+.form-box select {
+  padding: 15px;
+  padding-left: 20px;
+  padding-right: 20px;
+  font-family: Inria Serif;
+  font-size: 15px;
+  border-radius: 10px;
+  background-color: #F1EDE5;
+  border-color: #104436;
+  border-width: 2px;
+}
+
 .form-box button {
   width: 90%;
   padding: 20px;
@@ -337,6 +349,30 @@ input::placeholder {
 .login-container {
   justify-items: center;
   text-align: center;
+}
+
+/* END OF LOGIN ======================================================================== */
+
+/* ABOUT ============================================================================= */
+.about img {
+  width: 100%;
+  height: auto;
+}
+
+.third-container {
+  margin-left: 50px;
+}
+
+.third-container img {
+  width: 500px;
+  border-radius: 15px;
+  margin-right: 70px;
+  margin-left: 70px;
+  /* transition: opacity 0.5s ease; */
+}
+
+.icons p {
+  font-family: 'Red Hat Display';
 }
 
 /* FOOTER =================================================================== */
