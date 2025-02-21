@@ -58,11 +58,6 @@ export default function Login() {
                     <p>Forgot password?</p>
                     <br />
                     <button type="submit">LOGIN</button>
-                    <br /><br />
-                    <button type="button">Sign in with Google</button>
-                    <br /><br />
-                    <button type="button">Sign in with Facebook</button>
-                    <br /><br />
                     <p>
                         Don't have an account?
                         <Link to="/Register"><strong> Register</strong></Link>
