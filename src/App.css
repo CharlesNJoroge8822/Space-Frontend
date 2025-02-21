@@ -10,6 +10,11 @@ body {
   padding: 2rem;
   text-align: center;
 } */
+ /* In App.css */
+.navbar-custom {
+  background-color: #104436;
+}
+
 
 /* Navbar Styling */
 .navbar {
@@ -28,6 +33,10 @@ body {
   z-index: 1000;
   border-radius: 20px;
 }
+.navbar {
+  background-color: #104436;
+}
+
 
 .navbar-logo {
   display: flex;

@@ -16,15 +16,16 @@ export default function Login() {
     const handleSubmit = async (e) => {  
         e.preventDefault();   
 
-        try {  
-            await login(email, password, role); // Include role in login function if needed  
+        try {
+            await login(email, password, role); // Include role in login function if needed
             setIsLoggedIn(true); // Update state on successful login
+            setTime(); // Call setTime to track login time
             toast.success(`Login successful as ${role}!`); // Display success notification  
         } catch (error) {  
             setIsLoggedIn(false); // Ensure state is updated on failure
             toast.error("Login failed! Please check your credentials."); // Display error notification  
-        }  
-    };  
+        }
+    }; 
 
     return (
         <div className="login-container">
@@ -66,11 +67,7 @@ export default function Login() {
                         Don't have an account?
                         <Link to="/Register"><strong> Register</strong></Link>
                     </p>
-                    <p><strong>Or</strong></p>
-                    <p>
-                        Are you an admin?
-                        <Link to="/AdminForm"><strong> Sign in here!</strong></Link>
-                    </p>
+
                 </form>
                 {/* Show message when logged in */}
                 {isLoggedIn && <p>You are logged in as {role}!</p>}

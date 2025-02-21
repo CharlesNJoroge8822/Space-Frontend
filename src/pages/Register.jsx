@@ -93,8 +93,6 @@ export default function Register() {
                     {confirmError && <p className="error">⚠️ {confirmError}</p>}
                     <br /><br />
 
-                    {/* Role Selection */}
-
                     <br /><br />
 
                     <p className="forgot-password">Forgot password?</p>
@@ -107,13 +105,12 @@ export default function Register() {
                     {/* Social Sign-up Options */}
                     <button 
                         type="button" 
-                        onClick={() => window.location.href = "http://127.0.0.1:5000/google_login"} 
+                        onClick={() => window.location.href = "http://127.0.0.1:5000/authorize_google"} 
                         style={{ cursor: 'pointer' }}
                     >
                         Sign up with Google
                     </button>
-                        <br></br>
-                        <br></br>
+                    <br /><br />
                     <button 
                         type="button" 
                         style={{ cursor: 'pointer' }}
