@@ -17,7 +17,11 @@ export default function AddSpace() {
         <div className="admin-form">
         <div className="admin-box">
             <h2>Create a New Space</h2>
+            <br />
+            <br />
             <form onSubmit={handleSubmit}>
+            <label>Name of the space</label>
+                <br />
                 <br />
                 <input
                     type="text"
@@ -27,11 +31,19 @@ export default function AddSpace() {
                 />
                 <br />
                 <br />
+                <br />
+                <label>Description</label>
+                <br />
+                <br />
                 <textarea
                     name="description"
                     placeholder="Description"
                     required
                 />
+                <br />
+                <br />
+                <br />
+                <label>Add a location</label>
                 <br />
                 <br />
                 <input
@@ -42,6 +54,10 @@ export default function AddSpace() {
                 />
                 <br />
                 <br />
+                <br />
+                <label>Prices</label>
+                <br />
+                <br />
                 <input
                     type="number"
                     name="price_per_hour"
@@ -50,12 +66,17 @@ export default function AddSpace() {
                 />
                 <br />
                 <br />
+                
                 <input
                     type="number"
                     name="price_per_day"
                     placeholder="Price per day"
                     required
                 />
+                <br />
+                <br />
+                <br />
+                <label>Availabilty</label>
                 <br />
                 <br />
                 <input
@@ -66,12 +87,17 @@ export default function AddSpace() {
                 />
                 <br />
                 <br />
+                <br />
+                <label>Add Images</label>
+                <br />
+                <br />
                 <input
                     type="text"
                     name="images"
                     placeholder="Image URLs (comma-separated)"
                     required
                 />
+                <br />
                 <br />
                 <br />
                 <button type="submit">SUBMIT</button>

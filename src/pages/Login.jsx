@@ -50,18 +50,14 @@ export default function Login() {
                     />
                     <br /><br />
                     {/* Role Selection Dropdown */}
-                    <select value={role} onChange={(e) => setRole(e.target.value)}>
+                    {/* <select value={role} onChange={(e) => setRole(e.target.value)}>
                         <option value="Client">Client</option>
                         <option value="Admin">Admin</option>
-                    </select>
-                    <br /><br />
+                    </select> */}
+                    {/* <br /><br /> */}
                     <p>Forgot password?</p>
                     <br />
                     <button type="submit">LOGIN</button>
-                    <br /><br />
-                    <button type="button">Sign in with Google</button>
-                    <br /><br />
-                    <button type="button">Sign in with Facebook</button>
                     <br /><br />
                     <p>
                         Don't have an account?

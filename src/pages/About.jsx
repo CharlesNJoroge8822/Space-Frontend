@@ -27,7 +27,7 @@ export default function About(){
                                 <div class="text-third">
                                     <h3>Get in Touch</h3>
                                     <div class="paragraph">
-                                        <p>Don’t leave just yet! Feel free to connect with us for the latest updates.</p>
+                                        <p>Don't leave just yet! Feel free to connect with us for the latest updates.</p>
                                     </div>
                                     <div class="icons">
                                         <p> 
