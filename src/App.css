@@ -1,6 +1,7 @@
-body {
+html, body {
   background-color: #F1EDE5;
   margin: auto;
+  height: 100%;
 }
 
 /* General Layout */
@@ -10,11 +11,6 @@ body {
   padding: 2rem;
   text-align: center;
 } */
- /* In App.css */
-.navbar-custom {
-  background-color: #104436;
-}
-
 
 /* Navbar Styling */
 .navbar {
@@ -33,10 +29,6 @@ body {
   z-index: 1000;
   border-radius: 20px;
 }
-.navbar {
-  background-color: #104436;
-}
-
 
 .navbar-logo {
   display: flex;
@@ -178,7 +170,7 @@ body {
 }
 
 .product-item img:hover {
-  transform: scale(0.8);
+  transform: scale(1.1);
 }
 
 .product-item p {
@@ -374,6 +366,168 @@ input::placeholder {
 .icons p {
   font-family: 'Red Hat Display';
 }
+
+/* NOPAGE =================================================================== */
+.container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* This makes the container fill the entire viewport */
+}
+
+main {
+  flex: 1; /* Allows main content to take up available space */
+  padding: 20px;
+}
+
+/* END OF NOPAGE ============================================================ */
+
+/* STATEMENT SINGLE PAGE ================================================================== */
+.single-space img {
+  width: 100%;
+  height: auto;
+}
+
+.single-container {
+  display: flex;
+  padding: 30px;
+  position: relative; 
+  margin-top: 50px;
+}
+
+.single-container img {
+  width: 700px;
+  border-radius: 15px;
+  margin-right: 70px;
+  margin-left: 70px;
+  /* transition: opacity 0.5s ease; */
+}
+
+.single-space h3 {
+  font-family: 'Red Hat Display';
+  font-size: 50px;
+  color:#104436;
+  font-weight:500;
+  text-align: center;
+}
+
+.text-third p {
+  color: black;
+}
+
+.text-third a {
+  color: #104436;
+  text-decoration: none;
+}
+
+/* END OF STATEMENT SPACE ==================================================== */
+
+/* SETTINGS =================================================================== */
+.settings-container img {
+  width: 100%;
+  height: auto;
+  margin-bottom: 50px;
+}
+
+.main {
+  text-align: center;
+  min-height: 30vh;
+} 
+
+.main a {
+  font-family: 'Red Hat Display';
+  text-decoration: none;
+  color: black;
+  margin-right: 20px; 
+  font-size: 18px;
+}
+
+.main a:hover {
+  color:#104436;
+  
+}
+
+.main button {
+  background-color: #104436;
+  color: white;
+  border-radius: 20px;
+  border-color: #04100d;
+  border-width: 10px;
+  padding: 20px 40px;
+  font-family: Inria Serif;
+  font-size: 16px;
+  
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition */
+}
+
+.main button:hover {
+  transform: scale(1.1); /* Scale the button up to 110% */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Add shadow for depth */
+}
+
+/* END OF SETTINGS PAGE ====================================================== */
+
+/* MANAGE SPACES =============================================================== */
+.admin-form {
+  justify-items: center;
+  text-align: center;
+}
+
+.admin-box {
+  background-color: #F1EDE5;
+  padding: 40px;
+  padding-top: 10px;
+  border-color: #104436;
+  border-width: 7px;
+  border-radius: 20px;
+  border-style: solid; /* Add border style */
+  text-align: center;
+  width: 600px;
+  margin-bottom: 40px;
+}
+
+.admin-box h2 {
+  font-family: Inria Serif;
+  font-size: 30px;
+  color: #104436;
+}
+
+.admin-box label {
+  font-family: Inria Serif;
+  font-weight: 600;
+  font-size: 19px;
+}
+.admin-box textarea {
+  width: 85%;
+  border-radius: 20px;
+  min-height: 30vh;
+  border-color: #104436;
+  border-width: 2px;
+}
+
+.admin-box textarea::placeholder {
+  padding-top: 20px;
+  padding-left: 20px;
+  font-family: 'Red Hat Display';
+  font-size: 16px;
+}
+
+.admin-box button {
+  background-color: #104436;
+  color: white;
+  border-radius: 20px;
+  padding: 20px 60px;
+  font-family: Inria Serif;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition */
+}
+
+.admin-box button:hover {
+  transform: scale(1.1); /* Scale the button up to 110% */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Add shadow for depth */
+}
+
 
 /* FOOTER =================================================================== */
 .footer {

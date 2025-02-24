@@ -1,9 +1,10 @@
 import React, { useContext, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 
 export default function Register() {
     const { addUser } = useContext(UserContext);
+    const navigate = useNavigate();  // React Router's navigate hook
 
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -38,6 +39,11 @@ export default function Register() {
 
         // Call addUser function from context to register the user
         addUser(name, email, password, role);
+    };
+
+    // Redirect to the main page after Google OAuth login
+    const handleGoogleLogin = () => {
+        window.location.href = "http://127.0.0.1:5000/authorize_google"; // Initiate Google OAuth
     };
 
     return (
@@ -93,8 +99,6 @@ export default function Register() {
                     {confirmError && <p className="error">⚠️ {confirmError}</p>}
                     <br /><br />
 
-                    <br /><br />
-
                     <p className="forgot-password">Forgot password?</p>
                     <br />
 
@@ -104,20 +108,18 @@ export default function Register() {
 
                     {/* Social Sign-up Options */}
                     <button 
+                        type="button" 
+                        onClick={handleGoogleLogin} // This will trigger Google login and redirection
+                        style={{ cursor: 'pointer' }}
+                    >
+                        Sign up with Google
+                    </button>
   type="button" 
   onClick={() => window.location.href = "http://127.0.0.1:5000/google_login"} 
   style={{ cursor: 'pointer' }}
 >
   Sign up with Google
 </button>
-
-                    <br /><br />
-                    <button 
-                        type="button" 
-                        style={{ cursor: 'pointer' }}
-                    >
-                        Sign up with Facebook
-                    </button>
                     <br /><br />
 
                     <p>

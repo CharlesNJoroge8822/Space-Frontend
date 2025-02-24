@@ -13,6 +13,9 @@ import 'react-toastify/dist/ReactToastify.css';
 import Settings from './pages/Settings';
 import ManageUsers from './pages/ManageUsers';
 import Spaces from "./pages/Spaces";
+import StatementSpace from "./pages/StatementSpace";
+import HomeSweetHome from "./pages/HomeSweetHome";
+import Business from "./pages/Business";
 
 function App() {
   return (
@@ -26,6 +29,9 @@ function App() {
             <Route path="about" element={<About />} />
             <Route path="profile" element={<Profile />} />
             <Route path="manage-spaces" element={<ManageSpace />} />
+            <Route path="statementspace" element={<StatementSpace />} />
+            <Route path="homesweethome" element={<HomeSweetHome />} />
+            <Route path="business" element={<Business />} />
             <Route path="manage-bookings" element={<ManageBooking />} />
             <Route path="settings" element={<Settings />} />
             <Route path="manage-users" element={<ManageUsers />} />

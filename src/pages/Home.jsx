@@ -36,15 +36,15 @@ export default function Home(){
             <div class="product-grid">
                 <div class="product-item">
                 <img src={apartmentsPhoto} alt="Photo fo apartments" class="normal-image" />
-                <Link to="/SingleSpace">HOME SWEET HOME</Link>
+                <Link to="/HomeSweetHome">HOME SWEET HOME</Link>
                 </div>
                 <div class="product-item">
                     <img src={restaurantPhoto} alt="Restaurant Photo" />
-                    <Link to="/SingleSpace">STATEMENT PLACE</Link>
+                    <Link to="/StatementSpace">STATEMENT PLACE</Link>
                 </div>
                 <div class="product-item">
                     <img src={office} alt="Photo of an office" />
-                    <Link to="/SingleSpace">BUSINESS VENTURES</Link>
+                    <Link to="/Business">BUSINESS VENTURES</Link>
                 </div>
             </div>
 

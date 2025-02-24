@@ -1,15 +1,53 @@
 import { createContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const [authToken, setAuthToken] = useState(() => sessionStorage.getItem("token"));
     const [current_user, setCurrentUser] = useState(null);
 
     console.log("Current user:", current_user);
+
+    // Function to handle Google login
+    const handleGoogleLogin = () => {
+        // Extract user data from URL parameters
+        const user_id = searchParams.get("user_id");
+        const name = searchParams.get("name");
+        const email = searchParams.get("email");
+        const role = searchParams.get("role");
+
+        if (user_id && name && email && role) {
+            // Update the current_user state
+            setCurrentUser({
+                id: user_id,
+                name: name,
+                email: email,
+                role: role,
+            });
+
+            // Clear the URL parameters
+            navigate(location.pathname, { replace: true });
+
+            // Show success message
+            toast.success("Successfully logged in with Google!");
+
+            // Redirect based on role
+            if (role === "Client") {
+                navigate("/spaces");
+            } else if (role === "Admin") {
+                navigate("/manage-bookings");
+            }
+        }
+    };
+
+    // Check for Google login data on component mount
+    useEffect(() => {
+        handleGoogleLogin();
+    }, [searchParams]);
 
     const login = async (email, password, role) => {
         toast.loading("Logging you in ... ");
@@ -40,8 +78,7 @@ export const UserProvider = ({ children }) => {
                     setCurrentUser(user);
                     toast.success("Successfully Logged in!");
 
-
-                    // ✅ Redirect based on role
+                    // Redirect based on role
                     if (user.role === "Client") {
                         navigate("/spaces");
                     } else if (user.role === "Admin") {
@@ -57,11 +94,10 @@ export const UserProvider = ({ children }) => {
             toast.error("An error occurred. Please try again.");
         }
     };
-    
+
     const logout = () => {
-        console.log("Logout function triggered"); // Check if logout function is being triggered
-    
-        // Show loading toast
+        console.log("Logout function triggered");
+
         toast.loading("Logging out ... ");
         
         fetch("http://127.0.0.1:5000/logout", {
@@ -73,37 +109,30 @@ export const UserProvider = ({ children }) => {
         })
         .then((resp) => resp.json())
         .then((response) => {
-            console.log("Logout response:", response); // Check server response structure
-    
-            // Check if the response indicates success
+            console.log("Logout response:", response);
+
             if (response.success) {
-                // Remove token and user data
                 sessionStorage.removeItem("token");
                 setAuthToken(null);
                 setCurrentUser(null);
-    
-                // Dismiss the loading toast and show the success message
-                toast.dismiss(); // Dismiss loading toast
+
+                toast.dismiss();
                 setTimeout(() => {
-                    toast.success("Successfully Logged out"); // Delay to ensure toast is shown after dismiss
+                    toast.success("Successfully Logged out");
                 }, 100);
-    
-                // Navigate to the login page
+
                 navigate("/login");
             } else {
-                // If logout failed, show error toast
                 toast.dismiss();
                 toast.error("Logout failed. Please try again.");
             }
         })
         .catch((error) => {
-            // Handle network errors
             toast.dismiss();
             toast.error("An error occurred while logging out. Please try again.");
-            console.error("Logout error:", error); // Log error for debugging
+            console.error("Logout error:", error);
         });
     };
-    
 
     const updateProfile = async (userId, newProfileData) => {
         toast.loading("Updating profile...");
@@ -141,26 +170,31 @@ export const UserProvider = ({ children }) => {
             toast.error("All fields are required!");
             return;
         }
-
+    
         toast.loading("Registering...");
-
+    
         try {
             const payload = JSON.stringify({
                 name: name.trim(),
                 email: email.trim(),
                 password: password.trim(),
-                role: role === "Admin" ? "Admin" : "Client", // Ensures valid role
+                role: role === "Admin" ? "Admin" : "Client",
             });
-
+    
+            const token = localStorage.getItem('token');
+    
             const response = await fetch("http://127.0.0.1:5000/users", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: payload,
             });
-
+    
             const data = await response.json();
-
             toast.dismiss();
+    
             if (response.ok) {
                 toast.success(data.message || "Registration successful!");
                 navigate("/login");
@@ -175,7 +209,7 @@ export const UserProvider = ({ children }) => {
     };
 
     return (
-        <UserContext.Provider value={{ authToken, login, current_user, setCurrentUser, logout, addUser, updateProfile }}>
+        <UserContext.Provider value={{ authToken, login, current_user, setCurrentUser, logout, addUser, updateProfile, handleGoogleLogin }}>
             {children}
         </UserContext.Provider>
     );
