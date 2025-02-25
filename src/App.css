@@ -255,20 +255,23 @@ html, body {
 .register-container {
   justify-items: center;
   text-align: center;
+  min-height: 100vh;
 }
 
 .form-box {
+  margin-top: 100px;
   background-color: #F1EDE5;
   padding: 40px;
   padding-top:10px;
   border-radius: 12px;
-  border-bottom: 8px solid #104436;
-  border-right: 8px solid #104436;
-  border-radius: 20px;
+  border-bottom: 10px solid #104436;
+  border-right: 9px solid #104436;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   text-align: center;
   width: 400px;
   margin-bottom: 40px;
+  border-color: #104436;
+  border-style: solid;
 }
 
 .form-box h2 {
@@ -341,6 +344,7 @@ input::placeholder {
 .login-container {
   justify-items: center;
   text-align: center;
+  min-height: 100vh;
 }
 
 /* END OF LOGIN ======================================================================== */
@@ -526,6 +530,34 @@ main {
 .admin-box button:hover {
   transform: scale(1.1); /* Scale the button up to 110% */
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Add shadow for depth */
+}
+
+/* RESET BOX ================================================================ */
+/* style this part */
+
+/* END OF RESET BOX ========================================================== */
+
+/* GOOGLE BUTTON LOGIN =========================================================== */
+.google-login-btn {
+  display: flex;
+  justify-content: center;
+  margin: 10px 0;
+  margin-top: 20px;
+}
+
+.google-login-btn button {
+  background-color: #4285F4; /* Google blue */
+  color: white;
+  border-radius: 5px;
+  padding: 20px 20px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.google-login-btn button:hover {
+  background-color: #104436; /* Darker blue on hover */
 }
 
 
