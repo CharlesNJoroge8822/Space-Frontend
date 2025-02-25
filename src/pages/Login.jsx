@@ -1,11 +1,14 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, use } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
+
 
 export default function Login() {
-    const { login } = useContext(UserContext);
+    const { login, googleLogin } = useContext(UserContext);
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -14,7 +17,7 @@ export default function Login() {
 
     const [showResetForm, setShowResetForm] = useState(false);
     const [resetEmail, setResetEmail] = useState('');
-    const [resetMessage, setResetMessage] = useState('');
+    const [resetMessage, setResetMessage] = useState('');    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -54,6 +57,16 @@ export default function Login() {
         }
     };
 
+    function google_login(token){
+        const user_details = jwtDecode(token);
+
+        // print the token
+        console.log("Google user", user_details);
+        googleLogin(user_details.email)
+        // register(user_details.name, user_details.email, password)
+        
+    }
+
     return (
         <div className="login-container">
             <div className="form-box">
@@ -77,9 +90,24 @@ export default function Login() {
                     />
                     <br /><br />
 
-                    <p className="forgot-password" onClick={() => setShowResetForm(true)} style={{ cursor: "pointer", color: "blue" }}>
+                    
+
+                    <p className="forgot-password" onClick={() => setShowResetForm(true)} style={{ cursor: "pointer", color: "black", textDecoration: "underline"}}>
                         Forgot password?
                     </p>
+
+                    {/* Login with google */}
+                    <div className="google-login-btn">
+                    <GoogleLogin
+                            onSuccess={credentialResponse => {
+                                google_login(credentialResponse.credential);
+                            }}
+                            onError={() => {
+                                console.log('Login Failed');
+                            }}
+                            />
+                    </div>
+
                     <br />
                     <button type="submit">LOGIN</button>
                     <br /><br />
