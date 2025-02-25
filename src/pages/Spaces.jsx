@@ -10,7 +10,7 @@ export default function Spaces() {
   )
 }
 import { useContext, useEffect, useMemo, useState } from "react";
-import { SpaceContext } from "../contexts/SpaceContext";
+// import { SpaceContext } from "../context/SpaceContext";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 

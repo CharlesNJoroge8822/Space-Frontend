@@ -1,31 +1,58 @@
 import React, { useState, useContext } from "react";
 import { Link } from "react-router-dom";
-import { UserContext } from "../context/UserContext"; // Import UserContext
-import { toast, ToastContainer } from 'react-toastify'; // Import Toastify functions  
-import 'react-toastify/dist/ReactToastify.css'; // Import Toastify CSS  
+import { UserContext } from "../context/UserContext";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Login() {
-    const { login } = useContext(UserContext); // Destructure login function from context
+    const { login } = useContext(UserContext);
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [role, setRole] = useState('Client'); // Added role state
-    const [isLoggedIn, setIsLoggedIn] = useState(false); // Added isLoggedIn state
+    const [role, setRole] = useState('Client');
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    // ====> Handle form submission
-    const handleSubmit = async (e) => {  
-        e.preventDefault();   
+    const [showResetForm, setShowResetForm] = useState(false);
+    const [resetEmail, setResetEmail] = useState('');
+    const [resetMessage, setResetMessage] = useState('');
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
         try {
-            await login(email, password, role); // Include role in login function if needed
-            setIsLoggedIn(true); // Update state on successful login
-            setTime(); // Call setTime to track login time
-            toast.success(`Login successful as ${role}!`); // Display success notification  
-        } catch (error) {  
-            setIsLoggedIn(false); // Ensure state is updated on failure
-            toast.error("Login failed! Please check your credentials."); // Display error notification  
+            await login(email, password, role);
+            setIsLoggedIn(true);
+            toast.success(`Login successful as ${role}!`);
+        } catch (error) {
+            setIsLoggedIn(false);
+            toast.error("Login failed! Please check your credentials.");
         }
-    }; 
+    };
+
+    const handlePasswordReset = async (e) => {
+        e.preventDefault();
+        if (!resetEmail) {
+            setResetMessage("Please enter your email.");
+            return;
+        }
+
+        try {
+            const response = await fetch("http://127.0.0.1:5000/request_password_reset", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: resetEmail }),
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                setResetMessage("Password reset link sent to your email.");
+            } else {
+                setResetMessage(data.error || "Failed to send reset link.");
+            }
+        } catch (error) {
+            setResetMessage("An error occurred. Please try again.");
+        }
+    };
 
     return (
         <div className="login-container">
@@ -49,13 +76,10 @@ export default function Login() {
                         required
                     />
                     <br /><br />
-                    {/* Role Selection Dropdown */}
-                    {/* <select value={role} onChange={(e) => setRole(e.target.value)}>
-                        <option value="Client">Client</option>
-                        <option value="Admin">Admin</option>
-                    </select> */}
-                    {/* <br /><br /> */}
-                    <p>Forgot password?</p>
+
+                    <p className="forgot-password" onClick={() => setShowResetForm(true)} style={{ cursor: "pointer", color: "blue" }}>
+                        Forgot password?
+                    </p>
                     <br />
                     <button type="submit">LOGIN</button>
                     <br /><br />
@@ -63,12 +87,31 @@ export default function Login() {
                         Don't have an account?
                         <Link to="/Register"><strong> Register</strong></Link>
                     </p>
-
                 </form>
-                {/* Show message when logged in */}
+
                 {isLoggedIn && <p>You are logged in as {role}!</p>}
             </div>
-            {/* Add ToastContainer here */}
+
+            {showResetForm && (
+                <div className="reset-password-modal">
+                    <div className="reset-password-content">
+                        <span className="close" onClick={() => setShowResetForm(false)}>&times;</span>
+                        <h4>Reset Password</h4>
+                        <input 
+                            type="email" 
+                            value={resetEmail} 
+                            onChange={(e) => setResetEmail(e.target.value)} 
+                            placeholder="Enter your email" 
+                            required 
+                        />
+                        <button type="button" onClick={handlePasswordReset}>
+                            Send Reset Link
+                        </button>
+                        {resetMessage && <p className="reset-message">{resetMessage}</p>}
+                    </div>
+                </div>
+            )}
+
             <ToastContainer />
         </div>
     );
