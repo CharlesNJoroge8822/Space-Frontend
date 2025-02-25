@@ -49,6 +49,53 @@ export const UserProvider = ({ children }) => {
         handleGoogleLogin();
     }, [searchParams]);
 
+    // Google login
+    const googleLogin = async (email) => {
+        toast.loading("Logging you in ... ");
+        try {
+            const response = await fetch("http://127.0.0.1:5000/googlelogin", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
+            });
+
+            const data = await response.json();
+
+            if (data.access_token) {
+                toast.dismiss();
+                sessionStorage.setItem("token", data.access_token);
+                setAuthToken(data.access_token);
+
+                const userResponse = await fetch("http://127.0.0.1:5000/current_user", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${data.access_token}`,
+                    },
+                });
+
+                const user = await userResponse.json();
+                if (user.email) {
+                    setCurrentUser(user);
+                    toast.success("Successfully Logged in!");
+
+                    // Redirect based on role
+                    if (user.role === "Client") {
+                        navigate("/spaces");
+                    } else if (user.role === "Admin") {
+                        navigate("/manage-bookings");
+                    }
+                }
+            } else {
+                toast.dismiss();
+                toast.error(data.error || "Failed to login");
+            }
+        } catch (error) {
+            toast.dismiss();
+            toast.error("An error occurred. Please try again.");
+        }
+    };
+
     const login = async (email, password, role) => {
         toast.loading("Logging you in ... ");
         try {
@@ -209,7 +256,7 @@ export const UserProvider = ({ children }) => {
     };
 
     return (
-        <UserContext.Provider value={{ authToken, login, current_user, setCurrentUser, logout, addUser, updateProfile, handleGoogleLogin }}>
+        <UserContext.Provider value={{ authToken, login, current_user, setCurrentUser, logout, addUser, updateProfile, handleGoogleLogin, googleLogin }}>
             {children}
         </UserContext.Provider>
     );

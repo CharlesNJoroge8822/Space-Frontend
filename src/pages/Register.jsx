@@ -2,6 +2,7 @@ import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import "../App.css";
+import { toast } from "react-toastify";
 
 export default function Register() {
     const { addUser } = useContext(UserContext);
@@ -37,6 +38,7 @@ export default function Register() {
 
     const handleGoogleLogin = () => {
         window.location.href = "http://127.0.0.1:5000/authorize_google";
+        toast.success("Success")
     };
 
     return (
