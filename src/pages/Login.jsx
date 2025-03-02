@@ -1,5 +1,7 @@
 import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useContext, use } from "react";
+import { Link } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -10,6 +12,10 @@ export default function Login() {
     const { login, googleLogin } = useContext(UserContext);
     const navigate = useNavigate();
 
+
+export default function Login() {
+    const { login, googleLogin } = useContext(UserContext);
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('Client');
@@ -18,6 +24,31 @@ export default function Login() {
     const [showResetForm, setShowResetForm] = useState(false);
     const [resetEmail, setResetEmail] = useState('');
     const [resetMessage, setResetMessage] = useState('');
+=======
+
+    const [showResetForm, setShowResetForm] = useState(false);
+    const [resetEmail, setResetEmail] = useState('');
+    const [resetMessage, setResetMessage] = useState('');    
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        try {
+            await login(email, password, role);
+            setIsLoggedIn(true);
+            toast.success(`Login successful as ${role}!`);
+        } catch (error) {
+            setIsLoggedIn(false);
+            toast.error("Login failed! Please check your credentials.");
+        }
+    };
+
+    const handlePasswordReset = async (e) => {
+        e.preventDefault();
+        if (!resetEmail) {
+            setResetMessage("Please enter your email.");
+            return;
+        }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -58,6 +89,32 @@ export default function Login() {
     function google_login(token) {
         const user_details = jwtDecode(token);
         googleLogin(user_details.email);
+
+            const response = await fetch("http://127.0.0.1:5000/request_password_reset", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: resetEmail }),
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                setResetMessage("Password reset link sent to your email.");
+            } else {
+                setResetMessage(data.error || "Failed to send reset link.");
+            }
+        } catch (error) {
+            setResetMessage("An error occurred. Please try again.");
+        }
+    };
+
+    function google_login(token){
+        const user_details = jwtDecode(token);
+
+        // print the token
+        console.log("Google user", user_details);
+        googleLogin(user_details.email)
+        // register(user_details.name, user_details.email, password)
+        
     }
 
     return (
@@ -88,6 +145,15 @@ export default function Login() {
 
                     <div className="google-login-btn">
                         <GoogleLogin
+                    
+
+                    <p className="forgot-password" onClick={() => setShowResetForm(true)} style={{ cursor: "pointer", color: "black", textDecoration: "underline"}}>
+                        Forgot password?
+                    </p>
+
+                    {/* Login with google */}
+                    <div className="google-login-btn">
+                    <GoogleLogin
                             onSuccess={credentialResponse => {
                                 google_login(credentialResponse.credential);
                             }}
@@ -95,6 +161,7 @@ export default function Login() {
                                 console.log('Login Failed');
                             }}
                         />
+                            />
                     </div>
 
                     <br />
@@ -120,6 +187,12 @@ export default function Login() {
                             onChange={(e) => setResetEmail(e.target.value)}
                             placeholder="Enter your email"
                             required
+                        <input 
+                            type="email" 
+                            value={resetEmail} 
+                            onChange={(e) => setResetEmail(e.target.value)} 
+                            placeholder="Enter your email" 
+                            required 
                         />
                         <button type="button" onClick={handlePasswordReset}>
                             Send Reset Link
