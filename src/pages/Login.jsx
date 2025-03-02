@@ -1,14 +1,14 @@
-import React, { useState, useContext, use } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 
-
 export default function Login() {
     const { login, googleLogin } = useContext(UserContext);
+    const navigate = useNavigate();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -17,20 +17,18 @@ export default function Login() {
 
     const [showResetForm, setShowResetForm] = useState(false);
     const [resetEmail, setResetEmail] = useState('');
-    const [resetMessage, setResetMessage] = useState('');    
+    const [resetMessage, setResetMessage] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         try {
             await login(email, password, role);
             setIsLoggedIn(true);
-            toast.success(`Login successful as ${role}!`);
         } catch (error) {
             setIsLoggedIn(false);
-            toast.error("Login failed! Please check your credentials.");
         }
     };
+    
 
     const handlePasswordReset = async (e) => {
         e.preventDefault();
@@ -48,7 +46,7 @@ export default function Login() {
 
             const data = await response.json();
             if (response.ok) {
-                setResetMessage("Password reset link sent to your email.");
+                navigate("/reset-password", { state: { email: resetEmail } });
             } else {
                 setResetMessage(data.error || "Failed to send reset link.");
             }
@@ -57,14 +55,9 @@ export default function Login() {
         }
     };
 
-    function google_login(token){
+    function google_login(token) {
         const user_details = jwtDecode(token);
-
-        // print the token
-        console.log("Google user", user_details);
-        googleLogin(user_details.email)
-        // register(user_details.name, user_details.email, password)
-        
+        googleLogin(user_details.email);
     }
 
     return (
@@ -72,7 +65,6 @@ export default function Login() {
             <div className="form-box">
                 <h2>Welcome back!</h2>
                 <form onSubmit={handleSubmit}>
-                    <br />
                     <input
                         type="email"
                         value={email}
@@ -90,22 +82,19 @@ export default function Login() {
                     />
                     <br /><br />
 
-                    
-
-                    <p className="forgot-password" onClick={() => setShowResetForm(true)} style={{ cursor: "pointer", color: "black", textDecoration: "underline"}}>
+                    <p className="forgot-password" onClick={() => setShowResetForm(true)} style={{ cursor: "pointer", color: "black", textDecoration: "underline" }}>
                         Forgot password?
                     </p>
 
-                    {/* Login with google */}
                     <div className="google-login-btn">
-                    <GoogleLogin
+                        <GoogleLogin
                             onSuccess={credentialResponse => {
                                 google_login(credentialResponse.credential);
                             }}
                             onError={() => {
                                 console.log('Login Failed');
                             }}
-                            />
+                        />
                     </div>
 
                     <br />
@@ -125,12 +114,12 @@ export default function Login() {
                     <div className="reset-password-content">
                         <span className="close" onClick={() => setShowResetForm(false)}>&times;</span>
                         <h4>Reset Password</h4>
-                        <input 
-                            type="email" 
-                            value={resetEmail} 
-                            onChange={(e) => setResetEmail(e.target.value)} 
-                            placeholder="Enter your email" 
-                            required 
+                        <input
+                            type="email"
+                            value={resetEmail}
+                            onChange={(e) => setResetEmail(e.target.value)}
+                            placeholder="Enter your email"
+                            required
                         />
                         <button type="button" onClick={handlePasswordReset}>
                             Send Reset Link

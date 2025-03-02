@@ -813,3 +813,603 @@ main {
   font-size: 0.75em;
   color: #fff;
 }
+
+
+
+/* ! Ma *//* General container */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px;
+}
+
+/* Title */
+.title {
+  text-align: center;
+  font-size: 3rem;
+  font-weight: bold;
+  color: #222;
+  margin-bottom: 30px;
+}
+/* User Form Styling */
+.user-form {
+  background: #ffffff;
+  padding: 35px;
+  border-radius: 16px;
+  margin: 0 auto 50px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  max-width: 600px; /* Bigger form for better visibility */
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.user-form:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+.user-form h2 {
+  margin-bottom: 25px;
+  font-size: 2.4rem;
+  font-weight: bold;
+  color: #007bff;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Input and Select Fields */
+.user-form input,
+.user-form select {
+  display: block;
+  width: 100%;
+  padding: 16px;
+  margin-bottom: 18px;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  font-size: 1.3rem;
+  background: #f8f8f8;
+  transition: all 0.3s ease-in-out;
+}
+
+.user-form input:focus,
+.user-form select:focus {
+  border-color: #007bff;
+  outline: none;
+  background: #fff;
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.4);
+}
+
+/* Submit Button */
+.user-form button {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  font-size: 1.3rem;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  border-radius: 10px;
+  padding: 16px;
+  text-transform: uppercase;
+  transition: background 0.3s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.user-form button:hover {
+  background: linear-gradient(135deg, #0056b3, #003d82);
+  transform: scale(1.07);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+
+/* User List Grid */
+.user-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 25px;
+  padding: 10px;
+}
+
+/* User Card */
+.user-card {
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.user-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+/* User Details */
+.user-name {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #222;
+  margin-bottom: 10px;
+}
+
+.user-email,
+.user-role {
+  font-size: 1.2rem;
+  color: #555;
+  margin-bottom: 12px;
+}
+
+/* Buttons Styling */
+.delete-btn,
+.edit-btn,
+.role-btn {
+  padding: 12px 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: all 0.3s ease-in-out;
+}
+
+.delete-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.delete-btn:hover {
+  background: #c82333;
+  transform: scale(1.05);
+}
+
+.edit-btn {
+  background: #ffc107;
+  color: black;
+}
+
+.edit-btn:hover {
+  background: #e0a800;
+  transform: scale(1.05);
+}
+
+.role-btn {
+  background: #28a745;
+  color: white;
+}
+
+.role-btn:hover {
+  background: #218838;
+  transform: scale(1.05);
+}
+
+
+
+
+/* !mod */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 300px;
+  text-align: center;
+}
+
+.close {
+  float: right;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.message {
+  color: red;
+  margin-top: 10px;
+}
+
+
+
+/* !manage bookings */
+/* General Styles */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f7fafc;
+  color: #2d3748;
+  margin: 0;
+  padding: 0;
+}
+
+/* Container for the ManageBookings component */
+.manage-bookings-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Heading */
+.manage-bookings-heading {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #2d3748;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Form Styling */
+.booking-form {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.booking-form input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  font-size: 1rem;
+  color: #4a5568;
+}
+
+.booking-form input:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+}
+
+.booking-form button {
+  background-color: #4299e1;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.booking-form button:hover {
+  background-color: #0c2801;
+}
+
+/* Table Styling */
+.bookings-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.bookings-table th,
+.bookings-table td {
+  padding: 12px 15px;
+  text-align: left;
+}
+
+.bookings-table th {
+  background-color: #2d5c13;
+  color: white;
+  font-weight: bold;
+}
+
+.bookings-table tr {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.bookings-table tr:last-child {
+  border-bottom: none;
+}
+
+.bookings-table tr:hover {
+  background-color: #f7fafc;
+}
+
+/* Action Buttons */
+.action-button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.action-button.edit {
+  background-color: #f6e05e;
+  color: #2d3748;
+}
+
+.action-button.edit:hover {
+  background-color: #ecc94b;
+}
+
+.action-button.delete {
+  background-color: #f56565;
+  color: white;
+}
+
+.action-button.delete:hover {
+  background-color: #e53e3e;
+}
+
+/* Toast Notifications */
+.Toastify__toast {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  border-radius: 4px;
+}
+
+.Toastify__toast--success {
+  background-color: #48bb78;
+}
+
+.Toastify__toast--error {
+  background-color: #f56565;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .booking-form {
+      padding: 15px;
+  }
+
+  .booking-form input {
+      margin-bottom: 10px;
+  }
+
+  .bookings-table th,
+  .bookings-table td {
+      padding: 10px;
+  }
+
+  .manage-bookings-heading {
+      font-size: 2rem;
+  }
+}
+
+
+
+/* !Spaces styling */
+/* Container for main content */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+/* Title styling */
+.title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 2rem;
+}
+
+/* Loading text and error message */
+.loading-text, .error-text, .no-spaces-text {
+  text-align: center;
+  font-size: 1.25rem;
+  color: #555;
+}
+
+/* Error message color */
+.error-text {
+  color: red;
+}
+
+/* Grid layout for spaces */
+.spaces-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Individual space card */
+.space-card {
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Space image */
+.space-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+/* Space details */
+.space-details {
+  padding: 1.5rem;
+}
+
+.space-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.space-description, .space-location, .space-price-hour, .space-price-day, .space-availability {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  color: #555;
+}
+
+/* Availability styles */
+.available {
+  color: green;
+}
+
+.booked {
+  color: red;
+}
+
+/* Book button */
+.book-btn {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.3s ease;
+}
+
+.book-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Booking modal */
+.booking-modal {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 400px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Modal title */
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+/* Modal labels and inputs */
+.modal-label {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 0.5rem;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+/* Confirm button */
+.confirm-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.3s ease;
+}
+
+.confirm-btn:hover {
+  background-color: #218838;
+}
+
+/* Toast container styling */
+.toast-container {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1000;
+}
+
+
+
+/* !MyBookings.css */
+.my-bookings-container {
+  padding: 20px;
+  background-color: #1a1a1a; /* Dark background */
+  color: #e0e0e0; /* Light text */
+  min-height: 100vh;
+}
+
+.my-bookings-container h1 {
+  color: #4caf50; /* Dark green */
+  text-align: center;
+}
+
+.bookings-list {
+  list-style: none;
+  padding: 0;
+}
+
+.booking-item {
+  background-color: #2a2a2a; /* Slightly lighter dark background */
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.booking-details p {
+  margin: 5px 0;
+}
+
+.booking-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.delete-button {
+  background-color: #ff4d4d; /* Red for delete button */
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.delete-button:hover {
+  background-color: #cc0000;
+}
+
+.status-select {
+  background-color: #4caf50; /* Dark green */
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.status-select:hover {
+  background-color: #388e3c; /* Slightly darker green */
+}
