@@ -1,3 +1,5 @@
+import React, { useState, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import React, { useState, useContext, use } from "react";
 import { Link } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
@@ -5,6 +7,10 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
+
+export default function Login() {
+    const { login, googleLogin } = useContext(UserContext);
+    const navigate = useNavigate();
 
 
 export default function Login() {
@@ -14,6 +20,11 @@ export default function Login() {
     const [password, setPassword] = useState('');
     const [role, setRole] = useState('Client');
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    const [showResetForm, setShowResetForm] = useState(false);
+    const [resetEmail, setResetEmail] = useState('');
+    const [resetMessage, setResetMessage] = useState('');
+=======
 
     const [showResetForm, setShowResetForm] = useState(false);
     const [resetEmail, setResetEmail] = useState('');
@@ -39,7 +50,46 @@ export default function Login() {
             return;
         }
 
+    const handleSubmit = async (e) => {
+        e.preventDefault();
         try {
+            await login(email, password, role);
+            setIsLoggedIn(true);
+        } catch (error) {
+            setIsLoggedIn(false);
+        }
+    };
+    
+
+    const handlePasswordReset = async (e) => {
+        e.preventDefault();
+        if (!resetEmail) {
+            setResetMessage("Please enter your email.");
+            return;
+        }
+
+        try {
+            const response = await fetch("http://127.0.0.1:5000/request_password_reset", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: resetEmail }),
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                navigate("/reset-password", { state: { email: resetEmail } });
+            } else {
+                setResetMessage(data.error || "Failed to send reset link.");
+            }
+        } catch (error) {
+            setResetMessage("An error occurred. Please try again.");
+        }
+    };
+
+    function google_login(token) {
+        const user_details = jwtDecode(token);
+        googleLogin(user_details.email);
+
             const response = await fetch("http://127.0.0.1:5000/request_password_reset", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -72,7 +122,6 @@ export default function Login() {
             <div className="form-box">
                 <h2>Welcome back!</h2>
                 <form onSubmit={handleSubmit}>
-                    <br />
                     <input
                         type="email"
                         value={email}
@@ -90,6 +139,12 @@ export default function Login() {
                     />
                     <br /><br />
 
+                    <p className="forgot-password" onClick={() => setShowResetForm(true)} style={{ cursor: "pointer", color: "black", textDecoration: "underline" }}>
+                        Forgot password?
+                    </p>
+
+                    <div className="google-login-btn">
+                        <GoogleLogin
                     
 
                     <p className="forgot-password" onClick={() => setShowResetForm(true)} style={{ cursor: "pointer", color: "black", textDecoration: "underline"}}>
@@ -105,6 +160,7 @@ export default function Login() {
                             onError={() => {
                                 console.log('Login Failed');
                             }}
+                        />
                             />
                     </div>
 
@@ -125,6 +181,12 @@ export default function Login() {
                     <div className="reset-password-content">
                         <span className="close" onClick={() => setShowResetForm(false)}>&times;</span>
                         <h4>Reset Password</h4>
+                        <input
+                            type="email"
+                            value={resetEmail}
+                            onChange={(e) => setResetEmail(e.target.value)}
+                            placeholder="Enter your email"
+                            required
                         <input 
                             type="email" 
                             value={resetEmail} 

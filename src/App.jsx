@@ -6,21 +6,30 @@ import NoPage from './pages/NoPage';
 import Profile from './pages/Profile';
 import Register from './pages/Register';
 import About from './pages/About';
-import ManageSpace from './pages/ManageSpace';
 import ManageBooking from './pages/ManageBooking';
 import { UserProvider } from './context/UserContext'; 
+import { SpaceProvider } from './context/SpaceContext';
+import { PaymentsProvider } from './context/PaymentsContext';
+import { BookingProvider } from './context/BookingContext';
 import 'react-toastify/dist/ReactToastify.css';
 import Settings from './pages/Settings';
 import ManageUsers from './pages/ManageUsers';
+import ManageSpace from './pages/ManageSpace';
 import Spaces from "./pages/Spaces";
 import StatementSpace from "./pages/StatementSpace";
 import HomeSweetHome from "./pages/HomeSweetHome";
 import Business from "./pages/Business";
+import MyBookings from './pages/MyBookings';
+import ResetPasswordForm from './pages/ResetPasswordForm';
+
 
 function App() {
   return (
     <BrowserRouter>
       <UserProvider> {/* Ensure the whole app has UserProvider */}
+      <SpaceProvider>
+      <PaymentsProvider>
+        <BookingProvider>
         <Routes>
           <Route path="/" element={<Layout />}> 
             <Route index element={<Home />} />
@@ -36,11 +45,16 @@ function App() {
             <Route path="settings" element={<Settings />} />
             <Route path="manage-users" element={<ManageUsers />} />
             <Route path="spaces" element={<Spaces />} />
+            <Route path="bookings" element={<MyBookings />} />
+            <Route path="/reset-password" element={<ResetPasswordForm />} />
 
             {/* Catch-all route for 404 pages */}
             <Route path="*" element={<NoPage />} />
           </Route>
         </Routes>
+        </BookingProvider>
+        </PaymentsProvider>
+        </SpaceProvider>
       </UserProvider>
     </BrowserRouter>
   );

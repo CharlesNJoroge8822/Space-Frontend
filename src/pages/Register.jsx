@@ -100,6 +100,13 @@ export default function Register() {
                     <button type="button" onClick={handleGoogleLogin} style={{ cursor: 'pointer' }}>
                         Sign up with Google
                     </button>
+                    <button>
+  type="button" 
+  onClick={() => window.location.href = "http://127.0.0.1:5000/google_login"} 
+  style={{ cursor: 'pointer' }}
+  Sign up with Google
+</button>
+
                     <br /><br />
 
                     <p>
