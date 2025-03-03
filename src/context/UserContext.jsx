@@ -7,34 +7,118 @@ export const UserContext = createContext();
 export const UserProvider = ({ children }) => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
+
     const [authToken, setAuthToken] = useState(() => sessionStorage.getItem("token"));
     const [current_user, setCurrentUser] = useState(() => {
         const storedUser = sessionStorage.getItem("current_user");
         return storedUser ? JSON.parse(storedUser) : null;
     });
-    const [allUsers, setAllUsers] = useState([]);
+    const [allUsers, setAllUsers] = useState(() => {
+        const storedUsers = sessionStorage.getItem("all_users");
+        return storedUsers ? JSON.parse(storedUsers) : [];
+    });
 
+    /** ✅ Fetch all users (Admin Only) */
     const fetchAllUsers = async () => {
+        const token = sessionStorage.getItem("token");
+
+        if (!token) {
+            toast.error("Unauthorized! Please log in.");
+            return;
+        }
+
         try {
+            console.log("🔄 Fetching users...");
             const response = await fetch("http://127.0.0.1:5000/users", {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${authToken}`,
+                    Authorization: `Bearer ${token}`,
                 },
             });
-            const data = await response.json();
-            if (response.ok) {
-                setAllUsers(data.users);
-            } else {
-                toast.error(data.error || "Failed to fetch users");
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to fetch users.");
             }
+
+            const data = await response.json();
+            console.log("✅ Users fetched successfully:", data.users);
+
+            setAllUsers([...data.users]); // ✅ Ensures React state updates
+            sessionStorage.setItem("all_users", JSON.stringify(data.users)); // ✅ Cache users
+
         } catch (error) {
-            toast.error("An error occurred while fetching users");
+            console.error("❌ Fetch Users Error:", error.message);
+            setAllUsers([]); // Prevent stale data
+            toast.error(error.message);
         }
     };
-    
+
+    /** ✅ Load current user from sessionStorage */
+    useEffect(() => {
+        const storedUser = sessionStorage.getItem("current_user");
+        if (storedUser) {
+            setCurrentUser(JSON.parse(storedUser));
+        }
+    }, []);
+
+    /** ✅ Ensure fetchAllUsers runs when Admin logs in */
+    useEffect(() => {
+        if (current_user?.role === "Admin") {
+            console.log("👤 Admin detected, fetching all users...");
+            fetchAllUsers();
+        }
+    }, [current_user]); 
+
+    /** ✅ Log `allUsers` updates */
+    useEffect(() => {
+        console.log("📌 `allUsers` updated:", allUsers);
+    }, [allUsers]); 
+
     console.log("Current user:", current_user);
+
+    /** ✅ Login function */
+const login = async (email, password, role) => {
+    const loadingToast = toast.loading("Logging you in...");
+    try {
+        const response = await fetch("http://127.0.0.1:5000/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password, role }),
+        });
+        const data = await response.json();
+
+        if (data.access_token) {
+            sessionStorage.setItem("token", data.access_token);
+            setAuthToken(data.access_token);
+
+            const userResponse = await fetch("http://127.0.0.1:5000/current_user", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${data.access_token}`,
+                },
+            });
+            const user = await userResponse.json();
+
+            if (user.email) {
+                setCurrentUser(user);
+                sessionStorage.setItem("current_user", JSON.stringify(user));
+                toast.success("Successfully Logged in!");
+
+                navigate(user.role === "Client" ? "/spaces" : "/manage-bookings");
+            }
+        } else {
+            toast.error(data.error || "Failed to login");
+        }
+    } catch (error) {
+        toast.error("An error occurred. Please try again.");
+    } finally {
+        toast.dismiss(loadingToast);
+    }
+};
+
 
     // Function to handle Google login
     const handleGoogleLogin = () => {
@@ -121,54 +205,11 @@ export const UserProvider = ({ children }) => {
     };
     
 
-    const login = async (email, password, role) => {
-        const loadingToast = toast.loading("Logging you in ... "); // Store loading toast ID
-        try {
-            const response = await fetch("http://127.0.0.1:5000/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password, role }),
-            });
-            const data = await response.json();
-    
-            if (data.access_token) {
-                sessionStorage.setItem("token", data.access_token);
-                setAuthToken(data.access_token);
-    
-                const userResponse = await fetch("http://127.0.0.1:5000/current_user", {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${data.access_token}`,
-                    },
-                });
-                const user = await userResponse.json();
-    
-                if (user.email) {
-                    setCurrentUser(user);
-                    sessionStorage.setItem("current_user", JSON.stringify(user)); // ✅ Store user in sessionStorage
-                    
-                    toast.dismiss(loadingToast); // ✅ Dismiss only the loading toast
-                    toast.success("Successfully Logged in!"); // ✅ Success message will now show
-                    
-                    navigate(user.role === "Client" ? "/spaces" : "/manage-bookings");
-                }
-            } else {
-                toast.dismiss(loadingToast); // ✅ Dismiss only the loading toast
-                toast.error(data.error || "Failed to login");
-            }
-        } catch (error) {
-            toast.dismiss(loadingToast); // ✅ Dismiss only the loading toast
-            toast.error("An error occurred. Please try again.");
-        }
-    };
-    
-    
+    /** ✅ Logout */
     const logout = () => {
-        console.log("Logout function triggered"); // ✅ Debugging step
-    
-        const loadingToast = toast.loading("Logging out ... "); // ✅ Store loading toast ID
-    
+        console.log("🔴 Logging out...");
+        const loadingToast = toast.loading("Logging out...");
+
         fetch("http://127.0.0.1:5000/logout", {
             method: "DELETE",
             headers: {
@@ -178,125 +219,42 @@ export const UserProvider = ({ children }) => {
         })
         .then((resp) => resp.json())
         .then((response) => {
-            console.log("Logout response:", response); // ✅ Debugging step
-    
-            // ✅ **Dismiss only the loading toast**
-            toast.dismiss(loadingToast); 
-    
-            if (response.success === "Logged out successfully") { 
-                // ✅ **SHOW TOAST IMMEDIATELY (Before State Change)**
+            toast.dismiss(loadingToast);
+
+            if (response.success === "Logged out successfully") {
                 toast.success("Successfully Logged out", { autoClose: 3000 });
-    
-                // ✅ **DELAY CLEARING USER STATE TO PREVENT RE-RENDER ISSUES**
+
                 setTimeout(() => {
-                    sessionStorage.removeItem("token");
-                    sessionStorage.removeItem("current_user");
+                    sessionStorage.clear();
                     setAuthToken(null);
                     setCurrentUser(null);
-                }, 1000); // ⏳ **Short delay ensures toast appears before re-render**
-    
-                // ✅ **DELAY NAVIGATION TO PREVENT TOAST FROM DISAPPEARING**
-                setTimeout(() => {
-                    console.log("Navigating to login page"); // ✅ Debugging step
+                    setAllUsers([]);
                     navigate("/login");
-                }, 3000); // ⏳ **Ensure toast is visible before redirecting**
+                }, 1000);
             } else {
                 toast.error("Logout failed. Please try again.");
             }
         })
         .catch((error) => {
-            console.error("Logout error:", error);
             toast.dismiss(loadingToast);
             toast.error("An error occurred while logging out.");
         });
     };
-      
-    
-    const updateProfile = async (userId, newProfileData) => {
-        toast.loading("Updating profile...");
-    
-        // Ensure token is retrieved correctly
-        const token = sessionStorage.getItem("token");
-        if (!token) {
-            console.error("⛔ No token found!");
-            toast.error("You must be logged in to update your profile.");
-            return;
-        }
-    
-        console.log("Auth Token Being Sent:", token); // Debugging token
-    
-        try {
-            const response = await fetch(`http://127.0.0.1:5000/users/${userId}`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify(newProfileData),
-            });
-    
-            const data = await response.json();
-            console.log("Server Response:", data); // Debug response
-    
-            if (!response.ok) {
-                throw new Error(data.error || "Failed to update profile.");
-            }
-    
-            toast.dismiss();
-            toast.success("Profile updated successfully!");
-            setCurrentUser((prevUser) => ({ ...prevUser, ...newProfileData }));
-        } catch (error) {
-            toast.dismiss();
-            console.error("Error updating profile:", error);
-            toast.error(error.message);
-        }
-    };
-    
-    const addUser = async (name, email, password, role) => {
-        if (!name || !email || !password) {
-            toast.error("All fields are required!");
-            return;
-        }
-    
-        toast.loading("Registering...");
-    
-        try {
-            const payload = JSON.stringify({
-                name: name.trim(),
-                email: email.trim(),
-                password: password.trim(),
-                role: role === "Admin" ? "Admin" : "Client",
-            });
-    
-            const token = localStorage.getItem('token');
-    
-            const response = await fetch("http://127.0.0.1:5000/users", {
-                method: "POST",
-                headers: { 
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: payload,
-            });
-    
-            const data = await response.json();
-            toast.dismiss();
-    
-            if (response.ok) {
-                toast.success(data.message || "Registration successful!");
-                navigate("/login");
-            } else {
-                toast.error(data.error || "Registration failed. Please try again.");
-            }
-        } catch (error) {
-            toast.dismiss();
-            console.error("Network error:", error);
-            toast.error("Network error, please try again.");
-        }
-    };
 
     return (
-        <UserContext.Provider value={{ authToken, login, current_user, setCurrentUser, logout, addUser, updateProfile, handleGoogleLogin, googleLogin, fetchAllUsers }}>
+        <UserContext.Provider value={{ 
+            authToken, 
+            login, 
+            current_user, 
+            setCurrentUser, 
+            logout, 
+            fetchAllUsers, 
+            allUsers,   
+            setAllUsers, 
+            handleGoogleLogin,
+            googleLogin 
+
+        }}>
             {children}
         </UserContext.Provider>
     );

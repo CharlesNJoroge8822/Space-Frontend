@@ -5,60 +5,99 @@ import "../App.css";
 
 const ManageUsers = () => {
     const { allUsers, fetchAllUsers, current_user, deleteUser, addUser, updateProfile } = useContext(UserContext);
+
+    const [localUsers, setLocalUsers] = useState([]);
     const [newUser, setNewUser] = useState({ name: "", email: "", password: "", role: "Client" });
     const [editUser, setEditUser] = useState(null);
     const [loading, setLoading] = useState(false);
 
+    /** ✅ Sync local state with `allUsers` */
     useEffect(() => {
-        if (current_user && current_user.role === "Admin") {
-            setLoading(true);
-            fetchAllUsers()
-                .catch(() => toast.error("Failed to fetch users"))
-                .finally(() => setLoading(false));
-        }
-    }, [current_user, fetchAllUsers]);
+        setLocalUsers(allUsers);
+        console.log("📌 Updated `localUsers` in ManageUsers.jsx:", allUsers);
+    }, [allUsers]);
 
-    const handleDelete = async (userId) => {
-        if (window.confirm("Are you sure you want to delete this user?")) {
-            setLoading(true);
-            await deleteUser(userId)
-                .then(() => toast.success("User deleted successfully"))
-                .catch(() => toast.error("Failed to delete user"))
-                .finally(() => setLoading(false));
+    /** ✅ Fetch users when Admin logs in */
+    useEffect(() => {
+        if (current_user?.role === "Admin") {
+            console.log("👤 Admin detected, fetching all users...");
+            fetchAllUsers();
+        }
+    }, [current_user]);
+
+    /** ✅ Handle manual fetch */
+    const fetchUsers = async () => {
+        setLoading(true);
+        try {
+            await fetchAllUsers();
+        } catch (error) {
+            toast.error("Failed to fetch users");
+        } finally {
+            setLoading(false);
         }
     };
 
+    /** ✅ Handle user deletion */
+    const handleDelete = async (userId) => {
+        if (!window.confirm("Are you sure you want to delete this user?")) return;
+
+        setLoading(true);
+        try {
+            await deleteUser(userId);
+            toast.success("User deleted successfully");
+            fetchUsers();
+        } catch (error) {
+            toast.error("Failed to delete user");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    /** ✅ Handle adding a new user */
     const handleAddUser = async (e) => {
         e.preventDefault();
         setLoading(true);
-        await addUser(newUser.name, newUser.email, newUser.password, newUser.role)
-            .then(() => {
-                toast.success("User added successfully");
-                setNewUser({ name: "", email: "", password: "", role: "Client" });
-            })
-            .catch(() => toast.error("Failed to add user"))
-            .finally(() => setLoading(false));
+        try {
+            await addUser(newUser.name, newUser.email, newUser.password, newUser.role);
+            toast.success("User added successfully");
+            setNewUser({ name: "", email: "", password: "", role: "Client" });
+            fetchUsers();
+        } catch (error) {
+            toast.error("Failed to add user");
+        } finally {
+            setLoading(false);
+        }
     };
 
+    /** ✅ Handle updating a user */
     const handleUpdateUser = async (e) => {
         e.preventDefault();
         setLoading(true);
-        await updateProfile(editUser.id, editUser)
-            .then(() => {
-                toast.success("User updated successfully");
-                setEditUser(null);
-            })
-            .catch(() => toast.error("Failed to update user"))
-            .finally(() => setLoading(false));
+        try {
+            await updateProfile(editUser.id, editUser);
+            toast.success("User updated successfully");
+            setEditUser(null);
+            fetchUsers();
+        } catch (error) {
+            toast.error("Failed to update user");
+        } finally {
+            setLoading(false);
+        }
     };
 
+    /** ✅ Handle role change */
     const handleRoleChange = async (userId, newRole) => {
-        if (window.confirm(`Are you sure you want to change this user's role to ${newRole}?`)) {
-            setLoading(true);
-            await updateProfile(userId, { role: newRole })
-                .then(() => toast.success("Role updated successfully"))
-                .catch(() => toast.error("Failed to update role"))
-                .finally(() => setLoading(false));
+        if (!window.confirm(`Are you sure you want to change this user's role to ${newRole}?`)) return;
+
+        setLoading(true);
+        try {
+            await updateProfile(userId, { role: newRole });
+            toast.success("Role updated successfully");
+            fetchUsers();
+        } catch (error) {
+            toast.error("Failed to update role");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -70,7 +109,7 @@ const ManageUsers = () => {
         <div className="container">
             <h1 className="title">Manage Users</h1>
 
-            {loading && <p>Loading...</p>}
+            {loading && <p className="loading-text">Loading...</p>}
 
             {/* Edit User Form */}
             {editUser && (
@@ -97,8 +136,8 @@ const ManageUsers = () => {
 
             {/* User List */}
             <div className="user-list">
-                {allUsers.length > 0 ? (
-                    allUsers.map((user) => (
+                {localUsers.length > 0 ? (
+                    localUsers.map((user) => (
                         <div key={user.id} className="user-card">
                             <p className="user-name">{user.name}</p>
                             <p className="user-email">{user.email}</p>

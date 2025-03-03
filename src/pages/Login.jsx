@@ -24,36 +24,41 @@ export default function Login() {
         try {
             await login(email, password, role);
             setIsLoggedIn(true);
+            toast.success("Login successful!");
         } catch (error) {
             setIsLoggedIn(false);
+            toast.error("Invalid credentials. Please try again.");
         }
     };
     
+    
 
-    const handlePasswordReset = async (e) => {
-        e.preventDefault();
-        if (!resetEmail) {
-            setResetMessage("Please enter your email.");
-            return;
+const handlePasswordReset = async (e) => {
+    e.preventDefault();
+    if (!resetEmail) {
+        setResetMessage("Please enter your email.");
+        return;
+    }
+
+    try {
+        const response = await fetch("http://127.0.0.1:5000/request_password_reset", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: resetEmail }),
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            toast.success("Password reset link sent. Check your email.");
+            navigate("/reset-password", { state: { email: resetEmail } });
+        } else {
+            toast.error(data.error || "Failed to send reset link.");
         }
+    } catch (error) {
+        toast.error("An error occurred. Please try again.");
+    }
+};
 
-        try {
-            const response = await fetch("http://127.0.0.1:5000/request_password_reset", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: resetEmail }),
-            });
-
-            const data = await response.json();
-            if (response.ok) {
-                navigate("/reset-password", { state: { email: resetEmail } });
-            } else {
-                setResetMessage(data.error || "Failed to send reset link.");
-            }
-        } catch (error) {
-            setResetMessage("An error occurred. Please try again.");
-        }
-    };
 
     function google_login(token) {
         const user_details = jwtDecode(token);
