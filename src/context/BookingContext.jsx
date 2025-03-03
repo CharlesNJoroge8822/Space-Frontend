@@ -49,24 +49,48 @@ export const BookingProvider = ({ children }) => {
         }
     }, []);
 
-    // Delete a booking
-    const deleteBooking = useCallback(async (id) => {
+
+    // fetch user bookings
+
+    const fetchUserBookings = async (userId) => {
         try {
-            const response = await fetch(`http://127.0.0.1:5000/bookings/${id}`, {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-            });
-
-            if (!response.ok) throw new Error("Failed to delete booking.");
-
-            toast.success("✅ Booking deleted successfully!");
-            setBookings((prev) => prev.filter((booking) => booking.id !== id)); // Remove the deleted booking from state
+            const response = await fetch(`http://127.0.0.1:5000/bookings?user_id=${userId}`);
+            const data = await response.json();
+            setBookings(data);
         } catch (error) {
-            toast.error("❌ Failed to delete booking. Please try again.");
-            console.error("Delete Booking Error:", error);
+            console.error("Failed to fetch bookings:", error);
             throw error;
         }
-    }, []);
+    };
+
+    const deleteBooking = async (id) => {
+        try {
+            const token = sessionStorage.getItem("token"); // Get the JWT token from sessionStorage
+            if (!token) {
+                toast.error("You must be logged in to delete a booking.");
+                return;
+            }
+    
+            const response = await fetch(`http://127.0.0.1:5000/bookings/${id}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`, // Include the JWT token
+                },
+                credentials: "include", // Include credentials if using cookies
+            });
+    
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+    
+            toast.success("✅ Booking deleted successfully!", { autoClose: 1000 });
+            fetchBookings(); // Refresh the bookings list
+        } catch (error) {
+            console.error("Error deleting booking:", error);
+            toast.error(`❌ ${error.message}`, { autoClose: 1000 });
+        }
+    };
 
     // Update booking status
     const updateBookingStatus = useCallback(async (id, status) => {
@@ -100,6 +124,7 @@ export const BookingProvider = ({ children }) => {
                 fetchBookings,
                 deleteBooking,
                 updateBookingStatus,
+                fetchUserBookings
             }}
         >
             {children}

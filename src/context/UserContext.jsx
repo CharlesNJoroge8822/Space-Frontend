@@ -12,6 +12,27 @@ export const UserProvider = ({ children }) => {
         const storedUser = sessionStorage.getItem("current_user");
         return storedUser ? JSON.parse(storedUser) : null;
     });
+    const [allUsers, setAllUsers] = useState([]);
+
+    const fetchAllUsers = async () => {
+        try {
+            const response = await fetch("http://127.0.0.1:5000/users", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${authToken}`,
+                },
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setAllUsers(data.users);
+            } else {
+                toast.error(data.error || "Failed to fetch users");
+            }
+        } catch (error) {
+            toast.error("An error occurred while fetching users");
+        }
+    };
     
     console.log("Current user:", current_user);
 
@@ -275,7 +296,7 @@ export const UserProvider = ({ children }) => {
     };
 
     return (
-        <UserContext.Provider value={{ authToken, login, current_user, setCurrentUser, logout, addUser, updateProfile, handleGoogleLogin, googleLogin }}>
+        <UserContext.Provider value={{ authToken, login, current_user, setCurrentUser, logout, addUser, updateProfile, handleGoogleLogin, googleLogin, fetchAllUsers }}>
             {children}
         </UserContext.Provider>
     );

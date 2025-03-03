@@ -49,7 +49,7 @@ export default function Navbar() {
                                 <Link to="/profile" className={`navbar-link ${location.pathname === "/profile" ? "active" : ""}`}>Profile</Link>
                             </>
                         )}
-                        <Link to="/settings" className={`navbar-link ${location.pathname === "/settings" ? "active" : ""}`}>Settings</Link>
+                        {/* <Link to="/settings" className={`navbar-link ${location.pathname === "/settings" ? "active" : ""}`}>Settings</Link> */}
                     </>
                 ) : (
                     <>  
