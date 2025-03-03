@@ -12,7 +12,7 @@ import { SpaceProvider } from './context/SpaceContext';
 import { PaymentsProvider } from './context/PaymentsContext';
 import { BookingProvider } from './context/BookingContext';
 import 'react-toastify/dist/ReactToastify.css';
-import Settings from './pages/Settings';
+// import Settings from './pages/Settings';
 import ManageUsers from './pages/ManageUsers';
 import ManageSpace from './pages/ManageSpace';
 import Spaces from "./pages/Spaces";
@@ -42,7 +42,7 @@ function App() {
             <Route path="homesweethome" element={<HomeSweetHome />} />
             <Route path="business" element={<Business />} />
             <Route path="manage-bookings" element={<ManageBooking />} />
-            <Route path="settings" element={<Settings />} />
+            {/* <Route path="settings" element={<Settings />} /> */}
             <Route path="manage-users" element={<ManageUsers />} />
             <Route path="spaces" element={<Spaces />} />
             <Route path="bookings" element={<MyBookings />} />

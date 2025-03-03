@@ -40,7 +40,7 @@ export const BookingProvider = ({ children }) => {
             if (!response.ok) throw new Error("Failed to fetch bookings.");
 
             const data = await response.json();
-            setBookings(data.bookings); // Update the bookings state
+            setBookings(data.bookings || []); // Ensure we set an array
             return data;
         } catch (error) {
             toast.error("❌ Failed to fetch bookings. Please try again.");
@@ -49,61 +49,73 @@ export const BookingProvider = ({ children }) => {
         }
     }, []);
 
-    // Delete a booking
-    const deleteBooking = useCallback(async (id) => {
+    // Fetch bookings for a specific user
+    const fetchUserBookings = async (userId) => {
         try {
+            const response = await fetch(`http://127.0.0.1:5000/bookings?user_id=${userId}`, {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+            });
+
+            if (!response.ok) throw new Error("Failed to fetch user bookings.");
+
+            const data = await response.json();
+            setBookings(data.bookings || []); // Ensure it's an array
+        } catch (error) {
+            toast.error("❌ Failed to fetch user bookings. Please try again.");
+            console.error("Fetch User Bookings Error:", error);
+        }
+    };
+
+    // Delete a booking
+    const deleteBooking = async (id) => {
+        try {
+            const token = sessionStorage.getItem("token");a
+            if (!token) {
+                toast.error("You must be logged in to delete a booking.");
+                return;
+            }
+    
             const response = await fetch(`http://127.0.0.1:5000/bookings/${id}`, {
                 method: "DELETE",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                credentials: "include",
             });
-
-            if (!response.ok) throw new Error("Failed to delete booking.");
-
-            toast.success("✅ Booking deleted successfully!");
-            setBookings((prev) => prev.filter((booking) => booking.id !== id)); // Remove the deleted booking from state
+    
+            if (!response.ok) {
+                if (response.status === 401) {
+                    toast.error("Unauthorized! Please log in again.");
+                    return;
+                }
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+    
+            // Update the UI without re-fetching from the server
+            setBookings((prevBookings) => prevBookings.filter(booking => booking.id !== id));
+    
+            toast.success("✅ Booking deleted successfully!", { autoClose: 1000 });
+    
         } catch (error) {
-            toast.error("❌ Failed to delete booking. Please try again.");
-            console.error("Delete Booking Error:", error);
-            throw error;
+            console.error("Error deleting booking:", error);
+            toast.error(`❌ ${error.message}`, { autoClose: 1000 });
         }
-    }, []);
-
-    // Update booking status
-    const updateBookingStatus = useCallback(async (id, status) => {
-        try {
-            const response = await fetch(`http://127.0.0.1:5000/bookings/${id}/status`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ status }),
-            });
-
-            if (!response.ok) throw new Error("Failed to update booking status.");
-
-            toast.success("✅ Booking status updated successfully!");
-            setBookings((prev) =>
-                prev.map((booking) =>
-                    booking.id === id ? { ...booking, status } : booking
-                )
-            ); // Update the booking status in state
-        } catch (error) {
-            toast.error("❌ Failed to update booking status. Please try again.");
-            console.error("Update Booking Status Error:", error);
-            throw error;
-        }
-    }, []);
-
+    };
+    
+    
     return (
         <BookingContext.Provider
             value={{
                 bookings,
                 createBooking,
                 fetchBookings,
+                fetchUserBookings,
                 deleteBooking,
-                updateBookingStatus,
             }}
         >
             {children}
         </BookingContext.Provider>
     );
 };
--

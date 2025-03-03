@@ -3,7 +3,6 @@ import { UserContext } from "../context/UserContext";
 import { toast } from "react-toastify";
 import "../App.css";
 
-
 const Profile = () => {
     const { current_user, updateProfile, logout } = useContext(UserContext);
     const [profileData, setProfileData] = useState({
@@ -20,7 +19,7 @@ const Profile = () => {
                 image: current_user.image || "default.jpg",
             });
         }
-    }, [current_user]); // ✅ Added dependency to ensure correct data updates
+    }, [current_user]);
 
     const handleChange = (e) => {
         setProfileData({ ...profileData, [e.target.name]: e.target.value });
@@ -61,7 +60,6 @@ const Profile = () => {
         }
     };
 
-    // ✅ Ensure handleSubmit is defined before being used
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!profileData.name || !profileData.email) {
@@ -70,69 +68,50 @@ const Profile = () => {
         }
         await updateProfile(current_user.id, profileData);
     };
-    
 
     return (
-        <div className="max-w-lg mx-auto p-6 bg-white shadow-md rounded-lg">
-            <h2 className="text-2xl font-semibold mb-4">Profile</h2>
+        <div className="profile-container">
+            <h2>Profile</h2>
             <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                    <label className="block text-gray-700">Name</label>
+                <div className="form-group">
+                    <label>Name</label>
                     <input
                         type="text"
                         name="name"
                         value={profileData.name}
                         onChange={handleChange}
-                        className="w-full p-2 border rounded"
                     />
                 </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700">Email</label>
+                <div className="form-group">
+                    <label>Email</label>
                     <input
                         type="email"
                         name="email"
                         value={profileData.email}
                         onChange={handleChange}
-                        className="w-full p-2 border rounded"
                         disabled
                     />
                 </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700">Profile Image</label>
+                <div className="form-group">
+                    <label>Profile Image</label>
                     <input
                         type="file"
                         accept="image/*"
                         onChange={handleImageUpload}
-                        className="w-full p-2 border rounded"
                     />
-                    {profileData.image && <img src={profileData.image} alt="Profile" className="mt-2 w-32 h-32 rounded-full" />}
+                    {profileData.image && (
+                        <img src={profileData.image} alt="Profile" className="profile-image" />
+                    )}
                 </div>
-                <button type="submit" className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+                <button type="submit" className="submit-button">
                     Update Profile
                 </button>
             </form>
-            {/* Logout Button */}
-          <div style={{ textAlign: "center", marginTop: "20px" }}>
-            <br />
-            <br />
-            <button
-              onClick={logout}
-              style={{
-                padding: "10px 20px",
-                border: "none",
-                borderRadius: "5px",
-                fontSize: "14px",
-                cursor: "pointer",
-                backgroundColor: "#dc3545",
-                color: "#fff",
-                transition: "background-color 0.3s ease",
-              }}
-              onMouseOver={(e) => (e.target.style.backgroundColor = "#c82333")}
-              onMouseOut={(e) => (e.target.style.backgroundColor = "#dc3545")}
-            >
-              Logout
-            </button>
-          </div>
+            <div className="logout-container">
+                <button onClick={logout} className="logout-button">
+                    Logout
+                </button>
+            </div>
         </div>
     );
 };
