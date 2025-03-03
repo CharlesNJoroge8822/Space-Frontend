@@ -4,28 +4,19 @@ import { toast } from "react-toastify";
 import "../App.css";
 
 const ManageUsers = () => {
-    const { allUsers, fetchAllUsers, current_user, deleteUser, addUser, updateProfile } = useContext(UserContext);
-
-    const [localUsers, setLocalUsers] = useState([]);
+    const { allUsers = [], fetchAllUsers, current_user, deleteUser, addUser, updateProfile } = useContext(UserContext);
     const [newUser, setNewUser] = useState({ name: "", email: "", password: "", role: "Client" });
     const [editUser, setEditUser] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    /** ✅ Sync local state with `allUsers` */
-    useEffect(() => {
-        setLocalUsers(allUsers);
-        console.log("📌 Updated `localUsers` in ManageUsers.jsx:", allUsers);
-    }, [allUsers]);
-
-    /** ✅ Fetch users when Admin logs in */
     useEffect(() => {
         if (current_user?.role === "Admin") {
-            console.log("👤 Admin detected, fetching all users...");
+            console.log("Fetching all users...");  // ✅ Debugging Step
             fetchAllUsers();
         }
-    }, [current_user]);
+    }, [current_user]);  // ✅ Ensure it only runs when the user changes
+    
 
-    /** ✅ Handle manual fetch */
     const fetchUsers = async () => {
         setLoading(true);
         try {
@@ -37,15 +28,14 @@ const ManageUsers = () => {
         }
     };
 
-    /** ✅ Handle user deletion */
     const handleDelete = async (userId) => {
         if (!window.confirm("Are you sure you want to delete this user?")) return;
-
+        
         setLoading(true);
         try {
             await deleteUser(userId);
             toast.success("User deleted successfully");
-            fetchUsers();
+            fetchUsers(); // Refresh the user list
         } catch (error) {
             toast.error("Failed to delete user");
         } finally {
@@ -53,7 +43,6 @@ const ManageUsers = () => {
         }
     };
 
-    /** ✅ Handle adding a new user */
     const handleAddUser = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -69,7 +58,6 @@ const ManageUsers = () => {
         }
     };
 
-    /** ✅ Handle updating a user */
     const handleUpdateUser = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -85,10 +73,9 @@ const ManageUsers = () => {
         }
     };
 
-    /** ✅ Handle role change */
     const handleRoleChange = async (userId, newRole) => {
         if (!window.confirm(`Are you sure you want to change this user's role to ${newRole}?`)) return;
-
+        
         setLoading(true);
         try {
             await updateProfile(userId, { role: newRole });
@@ -135,30 +122,27 @@ const ManageUsers = () => {
             )}
 
             {/* User List */}
-            <div className="user-list">
-                {localUsers.length > 0 ? (
-                    localUsers.map((user) => (
-                        <div key={user.id} className="user-card">
-                            <p className="user-name">{user.name}</p>
-                            <p className="user-email">{user.email}</p>
-                            <p className="user-role">Role: {user.role}</p>
-                            <button className="delete-btn" onClick={() => handleDelete(user.id)} disabled={loading}>
-                                Delete
-                            </button>
-                            <button className="edit-btn" onClick={() => setEditUser(user)} disabled={loading}>
-                                Edit
-                            </button>
-                            {user.role === "Client" && (
-                                <button className="role-btn" onClick={() => handleRoleChange(user.id, "Admin")} disabled={loading}>
-                                    Make Admin
-                                </button>
+{/* User List */}
+                        <div className="user-list">
+                            {allUsers && allUsers.length > 0 ? (  // ✅ Ensures `allUsers` is not undefined
+                                allUsers.map((user) => (
+                                    <div key={user.id} className="user-card">
+                                        <p className="user-name">{user.name}</p>
+                                        <p className="user-email">{user.email}</p>
+                                        <p className="user-role">Role: {user.role}</p>
+                                        <button className="delete-btn" onClick={() => handleDelete(user.id)}>
+                                            Delete
+                                        </button>
+                                        <button className="edit-btn" onClick={() => setEditUser(user)}>
+                                            Edit
+                                        </button>
+                                    </div>
+                                ))
+                            ) : (
+                                <p>No users available.</p>
                             )}
                         </div>
-                    ))
-                ) : (
-                    <p>No users available.</p>
-                )}
-            </div>
+
 
             {/* Add User Form */}
             <form onSubmit={handleAddUser} className="user-form">

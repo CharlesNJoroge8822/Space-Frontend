@@ -204,6 +204,99 @@ const login = async (email, password, role) => {
         }
     };
     
+    /** ✅ Register a new user */
+const addUser = async (name, email, password, role = "Client") => {
+    const loadingToast = toast.loading("Creating your account...");
+
+    try {
+        const response = await fetch("http://127.0.0.1:5000//users", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, email, password, role }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            toast.success("Account created successfully!");
+
+            // ✅ Auto-login after successful registration
+            await login(email, password, role);
+        } else {
+            throw new Error(data.error || "Registration failed.");
+        }
+    } catch (error) {
+        toast.error(error.message);
+    } finally {
+        toast.dismiss(loadingToast);
+    }
+};  
+        const updateProfile = async (userId, updatedData) => {
+            const token = sessionStorage.getItem("token");
+
+            if (!token) {
+                toast.error("Unauthorized! Please log in.");
+                return;
+            }
+
+            try {
+                console.log(`✏️ Updating user ${userId}...`, updatedData);
+                const response = await fetch(`http://127.0.0.1:5000/users/${userId}`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify(updatedData),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || "Failed to update user.");
+                }
+
+                toast.success("User updated successfully!");
+                fetchAllUsers(); // Refresh the user list
+
+            } catch (error) {
+                console.error("❌ Update user error:", error.message);
+                toast.error(error.message);
+            }
+        };
+
+
+    const deleteUser = async (userId) => {
+        const token = sessionStorage.getItem("token");
+
+        if (!token) {
+            toast.error("Unauthorized! Please log in.");
+            return;
+        }
+
+        try {
+            console.log(`🗑️ Deleting user with ID: ${userId}...`);
+            const response = await fetch(`http://127.0.0.1:5000/users/${userId}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to delete user.");
+            }
+
+            toast.success("User deleted successfully!");
+            fetchAllUsers(); // Refresh the user list
+
+        } catch (error) {
+            console.error("❌ Delete user error:", error.message);
+            toast.error(error.message);
+        }
+    };
+
 
     /** ✅ Logout */
     const logout = () => {
@@ -252,7 +345,10 @@ const login = async (email, password, role) => {
             allUsers,   
             setAllUsers, 
             handleGoogleLogin,
-            googleLogin 
+            googleLogin ,
+            addUser,
+            deleteUser,  // ✅ Add deleteUser to context
+            updateProfile // 
 
         }}>
             {children}

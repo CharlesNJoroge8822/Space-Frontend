@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "../App.css"; // Import the custom CSS
+import "../App.css"; // Ensure this file has improved styles
 
 const ManageBookings = () => {
     const [bookings, setBookings] = useState([]);
@@ -14,34 +14,30 @@ const ManageBookings = () => {
         space_id: "",
         start_time: "",
         end_time: "",
-        status:""
+        status: ""
     });
 
     // Fetch bookings from the backend
     const fetchBookings = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`http://127.0.0.1:5000/bookings`, {
+            const response = await fetch("http://127.0.0.1:5000/bookings", {
                 method: "GET",
-                // headers: { "Content-Type": "application/json" },
-                // credentials: "include", // Include cookies for authenticated sessions
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${sessionStorage.getItem("token")}`
+                },
+                credentials: "include",
             });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
             const data = await response.json();
-            console.log("Fetched data:", data);
-
-            if (Array.isArray(data.bookings)) {
-                setBookings(data.bookings);
-            } else {
-                setBookings([]);
+            setBookings(Array.isArray(data.bookings) ? data.bookings : []);
+            if (!data.bookings.length) {
                 toast.warning("⚠️ No bookings found.", { autoClose: 1000 });
             }
         } catch (error) {
-            console.error("Error fetching bookings:", error);
             setError("Error fetching bookings. Please try again.");
             toast.error("❌ Error fetching bookings.", { autoClose: 1000 });
         } finally {
@@ -60,35 +56,22 @@ const ManageBookings = () => {
         try {
             const response = await fetch(url, {
                 method,
-                // headers: { "Content-Type": "application/json" },
-                // credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${sessionStorage.getItem("token")}`
+                },
+                credentials: "include",
                 body: JSON.stringify(currentBooking),
             });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
-            const data = await response.json();
-            toast.success(
-                isEditing ? "✅ Booking updated successfully!" : "✅ Booking created successfully!",
-                { autoClose: 1000 }
-            );
+            toast.success(isEditing ? "✅ Booking updated!" : "✅ Booking created!", { autoClose: 1000 });
 
-            // Refresh the bookings list
             fetchBookings();
-            // Reset the form
             setIsEditing(false);
-            setCurrentBooking({
-                id: null,
-                user_id: "",
-                space_id: "",
-                start_time: "",
-                end_time: "",
-                status: ""
-            });
+            setCurrentBooking({ id: null, user_id: "", space_id: "", start_time: "", end_time: "", status: "" });
         } catch (error) {
-            console.error("Error saving booking:", error);
             toast.error(`❌ ${error.message}`, { autoClose: 1000 });
         }
     };
@@ -98,34 +81,20 @@ const ManageBookings = () => {
         try {
             const response = await fetch(`http://127.0.0.1:5000/bookings/${id}`, {
                 method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${sessionStorage.getItem("token")}`
+                },
                 credentials: "include",
             });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
-            toast.success("✅ Booking deleted successfully!", { autoClose: 1000 });
-            // Refresh the bookings list
-            fetchBookings();
+            setBookings((prev) => prev.filter(booking => booking.id !== id));
+            toast.success("✅ Booking deleted!", { autoClose: 1000 });
         } catch (error) {
-            console.error("Error deleting booking:", error);
             toast.error(`❌ ${error.message}`, { autoClose: 1000 });
         }
-    };
-
-    // Set the current booking for editing
-    const editBooking = (booking) => {
-        setIsEditing(true);
-        setCurrentBooking({
-            id: booking.id,
-            user_id: booking.user_id,
-            space_id: booking.space_id,
-            start_time: booking.start_time,
-            end_time: booking.end_time,
-            status: booking.status,
-
-        });
     };
 
     // Handle input changes
@@ -134,76 +103,22 @@ const ManageBookings = () => {
         setCurrentBooking({ ...currentBooking, [name]: value });
     };
 
-    // Fetch bookings when the component mounts
     useEffect(() => {
         fetchBookings();
     }, []);
-
-    // Render loading state
-    if (loading) return <div className="p-4 text-center">Loading...</div>;
-
-    // Render error state
-    if (error) return <div className="p-4 text-center text-red-500">Error: {error}</div>;
 
     return (
         <div className="manage-bookings-container">
             <h1 className="manage-bookings-heading">Manage Bookings</h1>
 
-            {/* Form for creating/updating bookings */}
-            <form onSubmit={saveBooking} className="booking-form">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input
-                        type="text"
-                        name="user_id"
-                        placeholder="User ID"
-                        value={currentBooking.user_id}
-                        onChange={handleInputChange}
-                        required
-                    />
-                    <input
-                        type="text"
-                        name="space_id"
-                        placeholder="Space ID"
-                        value={currentBooking.space_id}
-                        onChange={handleInputChange}
-                        required
-                    />
-                    <input
-                        type="datetime-local"
-                        name="start_time"
-                        placeholder="Start Time"
-                        value={currentBooking.start_time}
-                        onChange={handleInputChange}
-                        required
-                    />
-                       <input
-                        type="text"
-                        name="payment-status"
-                        placeholder="payment-status"
-                        value={currentBooking.status}
-                        onChange={handleInputChange}
-                        required
-                    />
-                    <input
-                        type="datetime-local"
-                        name="end_time"
-                        placeholder="End Time"
-                        value={currentBooking.end_time}
-                        onChange={handleInputChange}
-                        required
-                    />
-                </div>
-                <button type="submit">
-                    {isEditing ? "Update Booking" : "Create Booking"}
-                </button>
-            </form>
 
-            {/* Display bookings in a table */}
+
+            {/* Bookings Table */}
             <table className="bookings-table">
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>User ID</th>    
+                        <th>User ID</th>
                         <th>Space ID</th>
                         <th>Start Time</th>
                         <th>End Time</th>
@@ -220,18 +135,9 @@ const ManageBookings = () => {
                             <td>{new Date(booking.start_time).toLocaleString()}</td>
                             <td>{new Date(booking.end_time).toLocaleString()}</td>
                             <td>{booking.status}</td>
-
                             <td>
-                                <button
-                                    onClick={() => editBooking(booking)}
-                                    className="action-button edit"
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    onClick={() => deleteBooking(booking.id)}
-                                    className="action-button delete"
-                                >
+
+                                <button onClick={() => deleteBooking(booking.id)} className="delete-button">
                                     Delete
                                 </button>
                             </td>
@@ -240,8 +146,7 @@ const ManageBookings = () => {
                 </tbody>
             </table>
 
-            {/* Toast notifications */}
-            <ToastContainer position="top-right" autoClose={3000} />
+            <ToastContainer position="top-right" autoClose={2000} />
         </div>
     );
 };

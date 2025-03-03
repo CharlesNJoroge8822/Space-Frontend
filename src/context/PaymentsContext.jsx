@@ -52,8 +52,44 @@ export const PaymentsProvider = ({ children }) => {
         }
     }, []);
 
+    const deletePayment = async (id) => {
+        try {
+            const token = sessionStorage.getItem("token");
+    
+            if (!token) {
+                toast.error("You must be logged in to delete a payment.");
+                return;
+            }
+    
+            console.log("JWT Token being sent:", token); // Debugging
+    
+            const response = await fetch(`http://127.0.0.1:5000/payments/${id}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`, // Ensure token is sent
+                },
+                credentials: "include",
+            });
+    
+            if (!response.ok) {
+                if (response.status === 401) {
+                    toast.error("Unauthorized! Your session might have expired. Please log in again.");
+                    return;
+                }
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+    
+            toast.success("✅ Payment deleted successfully!", { autoClose: 1000 });
+        } catch (error) {
+            console.error("Error deleting payment:", error);
+            toast.error(`❌ ${error.message}`, { autoClose: 1000 });
+        }
+    };
+    
+
     return (
-        <PaymentsContext.Provider value={{ stkPush, checkPaymentStatus, isPaymentProcessing, setIsPaymentProcessing }}>
+        <PaymentsContext.Provider value={{ stkPush, checkPaymentStatus, isPaymentProcessing, setIsPaymentProcessing,deletePayment }}>
             {children}
         </PaymentsContext.Provider>
     );
