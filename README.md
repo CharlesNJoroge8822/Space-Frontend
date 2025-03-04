@@ -61,6 +61,8 @@ For a Client:
 - There is also an about page that has Frequently asked questions and a contact info.
 
 - Next, you can create account using the Google Auth and login afterwards to be access the rest of the pages.
+
+- If you already have an account with us but can't remember the password, there's also an option to reset your password.
   
 - As a client, you will view the spaces, book one then see all your bookings in the booking page. Afterwards, you can choose to update your profile or not and lastly, you can logout.
 
