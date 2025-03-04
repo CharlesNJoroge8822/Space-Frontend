@@ -86,7 +86,7 @@ This project is licensed under the MIT License.
 
 ## Contacts
 Feel free to contact us if you have any enquiries or suggestions at:
-::arinabulobi@gmail.com
+::arinabulobi@gmail.com, charlesnjoroge@gmail.com, luqmanbashir@gmail.com
 
 
 Currently, two official plugins are available:
