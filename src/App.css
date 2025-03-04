@@ -1556,3 +1556,35 @@ body {
   padding: 10px;
   cursor: pointer;
 }
+
+/* Default status style */
+.status {
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+/* Pending Payment (Yellow) */
+.status.payment-pending {
+  background-color: #ffcc00;
+  color: #333;
+}
+
+/* Confirmed (Green) */
+.status.confirmed {
+  background-color: #28a745;
+  color: white;
+}
+
+/* Canceled (Red) */
+.status.canceled {
+  background-color: #dc3545;
+  color: white;
+}
+
+/* Completed (Blue) */
+.status.completed {
+  background-color: #007bff;
+  color: white;
+}

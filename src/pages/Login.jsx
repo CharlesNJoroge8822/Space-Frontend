@@ -24,7 +24,6 @@ export default function Login() {
         try {
             await login(email, password, role);
             setIsLoggedIn(true);
-            toast.success("Login successful!");
         } catch (error) {
             setIsLoggedIn(false);
             toast.error("Invalid credentials. Please try again.");

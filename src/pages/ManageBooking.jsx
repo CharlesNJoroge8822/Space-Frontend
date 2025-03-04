@@ -7,15 +7,6 @@ const ManageBookings = () => {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [isEditing, setIsEditing] = useState(false);
-    const [currentBooking, setCurrentBooking] = useState({
-        id: null,
-        user_id: "",
-        space_id: "",
-        start_time: "",
-        end_time: "",
-        status: ""
-    });
 
     // Fetch bookings from the backend
     const fetchBookings = async () => {
@@ -29,11 +20,23 @@ const ManageBookings = () => {
                 },
                 credentials: "include",
             });
-
+    
             if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
+    
             const data = await response.json();
-            setBookings(Array.isArray(data.bookings) ? data.bookings : []);
+            console.log("🔍 API Response:", data); // Debugging: Ensure space details are included
+    
+            setBookings(
+                Array.isArray(data.bookings)
+                    ? data.bookings.map((booking) => ({
+                          ...booking,
+                          userName: booking.user?.name || "Unknown User",
+                          userEmail: booking.user?.email || "Unknown Email",
+                          spaceName: booking.space?.name || "Unknown Space", // ✅ Fetch space.name
+                      }))
+                    : []
+            );
+    
             if (!data.bookings.length) {
                 toast.warning("⚠️ No bookings found.", { autoClose: 1000 });
             }
@@ -44,37 +47,7 @@ const ManageBookings = () => {
             setLoading(false);
         }
     };
-
-    // Create or update a booking
-    const saveBooking = async (e) => {
-        e.preventDefault();
-        const url = isEditing
-            ? `http://127.0.0.1:5000/bookings/${currentBooking.id}`
-            : "http://127.0.0.1:5000/bookings";
-        const method = isEditing ? "PATCH" : "POST";
-
-        try {
-            const response = await fetch(url, {
-                method,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${sessionStorage.getItem("token")}`
-                },
-                credentials: "include",
-                body: JSON.stringify(currentBooking),
-            });
-
-            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-            toast.success(isEditing ? "✅ Booking updated!" : "✅ Booking created!", { autoClose: 1000 });
-
-            fetchBookings();
-            setIsEditing(false);
-            setCurrentBooking({ id: null, user_id: "", space_id: "", start_time: "", end_time: "", status: "" });
-        } catch (error) {
-            toast.error(`❌ ${error.message}`, { autoClose: 1000 });
-        }
-    };
+    
 
     // Delete a booking
     const deleteBooking = async (id) => {
@@ -97,12 +70,6 @@ const ManageBookings = () => {
         }
     };
 
-    // Handle input changes
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setCurrentBooking({ ...currentBooking, [name]: value });
-    };
-
     useEffect(() => {
         fetchBookings();
     }, []);
@@ -111,15 +78,14 @@ const ManageBookings = () => {
         <div className="manage-bookings-container">
             <h1 className="manage-bookings-heading">Manage Bookings</h1>
 
-
-
             {/* Bookings Table */}
             <table className="bookings-table">
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>User ID</th>
-                        <th>Space ID</th>
+                        <th>User Name</th>
+                        <th>User Email</th>
+                        <th>Space Name</th>  {/* ✅ Updated from "Space ID" to "Space Name" */}
                         <th>Start Time</th>
                         <th>End Time</th>
                         <th>Status</th>
@@ -130,13 +96,15 @@ const ManageBookings = () => {
                     {bookings.map((booking) => (
                         <tr key={booking.id}>
                             <td>{booking.id}</td>
-                            <td>{booking.user_id}</td>
-                            <td>{booking.space_id}</td>
+                            <td>{booking.userName}</td>
+                            <td>{booking.userEmail}</td>
+                            <td>{booking.spaceName}</td>  {/* ✅ Display space.name */}
                             <td>{new Date(booking.start_time).toLocaleString()}</td>
                             <td>{new Date(booking.end_time).toLocaleString()}</td>
-                            <td>{booking.status}</td>
+                            <td className={`status ${booking.status.toLowerCase().replace(" ", "-")}`}>
+                                {booking.status}
+                            </td>
                             <td>
-
                                 <button onClick={() => deleteBooking(booking.id)} className="delete-button">
                                     Delete
                                 </button>
