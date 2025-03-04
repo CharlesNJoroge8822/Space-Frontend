@@ -5,12 +5,12 @@ import { BookingContext } from "../context/BookingContext";
 import { UserContext } from "../context/UserContext";
 import { X } from "lucide-react";
 import Swal from "sweetalert2";
-import "../../././src/space.css";
+import "../../src/space.css";
 
 const Spaces = () => {
-    const { spaces, fetchSpaces, updateSpaceAvailability } = useContext(SpaceContext);
+    const { spaces, fetchSpaces, updateSpaceAvailability, updateBookingStatus } = useContext(SpaceContext);
     const { stkPush } = useContext(PaymentsContext);
-    const { createBooking } = useContext(BookingContext);
+    const { createBooking, fetchUserBookings } = useContext(BookingContext);
     const { current_user } = useContext(UserContext);
 
     const [duration, setDuration] = useState(1);
@@ -22,6 +22,8 @@ const Spaces = () => {
     const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [paymentStatus, setPaymentStatus] = useState("pending");
+    const [agreedToTerms, setAgreedToTerms] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -35,70 +37,50 @@ const Spaces = () => {
             }
         };
         fetchData();
-    }, []);
+    }, [fetchSpaces]);
 
     const calculateTotalPrice = (space) => {
-        return unit === "hour"
-            ? space.price_per_hour * duration
-            : space.price_per_day * duration;
+        return unit === "hour" ? space.price_per_hour * duration : space.price_per_day * duration;
     };
 
     const openBookingModal = (space) => {
-        if (!space.availability) {
+        if (space.availability === "1" || space.availability === true) {
+            setSelectedSpace(space);
+            setIsBookingModalOpen(true);
+        } else {
             Swal.fire({
                 icon: "error",
                 title: "Space Booked",
                 text: "This space is already booked and cannot be reserved.",
             });
-            return;
         }
-        setSelectedSpace(space);
-        setIsBookingModalOpen(true);
     };
 
     const handleBooking = async () => {
         if (!selectedSpace || !current_user) {
-            Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: "Please log in to book a space.",
-            });
+            Swal.fire({ icon: "error", title: "Oops...", text: "Please log in to book a space." });
             return;
         }
 
         const totalCost = calculateTotalPrice(selectedSpace);
 
         try {
-            Swal.fire({
-                title: "Creating booking...",
-                text: "Please wait while we process your booking.",
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                },
-            });
+            Swal.fire({ title: "Creating booking...", text: "Processing...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
             const bookingResponse = await createBooking({
                 user_id: current_user.id,
                 space_id: selectedSpace.id,
                 start_time: new Date().toISOString().split(".")[0],
-                end_time: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString().split(".")[0],
+                end_time: new Date(Date.now() + duration * (unit === "hour" ? 3600000 : 86400000)).toISOString().split(".")[0],
                 total_amount: totalCost,
+                status: "Pending Payment",
             });
 
-            Swal.fire({
-                icon: "success",
-                title: "Booking Created!",
-                text: "Your booking was created successfully. Please proceed to payment.",
-            });
+            Swal.fire({ icon: "success", title: "Booking Created!", text: "Please proceed to payment." });
             setIsBookingModalOpen(false);
             setIsPaymentModalOpen(true);
         } catch (error) {
-            Swal.fire({
-                icon: "error",
-                title: "Booking Failed",
-                text: "Failed to create booking. Please try again.",
-            });
+            Swal.fire({ icon: "error", title: "Booking Failed", text: "Failed to create booking. Try again." });
             console.error("Create Booking Error:", error);
         }
     };
@@ -113,6 +95,15 @@ const Spaces = () => {
             return;
         }
 
+        if (!agreedToTerms) {
+            Swal.fire({
+                icon: "warning",
+                title: "Agreement Required",
+                text: "You must agree to the terms before proceeding with the payment.",
+            });
+            return;
+        }
+
         const totalCost = calculateTotalPrice(selectedSpace);
         setIsPaymentProcessing(true);
 
@@ -121,32 +112,25 @@ const Spaces = () => {
                 title: "Processing Payment...",
                 text: "Please wait while we process your payment.",
                 allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                },
+                didOpen: () => Swal.showLoading(),
             });
 
             const stkResponse = await stkPush(phoneNumber, totalCost, selectedSpace.id);
 
+            await updateBookingStatus(selectedSpace.id, "Confirmed");
+            setPaymentStatus("confirmed");
+
             Swal.fire({
                 icon: "success",
-                title: "Payment Request Sent!",
-                text: "Please approve the M-Pesa prompt on your phone.",
+                title: "Payment Confirmed!",
+                text: "Your booking has been confirmed successfully.",
             });
 
-            // Simulate payment status check
-            setTimeout(async () => {
-                // Update space availability in the backend
-                await updateSpaceAvailability(selectedSpace.id, false);
+            setIsPaymentModalOpen(false);
+            setPhoneNumber("");
+            setAgreedToTerms(false);
 
-                Swal.fire({
-                    icon: "success",
-                    title: "Payment Confirmed!",
-                    text: "Your payment was confirmed successfully.",
-                });
-                setIsPaymentModalOpen(false);
-                setPhoneNumber("");
-            }, 5000); // Simulate a 5-second delay for payment confirmation
+            fetchUserBookings();
         } catch (error) {
             Swal.fire({
                 icon: "error",
@@ -160,81 +144,57 @@ const Spaces = () => {
     };
 
     return (
-        <div className="container center">
+        <div className="container-center">
             <h2 className="title">Available Spaces</h2>
 
             {loading && <p className="text-muted">Loading spaces...</p>}
             {error && <p className="text-error">{error}</p>}
             {!loading && !error && spaces.length === 0 && <p className="text-muted">No spaces available.</p>}
 
-            {!loading && !error && spaces.length > 0 && (
-                <div className="grid-container">
-                    {spaces.map((space) => (
-                        <div 
-                            key={space.id} 
-                            className="card cursor-pointer" 
-                            onClick={() => openBookingModal(space)}
-                        >
-                            <img
-                                src={space.images || "https://source.unsplash.com/400x300/?office,workspace"}
-                                alt={space.name || "Space"}
-                                className="card-image"
-                            />
-                            <div className="card-content">
-                                <h3 className="card-title">{space.name || "Unnamed Space"}</h3>
-                                <p className="card-text">{space.description || "No description available."}</p>
-                                <p><strong>Location:</strong> {space.location || "Unknown"}</p>
-                                <p><strong>Price per Hour:</strong> ${space.price_per_hour || 0}</p>
-                                <p><strong>Price per Day:</strong> ${space.price_per_day || 0}</p>
-                                <p className={`text-${space.availability ? "success" : "error"}`}>
-                                    <strong>Availability:</strong> {space.availability ? "Available" : "Booked"}
-                                </p>
-                            </div>
+            <div className="grid-container">
+                {spaces.map((space) => (
+                    <div key={space.id} className="card cursor-pointer" onClick={() => openBookingModal(space)}>
+                        <img src={space.images || "https://source.unsplash.com/400x300/?office,workspace"} alt={space.name || "Space"} className="card-image" />
+                        <div className="card-content">
+                            <h3 className="card-title">{space.name || "Unnamed Space"}</h3>
+                            <p><strong>Location:</strong> {space.location || "Unknown"}</p>
+                            <p><strong>Price per Day:</strong> ${space.price_per_day || 0}</p>
+                            <p className={`text-${space.availability === "1" || space.availability === true ? "success" : "error"}`}>
+                                <strong>Availability:</strong> {space.availability === "1" || space.availability === true ? "Available" : "Booked"}
+                            </p>
                         </div>
-                    ))}
-                </div>
-            )}
+                    </div>
+                ))}
+            </div>
 
             {isBookingModalOpen && selectedSpace && (
                 <div className="modal-overlay">
                     <div className="modal">
-                        <button
-                            className="modal-close"
-                            onClick={() => setIsBookingModalOpen(false)}
-                            aria-label="Close Modal"
-                        >
+                        <button className="modal-close" onClick={() => setIsBookingModalOpen(false)} aria-label="Close Modal">
                             <X size={24} />
                         </button>
 
-                        <h3 className="modal-title">Book: {selectedSpace.name}</h3>
+                        <h5><strong>{selectedSpace.name}</strong></h5>
                         <p><strong>Location:</strong> {selectedSpace.location}</p>
                         <p><strong>Price per Hour:</strong> ${selectedSpace.price_per_hour}</p>
                         <p><strong>Price per Day:</strong> ${selectedSpace.price_per_day}</p>
 
-                        <label>Duration:</label>
-                        <input
-                            type="number"
-                            min="1"
-                            value={duration}
-                            onChange={(e) => setDuration(Number(e.target.value))}
-                            className="input"
-                        />
-                        <label>Unit:</label>
-                        <select
-                            value={unit}
-                            onChange={(e) => setUnit(e.target.value)}
-                            className="input"
-                        >
-                            <option value="hour">Hours</option>
-                            <option value="day">Days</option>
-                        </select>
+                        <div className="label-modal">
+                            <label>Duration</label>
+                            <label>Unit</label>
+                        </div>
 
-                        <p className="total-price">Total Price: ${calculateTotalPrice(selectedSpace)}</p>
+                        <div className="modal-label">
+                            <input type="number" min="1" value={duration} onChange={(e) => setDuration(Number(e.target.value))} className="input" />
+                            <select value={unit} onChange={(e) => setUnit(e.target.value)} className="input">
+                                <option value="hour">Hours</option>
+                                <option value="day">Days</option>
+                            </select>
+                        </div>
 
-                        <button
-                            onClick={handleBooking}
-                            className="btn-green"
-                        >
+                        <p className="total-price"><strong>Total Price:</strong> ${calculateTotalPrice(selectedSpace)}</p>
+
+                        <button onClick={handleBooking} className="btn-green">
                             Book Now
                         </button>
                     </div>
@@ -264,10 +224,21 @@ const Spaces = () => {
                             placeholder="Enter M-Pesa number"
                         />
 
+                        <div className="terms-checkbox">
+                            <label>
+                                <input
+                                    type="checkbox"
+                                    checked={agreedToTerms}
+                                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                                />
+                                I agree to the <a href="/terms" target="_blank">terms and conditions</a>.
+                            </label>
+                        </div>
+
                         <button
                             onClick={handlePayment}
                             className="btn-green"
-                            disabled={isPaymentProcessing}
+                            disabled={isPaymentProcessing || !agreedToTerms}
                         >
                             {isPaymentProcessing ? "Processing..." : "Pay via M-Pesa"}
                         </button>
@@ -277,7 +248,5 @@ const Spaces = () => {
         </div>
     );
 };
-
-
 
 export default Spaces;

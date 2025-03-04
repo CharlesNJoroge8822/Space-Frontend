@@ -1,75 +1,82 @@
-import React, { useContext, useEffect, useState } from "react";
-import { BookingContext } from "../context/BookingContext";
-import "../App.css" 
+import React, { useState, useEffect } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "../App.css"; // Ensure this file has improved styles
 
 const MyBookings = () => {
-    const { bookings, fetchBookings, deleteBooking, updateBookingStatus } =
-        useContext(BookingContext);
-    const [loading, setLoading] = useState(true);
+    const [bookings, setBookings] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    // Fetch bookings for the current user
+    const fetchUserBookings = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch("http://127.0.0.1:5000/my-bookings", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${sessionStorage.getItem("token")}`
+                },
+                credentials: "include",
+            });
+
+            if (!response.ok) throw new Error("Failed to fetch user bookings.");
+
+            const data = await response.json();
+            console.log("🔍 My Bookings API Response:", data);
+
+            setBookings(Array.isArray(data.bookings) ? data.bookings : []);
+        } catch (error) {
+            toast.error("❌ Failed to fetch bookings.");
+            console.error("Fetch Bookings Error:", error);
+        }
+        setLoading(false);
+    };
 
     useEffect(() => {
-        const loadBookings = async () => {
-            await fetchBookings();
-            setLoading(false);
-        };
-        loadBookings();
-    }, [fetchBookings]);
-
-    if (loading) {
-        return <div>Loading...</div>;
-    }
+        fetchUserBookings();
+    }, []);
 
     return (
-        <div className="my-bookings-container">
-            <h1>My Bookings</h1>
-            {bookings.length === 0 ? (
-                <p>No bookings found.</p>
-            ) : (
-                <ul className="bookings-list">
-                    {bookings.map((booking) => (
-                        <li key={booking.id} className="booking-item">
-                            <div className="booking-details">
-                                <p>
-                                    <strong>Booking ID:</strong> {booking.id}
-                                </p>
-                                <p>
-                                    <strong>Space ID:</strong> {booking.space_id}
-                                </p>
-                                <p>
-                                    <strong>Start Time:</strong> {booking.start_time}
-                                </p>
-                                <p>
-                                    <strong>End Time:</strong> {booking.end_time}
-                                </p>
-                                <p>
-                                    <strong>Total Amount:</strong> ${booking.total_amount}
-                                </p>
-                                <p>
-                                    <strong>Status:</strong> {booking.status}
-                                </p>
-                            </div>
-                            <div className="booking-actions">
-                                <button
-                                    className="delete-button"
-                                    onClick={() => deleteBooking(booking.id)}
-                                >
-                                    Delete
-                                </button>
-                                <select
-                                    className="status-select"
-                                    value={booking.status}
-                                    onChange={(e) =>
-                                        updateBookingStatus(booking.id, e.target.value)
-                                    }
-                                >
-                                    {/* <option value="Pending Payment">Pending Payment</option> */}
-                                   
-                                </select>
-                            </div>
-                        </li>
-                    ))}
-                </ul>
-            )}
+        <div className="manage-bookings-container">
+            <h1 className="manage-bookings-heading">My Bookings</h1>
+
+            {loading && <p>Loading bookings...</p>}
+            {error && <p className="error">{error}</p>}
+
+            <table className="bookings-table">
+                <thead>
+                    <tr>
+                        <th>Space Name</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {bookings.length > 0 ? (
+                        bookings.map((booking) => (
+                            <tr key={booking.id}>
+                                <td>{booking.space?.name || "Unknown Space"}</td> {/* ✅ Fix here */}
+                                <td>{new Date(booking.start_time).toLocaleString()}</td>
+                                <td>{new Date(booking.end_time).toLocaleString()}</td>
+                                <td>${booking.total_amount.toFixed(2)}</td>
+                                <td className={`status ${booking.status.toLowerCase().replace(" ", "-")}`}>
+                                    {booking.status}
+                                </td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan="5" style={{ textAlign: "center" }}>No bookings found</td>
+                        </tr>
+                    )}
+                </tbody>
+            </table>
+
+            <ToastContainer position="top-right" autoClose={2000} />
         </div>
     );
 };
