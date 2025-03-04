@@ -8,14 +8,20 @@ We have two roles; Admin and Client.
 
 The Admin can: 
 - Manage the spaces which includes adding a space and editing the space details.
+  
 - Manage the users which gives them the right to add a user, change their roles and give permissions that a normal user is not allowed to do.
+  
 - Manage the bookings by seeing which space has been booked, start and end time the space was officially booked, a verified status to show that a space has been paid for and booked and the price of the space.
 
 The Client can:
 - View all the available and unavailable spaces.
+  
 - Book a space on the availabilty.
+  
 - Pay for a space via mPesa and receive a message on their phone to confirm their payment before proceeding.
+  
 - View all their bookings including the space details and price of the space.
+  
 - Edit their profile.
 
 ## Technologies used
@@ -30,33 +36,42 @@ Since this is a fullstack project, we used the technologies below:
 But for the frontend, we used; ReactJs and CSS.
 
 ## Installation
+
 For the application to work, you need the following prerequisites: 
 
-- Python3
+- Python3 - This is for backend
 - Npm (Node Package Manager)
 
 ## Setup Instructions
+
 1. Clone the respository to your VS Code
    
     `git clone https://github.com/CharlesNJoroge8822/Frontend.git` 
     `cd Frontend`
 
 2. Run the command, `npm install` in your VS Code terminal.
-3. Run the final command to start the frontend `npm run dev`.
+3. Run the final command to start the frontend `npm run dev` or `npm start` depending on the React app that you have.
 
 ## Usage
+
 For a Client:
 
-- Once the app is running, the first thing you will see is our landing page where as a client, you are given more information about Ivy Court before creating an account with us.
-- There is also an about page that has Frequently asked questions and a contact info. 
-- Next, you can create account using the Google Auth and login afterwards to be access the rest of the pages. 
+- Once the app is running, the first thing you will see is our landing page where as a client, you are given more information about Ivy Court before creating an account with us. If you already have an account, jsut login.
+  
+- There is also an about page that has Frequently asked questions and a contact info.
+
+- Next, you can create account using the Google Auth and login afterwards to be access the rest of the pages.
+  
 - As a client, you will view the spaces, book one then see all your bookings in the booking page. Afterwards, you can choose to update your profile or not and lastly, you can logout.
 
 For an Admin:
 
 - Their details are already saved in the database so all they need is to login which will navigate them to the manage spaces where they can add another space if their want and update the details.
+  
 - They can also manage the bookings, seeing the space booked and whether the payment is confirmed or not.
+  
 - In the manage users, they have permissions to remove a user and see a list of all the users logged in as an admin.
+  
 - And finally logout.
 
 ## Live Server
