@@ -77,6 +77,8 @@ For an Admin:
 ## Live Server
 You can click this link below that will take you to our web application => 
 
+And this will take you to our google slides presentation => [Spaces for rent ](https://www.canva.com/design/DAGgwe04SG4/HXw4iJJb9V73V67SuT7trg/edit?utm_content=DAGgwe04SG4&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
+
 ## License
 This project is licensed under the MIT License.
 
