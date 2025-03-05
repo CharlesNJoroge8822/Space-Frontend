@@ -29,8 +29,13 @@ export const SpaceProvider = ({ children }) => {
             console.log("Fetched spaces:", data);
 
             if (Array.isArray(data.spaces) && data.spaces.length > 0) {
-                setSpaces([...data.spaces]);
-                console.log("Updated Spaces State:", data.spaces);
+                // Parse the availability field for each space
+                const parsedSpaces = data.spaces.map(space => ({
+                    ...space,
+                    availability: JSON.parse(space.availability) // Parse JSON string to object
+                }));
+                setSpaces(parsedSpaces);
+                console.log("Updated Spaces State:", parsedSpaces);
             } else {
                 setSpaces([]);
                 toast.warning("⚠️ No spaces found.");
@@ -52,6 +57,13 @@ export const SpaceProvider = ({ children }) => {
             return;
         }
 
+        // Convert availability to JSON string
+        const availability = JSON.stringify({ slots: ["09:00-12:00", "13:00-17:00"] }); // Example slots
+        const payload = {
+            ...spaceData,
+            availability: availability, // Send as JSON string
+        };
+
         const toastId = toast.loading("⏳ Creating space...");
         try {
             const response = await fetch("https://space-backend-7.onrender.com/spaces", {
@@ -60,7 +72,7 @@ export const SpaceProvider = ({ children }) => {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${authToken}`,
                 },
-                body: JSON.stringify(spaceData),
+                body: JSON.stringify(payload),
             });
 
             if (!response.ok) throw new Error("Failed to create space.");
@@ -88,6 +100,12 @@ export const SpaceProvider = ({ children }) => {
      * Update Space - Prevents duplicate toasts
      */
     const updateSpace = async (spaceId, updatedData) => {
+        // Convert availability to JSON string if it exists in updatedData
+        const payload = {
+            ...updatedData,
+            availability: updatedData.availability ? JSON.stringify(updatedData.availability) : undefined,
+        };
+
         const toastId = toast.loading("⏳ Updating space...");
         try {
             const response = await fetch(`https://space-backend-7.onrender.com/spaces/${spaceId}`, {
@@ -96,7 +114,7 @@ export const SpaceProvider = ({ children }) => {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${authToken}`,
                 },
-                body: JSON.stringify(updatedData),
+                body: JSON.stringify(payload),
             });
 
             if (!response.ok) throw new Error("Failed to update space.");
