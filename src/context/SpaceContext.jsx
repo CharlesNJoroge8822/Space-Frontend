@@ -18,7 +18,7 @@ export const SpaceProvider = ({ children }) => {
     const fetchSpaces = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await fetch("https://space-backend-6.onrender.com/spaces", {
+            const response = await fetch("https://space-backend-8.onrender.com/spaces", {
                 method: "GET",
                 headers: { "Content-Type": "application/json" },
             });
@@ -53,7 +53,7 @@ export const SpaceProvider = ({ children }) => {
 
         const toastId = toast.loading("⏳ Creating space...");
         try {
-            const response = await fetch("https://space-backend-6.onrender.com/spaces", {
+            const response = await fetch("https://space-backend-8.onrender.com/spaces", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -89,7 +89,7 @@ export const SpaceProvider = ({ children }) => {
     const updateSpace = async (spaceId, updatedData) => {
         const toastId = toast.loading("⏳ Updating space...");
         try {
-            const response = await fetch(`https://space-backend-6.onrender.com/spaces/${spaceId}`, {
+            const response = await fetch(`https://space-backend-8.onrender.com/spaces/${spaceId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -127,7 +127,7 @@ export const SpaceProvider = ({ children }) => {
         try {
             console.log(`Updating space availability: ${spaceId} -> ${isAvailable ? "Available" : "Booked"}`);
             
-            const response = await fetch(`https://space-backend-6.onrender.com/spaces/${spaceId}/availability`, {
+            const response = await fetch(`https://space-backend-8.onrender.com/spaces/${spaceId}/availability`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -158,7 +158,7 @@ export const SpaceProvider = ({ children }) => {
     const deleteSpace = async (spaceId) => {
         const toastId = toast.loading("⏳ Deleting space...");
         try {
-            const response = await fetch(`https://space-backend-6.onrender.com/spaces/${spaceId}`, {
+            const response = await fetch(`https://space-backend-8.onrender.com/spaces/${spaceId}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",

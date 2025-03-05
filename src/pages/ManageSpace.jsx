@@ -18,7 +18,6 @@ const ManageSpace = () => {
         availability: true,
         images: ""
     });
-
     // Fetch spaces on component mount and every 30 seconds
     useEffect(() => {
         const getSpaces = async () => {

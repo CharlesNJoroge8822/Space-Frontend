@@ -26,7 +26,7 @@ export default function ResetPasswordForm() {
         }
 
         try {
-            const response = await fetch("https://space-backend-7.onrender.com/reset_password", {
+            const response = await fetch("https://space-backend-8.onrender.com/reset_password", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ reset_token: resetToken, new_password: newPassword }),
