@@ -23,9 +23,9 @@ const Spaces = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [agreedToTerms, setAgreedToTerms] = useState(false);
-    const [isTermsModalOpen, setIsTermsModalOpen] = useState(false); // State for terms modal
+    const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
 
-    // Fetch spaces on component mount
+    // Fetch spaces on component mount and every 30 seconds
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -37,7 +37,12 @@ const Spaces = () => {
                 setLoading(false);
             }
         };
-        fetchData();
+
+        fetchData(); // Initial fetch
+
+        // Refresh spaces every 30 seconds
+        const interval = setInterval(fetchData, 30000);
+        return () => clearInterval(interval); // Cleanup interval on unmount
     }, [fetchSpaces]);
 
     // Calculate total price based on duration and unit
@@ -47,7 +52,7 @@ const Spaces = () => {
 
     // Open booking modal only if the space is available
     const openBookingModal = (space) => {
-        if (space.availability === "1" || space.availability === true) {
+        if (space.availability === "Available" || space.availability === true) {
             setSelectedSpace(space);
             setIsBookingModalOpen(true);
         } else {
@@ -104,7 +109,7 @@ const Spaces = () => {
             await stkPush(phoneNumber, totalCost, selectedSpace.id);
 
             // Create booking after successful payment
-            const bookingResponse = await createBooking({
+            await createBooking({
                 user_id: current_user.id,
                 space_id: selectedSpace.id,
                 start_time: new Date().toISOString().split(".")[0],
@@ -113,7 +118,7 @@ const Spaces = () => {
                 status: "booked", // Set status to "booked"
             });
 
-            // Update space availability to "booked" in the backend
+            // Update space availability to "Booked" in the backend
             await updateSpaceAvailability(selectedSpace.id, false);
 
             // Update space availability in the frontend state immediately
@@ -153,7 +158,7 @@ const Spaces = () => {
         const checkBookingEndTimes = () => {
             const now = new Date();
             spaces.forEach(async (space) => {
-                if (space.availability === "0" || space.availability === false) {
+                if (space.availability === "Booked" || space.availability === false) {
                     const booking = space.bookings?.find((b) => new Date(b.end_time) > now);
                     if (!booking) {
                         await updateSpaceAvailability(space.id, true);
@@ -184,16 +189,16 @@ const Spaces = () => {
                 {spaces.map((space) => (
                     <div
                         key={space.id}
-                        className={`card ${space.availability === "1" || space.availability === true ? "cursor-pointer" : "cursor-not-allowed"}`}
-                        onClick={() => (space.availability === "1" || space.availability === true) && openBookingModal(space)}
+                        className={`card ${space.availability === "Available" || space.availability === true ? "cursor-pointer" : "cursor-not-allowed"}`}
+                        onClick={() => (space.availability === "Available" || space.availability === true) && openBookingModal(space)}
                     >
                         <img src={space.images || "https://source.unsplash.com/400x300/?office,workspace"} alt={space.name || "Space"} className="card-image" />
                         <div className="card-content">
                             <h3 className="card-title">{space.name || "Unnamed Space"}</h3>
                             <p><strong>Location:</strong> {space.location || "Unknown"}</p>
                             <p><strong>Price per Day:</strong> ${space.price_per_day || 0}</p>
-                            <p className={`text-${space.availability === "1" || space.availability === true ? "success" : "error"}`}>
-                                <strong>Availability:</strong> {space.availability === "1" || space.availability === true ? "Available" : "Booked"}
+                            <p className={`text-${space.availability === "Available" || space.availability === true ? "success" : "error"}`}>
+                                <strong>Availability:</strong> {space.availability === "Available" || space.availability === true ? "Available" : "Booked"}
                             </p>
                         </div>
                     </div>

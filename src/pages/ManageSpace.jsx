@@ -19,6 +19,7 @@ const ManageSpace = () => {
         images: ""
     });
 
+    // Fetch spaces on component mount and every 30 seconds
     useEffect(() => {
         const getSpaces = async () => {
             setLoading(true);
@@ -31,7 +32,12 @@ const ManageSpace = () => {
                 setLoading(false);
             }
         };
-        getSpaces();
+
+        getSpaces(); // Initial fetch
+
+        // Refresh spaces every 30 seconds
+        const interval = setInterval(getSpaces, 30000);
+        return () => clearInterval(interval); // Cleanup interval on unmount
     }, [fetchSpaces]);
 
     const handleChange = (e) => {

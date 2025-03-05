@@ -13,11 +13,37 @@ export const SpaceProvider = ({ children }) => {
     const [error, setError] = useState(null);
 
     /**
-     * Fetch Spaces - Prevents duplicate toasts and handles errors properly
+     * ✅ Fetch Spaces - Updates UI with real-time booking status
      */
-   z
+    const fetchSpaces = useCallback(async () => {
+        setLoading(true);
+        try {
+            const response = await fetch("https://space-backend-6.onrender.com/spaces", {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+            });
+
+            if (!response.ok) throw new Error("Failed to fetch spaces.");
+
+            const data = await response.json();
+            console.log("Fetched spaces:", data);
+
+            if (Array.isArray(data.spaces) && data.spaces.length > 0) {
+                setSpaces([...data.spaces]);
+            } else {
+                setSpaces([]);
+                toast.warning("⚠️ No spaces found.");
+            }
+        } catch (error) {
+            console.error("Error fetching spaces:", error);
+            setError("Error fetching spaces. Please try again later.");
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     /**
-     * Create Space - Properly updates UI and prevents duplicate toast messages
+     * ✅ Create Space - Ensures the admin can add new spaces
      */
     const createSpace = async (spaceData) => {
         if (!spaceData.name || !spaceData.description || !spaceData.location) {
@@ -27,7 +53,7 @@ export const SpaceProvider = ({ children }) => {
 
         const toastId = toast.loading("⏳ Creating space...");
         try {
-            const response = await fetch("https://space-backend-7.onrender.com/spaces", {
+            const response = await fetch("https://space-backend-6.onrender.com/spaces", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -58,12 +84,12 @@ export const SpaceProvider = ({ children }) => {
     };
 
     /**
-     * Update Space - Prevents duplicate toasts
+     * ✅ Update Space - Allows admin to edit spaces
      */
     const updateSpace = async (spaceId, updatedData) => {
         const toastId = toast.loading("⏳ Updating space...");
         try {
-            const response = await fetch(`https://space-backend-7.onrender.com/spaces/${spaceId}`, {
+            const response = await fetch(`https://space-backend-6.onrender.com/spaces/${spaceId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -95,12 +121,44 @@ export const SpaceProvider = ({ children }) => {
     };
 
     /**
-     * Delete Space - Handles errors properly and prevents duplicate toasts
+     * ✅ Update Space Availability - Ensures spaces update after booking/payment
+     */
+    const updateSpaceAvailability = async (spaceId, isAvailable) => {
+        try {
+            console.log(`Updating space availability: ${spaceId} -> ${isAvailable ? "Available" : "Booked"}`);
+            
+            const response = await fetch(`https://space-backend-6.onrender.com/spaces/${spaceId}/availability`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${authToken}`,
+                },
+                body: JSON.stringify({ availability: isAvailable }),
+            });
+
+            if (!response.ok) throw new Error("Failed to update space availability.");
+
+            // Update local state to reflect new availability
+            setSpaces((prevSpaces) =>
+                prevSpaces.map((space) =>
+                    space.id === spaceId ? { ...space, availability: isAvailable } : space
+                )
+            );
+
+            toast.success(`✅ Space ${isAvailable ? "is now available" : "has been booked"}`);
+        } catch (error) {
+            console.error("Error updating space availability:", error);
+            toast.error("❌ Failed to update space availability.");
+        }
+    };
+
+    /**
+     * ✅ Delete Space - Allows admin to remove spaces
      */
     const deleteSpace = async (spaceId) => {
         const toastId = toast.loading("⏳ Deleting space...");
         try {
-            const response = await fetch(`https://space-backend-7.onrender.com/spaces/${spaceId}`, {
+            const response = await fetch(`https://space-backend-6.onrender.com/spaces/${spaceId}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
@@ -128,14 +186,26 @@ export const SpaceProvider = ({ children }) => {
         }
     };
 
-    // Auto-fetch spaces when authToken is available
+    /**
+     * 🔄 Auto-fetch spaces when authToken is available
+     */
     useEffect(() => {
         if (authToken) fetchSpaces();
     }, [authToken]);
 
     return (
         <SpaceContext.Provider
-            value={{ authToken, spaces, fetchSpaces, createSpace, updateSpace, deleteSpace, loading, error }}
+            value={{
+                authToken,
+                spaces,
+                fetchSpaces,
+                createSpace,
+                updateSpace,
+                deleteSpace,
+                updateSpaceAvailability, // ✅ Added to update space after booking/payment
+                loading,
+                error,
+            }}
         >
             {children}
             <ToastContainer position="top-right" autoClose={3000} className="fixed top-0 right-0 m-4 z-50" />

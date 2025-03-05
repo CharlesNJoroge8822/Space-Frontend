@@ -20,12 +20,12 @@ const ManageBookings = () => {
                 },
                 credentials: "include",
             });
-    
+
             if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-    
+
             const data = await response.json();
             console.log("🔍 API Response:", data); // Debugging: Ensure space details are included
-    
+
             setBookings(
                 Array.isArray(data.bookings)
                     ? data.bookings.map((booking) => ({
@@ -36,7 +36,7 @@ const ManageBookings = () => {
                       }))
                     : []
             );
-    
+
             if (!data.bookings.length) {
                 toast.warning("⚠️ No bookings found.", { autoClose: 1000 });
             }
@@ -47,7 +47,6 @@ const ManageBookings = () => {
             setLoading(false);
         }
     };
-    
 
     // Delete a booking
     const deleteBooking = async (id) => {
@@ -70,42 +69,84 @@ const ManageBookings = () => {
         }
     };
 
+    // Fetch bookings on component mount and every 30 seconds
     useEffect(() => {
-        fetchBookings();
+        fetchBookings(); // Initial fetch
+
+        // Refresh bookings every 30 seconds
+        const interval = setInterval(fetchBookings, 30000);
+        return () => clearInterval(interval); // Cleanup interval on unmount
     }, []);
 
     return (
-        <div className="manage-bookings-container">
-            <h1 className="manage-bookings-heading">Manage Bookings</h1>
+        <div style={{ padding: "20px", margin: "0 auto", maxWidth: "1400px" }}>
+            <h1 style={{ fontFamily: "Inria Serif", textAlign: "center", color: "#104436", fontSize: "32px", marginBottom: "20px" }}>
+                Manage Bookings
+            </h1>
+
+            {loading && <p style={{ textAlign: "center", fontFamily: "Inria Serif" }}>Loading bookings...</p>}
+            {error && <p style={{ color: "red", textAlign: "center", fontFamily: "Inria Serif" }}>{error}</p>}
 
             {/* Bookings Table */}
-            <table className="bookings-table">
+            <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "Inria Serif" }}>
                 <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>User Name</th>
-                        <th>User Email</th>
-                        <th>Space Name</th>  {/* ✅ Updated from "Space ID" to "Space Name" */}
-                        <th>Start Time</th>
-                        <th>End Time</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                    <tr style={{ backgroundColor: "#104436", color: "white" }}>
+                        <th style={{ padding: "15px", textAlign: "left" }}>ID</th>
+                        <th style={{ padding: "15px", textAlign: "left" }}>User Name</th>
+                        <th style={{ padding: "15px", textAlign: "left" }}>User Email</th>
+                        <th style={{ padding: "15px", textAlign: "left" }}>Space Name</th>
+                        <th style={{ padding: "15px", textAlign: "left" }}>Start Time</th>
+                        <th style={{ padding: "15px", textAlign: "left" }}>End Time</th>
+                        <th style={{ padding: "15px", textAlign: "left" }}>Status</th>
+                        <th style={{ padding: "15px", textAlign: "left" }}>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {bookings.map((booking) => (
-                        <tr key={booking.id}>
-                            <td>{booking.id}</td>
-                            <td>{booking.userName}</td>
-                            <td>{booking.userEmail}</td>
-                            <td>{booking.spaceName}</td>  {/* ✅ Display space.name */}
-                            <td>{new Date(booking.start_time).toLocaleString()}</td>
-                            <td>{new Date(booking.end_time).toLocaleString()}</td>
-                            <td className={`status ${booking.status.toLowerCase().replace(" ", "-")}`}>
+                        <tr
+                            key={booking.id}
+                            style={{
+                                borderBottom: "1px solid #ddd",
+                                transition: "background-color 0.3s ease",
+                            }}
+                            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#f9f9f9")}
+                            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                        >
+                            <td style={{ padding: "15px" }}>{booking.id}</td>
+                            <td style={{ padding: "15px" }}>{booking.userName}</td>
+                            <td style={{ padding: "15px" }}>{booking.userEmail}</td>
+                            <td style={{ padding: "15px" }}>{booking.spaceName}</td>
+                            <td style={{ padding: "15px" }}>{new Date(booking.start_time).toLocaleString()}</td>
+                            <td style={{ padding: "15px" }}>{new Date(booking.end_time).toLocaleString()}</td>
+                            <td
+                                style={{
+                                    padding: "15px",
+                                    color:
+                                        booking.status.toLowerCase() === "confirmed"
+                                            ? "green"
+                                            : booking.status.toLowerCase() === "pending"
+                                            ? "orange"
+                                            : "red",
+                                }}
+                            >
                                 {booking.status}
                             </td>
-                            <td>
-                                <button onClick={() => deleteBooking(booking.id)} className="delete-button">
+                            <td style={{ padding: "15px" }}>
+                                <button
+                                    onClick={() => deleteBooking(booking.id)}
+                                    style={{
+                                        padding: "10px 20px",
+                                        backgroundColor: "#ff4d4d",
+                                        color: "#fff",
+                                        border: "none",
+                                        borderRadius: "20px",
+                                        cursor: "pointer",
+                                        fontFamily: "Inria Serif",
+                                        transition: "background-color 0.3s ease",
+                                    }}
+                                    onMouseOver={(e) => (e.target.style.backgroundColor = "#cc0000")}
+                                    onMouseOut={(e) => (e.target.style.backgroundColor = "#ff4d4d")}
+                                >
                                     Delete
                                 </button>
                             </td>

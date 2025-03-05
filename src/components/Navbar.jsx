@@ -55,13 +55,10 @@ export default function Navbar() {
                                 >
                                     Manage Spaces
                                 </Link>
-                                <ul className="navbar-nav">
-                                    <li className="nav-item">
-                                        <button onClick={logout} className="btn btn-danger ms-3">
+                            
+                                <button onClick={logout} style={{backgroundColor: "#104436", color: "white", fontFamily:"Inria Serif", fontSize: "20px", border: "none", }}>
                                             Logout
                                         </button>
-                                    </li>
-                                </ul>
                             </>
                         )}
 

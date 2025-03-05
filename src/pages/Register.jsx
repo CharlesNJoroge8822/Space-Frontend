@@ -1,20 +1,22 @@
 import React, { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
-import "../App.css";
 import { toast } from "react-toastify";
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+import jwtDecode from "jwt-decode";
+import "../App.css";
 
 export default function Register() {
     const { addUser } = useContext(UserContext);
     const navigate = useNavigate();
 
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [role, setRole] = useState('Client');
-    const [passwordError, setPasswordError] = useState('');
-    const [confirmError, setConfirmError] = useState('');
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [role, setRole] = useState("Client");
+    const [passwordError, setPasswordError] = useState("");
+    const [confirmError, setConfirmError] = useState("");
 
     const validatePassword = (pwd) => {
         const regex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
@@ -31,14 +33,20 @@ export default function Register() {
             setConfirmError("Passwords do not match.");
             return;
         }
-        setPasswordError('');
-        setConfirmError('');
+        setPasswordError("");
+        setConfirmError("");
         addUser(name, email, password, role);
     };
 
-    const handleGoogleLogin = () => {
-        window.location.href = "https://space-backend-7.onrender.com/authorize_google";
-        toast.success("Success")
+    const handleGoogleSuccess = (credentialResponse) => {
+        const userDetails = jwtDecode(credentialResponse.credential);
+        addUser(userDetails.name, userDetails.email, "", "Client"); // Add user with Google details
+        toast.success("Google sign-up successful!");
+        navigate("/");
+    };
+
+    const handleGoogleFailure = () => {
+        toast.error("Google sign-up failed. Please try again.");
     };
 
     return (
@@ -46,33 +54,33 @@ export default function Register() {
             <div className="form-box">
                 <h2>Create an Account</h2>
                 <form onSubmit={handleSubmit}>
-                    <input 
-                        type="text" 
-                        value={name} 
-                        onChange={(e) => setName(e.target.value)} 
-                        placeholder="Full Name" 
-                        required 
+                    <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Full Name"
+                        required
                     />
                     <br /><br />
 
-                    <input 
-                        type="email" 
-                        value={email} 
-                        onChange={(e) => setEmail(e.target.value)} 
-                        placeholder="Email Address" 
-                        required 
+                    <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Email Address"
+                        required
                     />
                     <br /><br />
 
-                    <input 
-                        type="password" 
-                        value={password} 
-                        onChange={(e) => { 
-                            setPassword(e.target.value); 
-                            setPasswordError(''); 
-                        }} 
-                        placeholder="Password" 
-                        required 
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => {
+                            setPassword(e.target.value);
+                            setPasswordError("");
+                        }}
+                        placeholder="Password"
+                        required
                     />
                     {password && !validatePassword(password) && (
                         <p className="error">
@@ -81,29 +89,28 @@ export default function Register() {
                     )}
                     <br /><br />
 
-                    <input 
-                        type="password" 
-                        value={confirmPassword} 
-                        onChange={(e) => { 
-                            setConfirmPassword(e.target.value); 
-                            setConfirmError(''); 
-                        }} 
-                        placeholder="Confirm Password" 
-                        required 
+                    <input
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => {
+                            setConfirmPassword(e.target.value);
+                            setConfirmError("");
+                        }}
+                        placeholder="Confirm Password"
+                        required
                     />
                     {confirmError && <p className="error">⚠️ {confirmError}</p>}
                     <br /><br />
 
                     <button type="submit">REGISTER</button>
                     <br /><br />
-                        
-                    <button
-  type="button"
-  onClick={handleGoogleLogin}
-  style={{ cursor: "pointer" }}
->
-  Sign up with Google
-</button>
+
+                    <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
+                        <GoogleLogin
+                            onSuccess={handleGoogleSuccess}
+                            onError={handleGoogleFailure}
+                        />
+                    </GoogleOAuthProvider>
 
                     <br /><br />
 
@@ -115,4 +122,4 @@ export default function Register() {
             </div>
         </div>
     );
-}
+}   

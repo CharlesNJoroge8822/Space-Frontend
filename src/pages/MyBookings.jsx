@@ -34,43 +34,113 @@ const MyBookings = () => {
         setLoading(false);
     };
 
+    // Fetch bookings on component mount and every 30 seconds
     useEffect(() => {
-        fetchUserBookings();
+        fetchUserBookings(); // Initial fetch
+
+        // Refresh bookings every 30 seconds
+        const interval = setInterval(fetchUserBookings, 30000);
+        return () => clearInterval(interval); // Cleanup interval on unmount
     }, []);
 
     return (
-        <div className="manage-bookings-container">
-            <h1 className="manage-bookings-heading">My Bookings</h1>
+        <div
+            style={{
+                maxWidth: "800px",
+                margin: "auto",
+                padding: "20px",
+                borderStyle: "solid",
+                borderColor: "#103436",
+                boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+                borderRadius: "10px",
+                paddingTop: "40px",
+                paddingBottom: "40px",
+                paddingRight: "40px",
+                paddingLeft: "40px",
+                marginBottom: "40px",
+                borderBottom: "10px solid #104436",
+                borderRight: "9px solid #104436",
+            }}
+        >
+            <h1
+                style={{
+                    textAlign: "center",
+                    color: "#104436",
+                    fontFamily: "Inria Serif",
+                    fontSize: "32px",
+                    marginBottom: "20px",
+                }}
+            >
+                My Bookings
+            </h1>
 
-            {loading && <p>Loading bookings...</p>}
-            {error && <p className="error">{error}</p>}
+            {loading && <p style={{ textAlign: "center", fontFamily: "Inria Serif" }}>Loading bookings...</p>}
+            {error && <p style={{ color: "red", textAlign: "center", fontFamily: "Inria Serif" }}>{error}</p>}
 
-            <table className="bookings-table">
+            <table
+                style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    fontFamily: "Inria Serif",
+                }}
+            >
                 <thead>
-                    <tr>
-                        <th>Space Name</th>
-                        <th>Start Time</th>
-                        <th>End Time</th>
-                        <th>Total Amount</th>
-                        <th>Status</th>
+                    <tr
+                        style={{
+                            backgroundColor: "#104436",
+                            color: "white",
+                        }}
+                    >
+                        <th style={{ padding: "15px", textAlign: "left" }}>Space Name</th>
+                        <th style={{ padding: "15px", textAlign: "left" }}>Start Time</th>
+                        <th style={{ padding: "15px", textAlign: "left" }}>End Time</th>
+                        <th style={{ padding: "15px", textAlign: "left" }}>Total Amount</th>
+                        <th style={{ padding: "15px", textAlign: "left" }}>Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     {bookings.length > 0 ? (
                         bookings.map((booking) => (
-                            <tr key={booking.id}>
-                                <td>{booking.space?.name || "Unknown Space"}</td> {/* ✅ Fix here */}
-                                <td>{new Date(booking.start_time).toLocaleString()}</td>
-                                <td>{new Date(booking.end_time).toLocaleString()}</td>
-                                <td>${booking.total_amount.toFixed(2)}</td>
-                                <td className={`status ${booking.status.toLowerCase().replace(" ", "-")}`}>
+                            <tr
+                                key={booking.id}
+                                style={{
+                                    borderBottom: "1px solid #ddd",
+                                    transition: "background-color 0.3s ease",
+                                }}
+                                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#f9f9f9")}
+                                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                            >
+                                <td style={{ padding: "15px" }}>{booking.space?.name || "Unknown Space"}</td>
+                                <td style={{ padding: "15px" }}>{new Date(booking.start_time).toLocaleString()}</td>
+                                <td style={{ padding: "15px" }}>{new Date(booking.end_time).toLocaleString()}</td>
+                                <td style={{ padding: "15px" }}>${booking.total_amount.toFixed(2)}</td>
+                                <td
+                                    style={{
+                                        padding: "15px",
+                                        color:
+                                            booking.status.toLowerCase() === "confirmed"
+                                                ? "green"
+                                                : booking.status.toLowerCase() === "pending"
+                                                ? "orange"
+                                                : "red",
+                                    }}
+                                >
                                     {booking.status}
                                 </td>
                             </tr>
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="5" style={{ textAlign: "center" }}>No bookings found</td>
+                            <td
+                                colSpan="5"
+                                style={{
+                                    textAlign: "center",
+                                    padding: "20px",
+                                    fontFamily: "Inria Serif",
+                                }}
+                            >
+                                No bookings found
+                            </td>
                         </tr>
                     )}
                 </tbody>

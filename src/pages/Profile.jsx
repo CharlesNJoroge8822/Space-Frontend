@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import "../App.css";
 
 const Profile = () => {
-    const { current_user, updateProfile, logout } = useContext(UserContext);
+    const { current_user, updateProfile, logout, fetchCurrentUser } = useContext(UserContext);
     const [profileData, setProfileData] = useState({
         name: "",
         email: "",
@@ -20,6 +20,11 @@ const Profile = () => {
             });
         }
     }, [current_user]);
+
+    useEffect(() => {
+        // Fetch the latest user data when the component mounts
+        fetchCurrentUser();
+    }, [fetchCurrentUser]);
 
     const handleChange = (e) => {
         setProfileData({ ...profileData, [e.target.name]: e.target.value });
@@ -49,6 +54,8 @@ const Profile = () => {
             const data = await response.json();
     
             if (response.ok) {
+                // Update the profile with the new image URL
+                await updateProfile(current_user.id, { ...profileData, image: data.image_url });
                 setProfileData({ ...profileData, image: data.image_url });
                 toast.dismiss();
                 toast.success("Image uploaded successfully!");
@@ -61,7 +68,6 @@ const Profile = () => {
         }
     };
 
-    // Function to handle image removal
     const handleRemoveImage = async () => {
         const defaultImage = "default.jpg";
 
@@ -80,7 +86,12 @@ const Profile = () => {
             toast.error("Name and email are required!");
             return;
         }
-        await updateProfile(current_user.id, profileData);
+        try {
+            await updateProfile(current_user.id, profileData);
+            toast.success("Profile updated successfully!");
+        } catch (error) {
+            toast.error("Failed to update profile.");
+        }
     };
 
     return (
