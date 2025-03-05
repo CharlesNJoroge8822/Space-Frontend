@@ -23,7 +23,7 @@ const Spaces = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [agreedToTerms, setAgreedToTerms] = useState(false);
-    const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
+    const [isTermsModalOpen, setIsTermsModalOpen] = useState(false); // State for terms modal
 
     // Fetch spaces on component mount
     useEffect(() => {
@@ -47,11 +47,7 @@ const Spaces = () => {
 
     // Open booking modal only if the space is available
     const openBookingModal = (space) => {
-        // Parse the availability field if it's a JSON string
-        const availability = typeof space.availability === "string" ? JSON.parse(space.availability) : space.availability;
-
-        // Check if the space is available
-        if (availability.slots && availability.slots.length > 0) {
+        if (space.availability === "1" || space.availability === true) {
             setSelectedSpace(space);
             setIsBookingModalOpen(true);
         } else {
@@ -59,10 +55,6 @@ const Spaces = () => {
                 icon: "error",
                 title: "Space Booked",
                 text: "This space is already booked and cannot be reserved.",
-                toast: true,
-                position: "top-end",
-                showConfirmButton: false,
-                timer: 2000,
             });
         }
     };
@@ -70,15 +62,7 @@ const Spaces = () => {
     // Handle "Book Now" button click (opens payment modal)
     const handleBookNow = () => {
         if (!selectedSpace || !current_user) {
-            Swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text: "Please log in to book a space.",
-                toast: true,
-                position: "top-end",
-                showConfirmButton: false,
-                timer: 2000,
-            });
+            Swal.fire({ icon: "error", title: "Oops...", text: "Please log in to book a space." });
             return;
         }
         setIsBookingModalOpen(false);
@@ -92,10 +76,6 @@ const Spaces = () => {
                 icon: "error",
                 title: "Invalid Phone Number",
                 text: "Please enter a valid M-Pesa phone number (2547XXXXXXXX format).",
-                toast: true,
-                position: "top-end",
-                showConfirmButton: false,
-                timer: 2000,
             });
             return;
         }
@@ -105,10 +85,6 @@ const Spaces = () => {
                 icon: "warning",
                 title: "Agreement Required",
                 text: "You must agree to the terms before proceeding with the payment.",
-                toast: true,
-                position: "top-end",
-                showConfirmButton: false,
-                timer: 2000,
             });
             return;
         }
@@ -122,26 +98,27 @@ const Spaces = () => {
                 text: "Please wait while we process your payment.",
                 allowOutsideClick: false,
                 didOpen: () => Swal.showLoading(),
-                timer: 2000,
             });
 
+            // Simulate M-Pesa payment
             await stkPush(phoneNumber, totalCost, selectedSpace.id);
 
+            // Create booking after successful payment
             const bookingResponse = await createBooking({
                 user_id: current_user.id,
                 space_id: selectedSpace.id,
                 start_time: new Date().toISOString().split(".")[0],
                 end_time: new Date(Date.now() + duration * (unit === "hour" ? 3600000 : 86400000)).toISOString().split(".")[0],
                 total_amount: totalCost,
-                status: "booked",
+                status: "booked", // Set status to "booked"
             });
 
             // Update space availability to "booked" in the backend
-            await updateSpaceAvailability(selectedSpace.id, JSON.stringify({ slots: [] })); // No slots available after booking
+            await updateSpaceAvailability(selectedSpace.id, false);
 
             // Update space availability in the frontend state immediately
             const updatedSpaces = spaces.map((space) =>
-                space.id === selectedSpace.id ? { ...space, availability: JSON.stringify({ slots: [] }) } : space
+                space.id === selectedSpace.id ? { ...space, availability: false } : space
             );
             fetchSpaces(updatedSpaces); // Update the spaces state
 
@@ -149,10 +126,6 @@ const Spaces = () => {
                 icon: "success",
                 title: "Payment Confirmed!",
                 text: "Your booking has been confirmed successfully.",
-                toast: true,
-                position: "top-end",
-                showConfirmButton: false,
-                timer: 2000,
             });
 
             // Close modals and reset state
@@ -168,10 +141,6 @@ const Spaces = () => {
                 icon: "error",
                 title: "Payment Failed",
                 text: "Failed to process payment. Please try again.",
-                toast: true,
-                position: "top-end",
-                showConfirmButton: false,
-                timer: 2000,
             });
             console.error("Error during payment:", error);
         } finally {
@@ -184,19 +153,13 @@ const Spaces = () => {
         const checkBookingEndTimes = () => {
             const now = new Date();
             spaces.forEach(async (space) => {
-                // Parse the availability field if it's a JSON string
-                const availability = typeof space.availability === "string" ? JSON.parse(space.availability) : space.availability;
-
-                // If no slots are available, check if the booking has ended
-                if (!availability.slots || availability.slots.length === 0) {
+                if (space.availability === "0" || space.availability === false) {
                     const booking = space.bookings?.find((b) => new Date(b.end_time) > now);
                     if (!booking) {
-                        // Update space availability to "available" in the backend
-                        await updateSpaceAvailability(space.id, JSON.stringify({ slots: ["09:00-12:00", "13:00-17:00"] })); // Example slots
-
+                        await updateSpaceAvailability(space.id, true);
                         // Update space availability in the frontend state
                         const updatedSpaces = spaces.map((s) =>
-                            s.id === space.id ? { ...s, availability: JSON.stringify({ slots: ["09:00-12:00", "13:00-17:00"] }) } : s
+                            s.id === space.id ? { ...s, availability: true } : s
                         );
                         fetchSpaces(updatedSpaces); // Update the spaces state
                     }
@@ -212,35 +175,29 @@ const Spaces = () => {
     return (
         <div className="container-center">
             <h2 className="title">Available Spaces</h2>
-            <h5 className="title">Marked Changes Njoroge</h5>
 
             {loading && <p className="text-muted">Loading spaces...</p>}
             {error && <p className="text-error">{error}</p>}
             {!loading && !error && spaces.length === 0 && <p className="text-muted">No spaces available.</p>}
 
             <div className="grid-container">
-                {spaces.map((space) => {
-                    // Parse the availability field if it's a JSON string
-                    const availability = typeof space.availability === "string" ? JSON.parse(space.availability) : space.availability;
-
-                    return (
-                        <div
-                            key={space.id}
-                            className={`card ${availability.slots && availability.slots.length > 0 ? "cursor-pointer" : "cursor-not-allowed"}`}
-                            onClick={() => availability.slots && availability.slots.length > 0 && openBookingModal(space)}
-                        >
-                            <img src={space.images || "https://source.unsplash.com/400x300/?office,workspace"} alt={space.name || "Space"} className="card-image" />
-                            <div className="card-content">
-                                <h3 className="card-title">{space.name || "Unnamed Space"}</h3>
-                                <p><strong>Location:</strong> {space.location || "Unknown"}</p>
-                                <p><strong>Price per Day:</strong> ${space.price_per_day || 0}</p>
-                                <p className={`text-${availability.slots && availability.slots.length > 0 ? "success" : "error"}`}>
-                                    <strong>Availability:</strong> {availability.slots && availability.slots.length > 0 ? "Available" : "Booked"}
-                                </p>
-                            </div>
+                {spaces.map((space) => (
+                    <div
+                        key={space.id}
+                        className={`card ${space.availability === "1" || space.availability === true ? "cursor-pointer" : "cursor-not-allowed"}`}
+                        onClick={() => (space.availability === "1" || space.availability === true) && openBookingModal(space)}
+                    >
+                        <img src={space.images || "https://source.unsplash.com/400x300/?office,workspace"} alt={space.name || "Space"} className="card-image" />
+                        <div className="card-content">
+                            <h3 className="card-title">{space.name || "Unnamed Space"}</h3>
+                            <p><strong>Location:</strong> {space.location || "Unknown"}</p>
+                            <p><strong>Price per Day:</strong> ${space.price_per_day || 0}</p>
+                            <p className={`text-${space.availability === "1" || space.availability === true ? "success" : "error"}`}>
+                                <strong>Availability:</strong> {space.availability === "1" || space.availability === true ? "Available" : "Booked"}
+                            </p>
                         </div>
-                    );
-                })}
+                    </div>
+                ))}
             </div>
 
             {/* Booking Modal */}
