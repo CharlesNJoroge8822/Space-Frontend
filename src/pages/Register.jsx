@@ -99,7 +99,7 @@ export default function Register() {
                         
                     <button
   type="button"
-  onClick={() => (window.location.href = "https://space-backend-6.onrender.com/authorize_google")}
+  onClick={handleGoogleLogin}
   style={{ cursor: "pointer" }}
 >
   Sign up with Google

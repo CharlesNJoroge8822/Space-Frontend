@@ -208,7 +208,7 @@ const addUser = async (name, email, password, role = "Client") => {
     const loadingToast = toast.loading("Creating your account...");
 
     try {
-        const response = await fetch("https://space-backend-6.onrender.com//users", {
+        const response = await fetch("https://space-backend-6.onrender.com/users", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name, email, password, role }),
