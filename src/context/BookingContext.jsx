@@ -11,7 +11,7 @@ export const BookingProvider = ({ children }) => {
         try {
             console.log("Sending Booking Payload:", bookingData);
 
-            const response = await fetch("http://127.0.0.1:5000/bookings", {
+            const response = await fetch("https://space-backend-6.onrender.com/bookings", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(bookingData),
@@ -32,18 +32,18 @@ export const BookingProvider = ({ children }) => {
     // Fetch all bookings
     const fetchBookings = useCallback(async () => {
         try {
-            const response = await fetch("http://127.0.0.1:5000/bookings", {
+            const response = await fetch("https://space-backend-6.onrender.com/bookings", {
                 method: "GET",
-                headers: { "Content-Type": "application/json" },
+                // headers: { "Content-Type": "application/json" },
             });
 
-            if (!response.ok) throw new Error("Failed to fetch bookings.");
+            // if (!response.ok) throw new Error("Failed to fetch bookings.");
 
             const data = await response.json();
             setBookings(data.bookings || []); // Ensure we set an array
             return data;
         } catch (error) {
-            toast.error("❌ Failed to fetch bookings. Please try again.");
+            // toast.error("Failed to fetch bookings. Please try again.");
             console.error("Fetch Bookings Error:", error);
             throw error;
         }
@@ -52,7 +52,7 @@ export const BookingProvider = ({ children }) => {
     // Fetch bookings for a specific user
     const fetchUserBookings = async (userId) => {
         try {
-            const response = await fetch(`http://127.0.0.1:5000/bookings?user_id=${userId}`, {
+            const response = await fetch(`https://space-backend-6.onrender.com/bookings?user_id=${userId}`, {
                 method: "GET",
                 headers: { "Content-Type": "application/json" },
             });
@@ -68,42 +68,38 @@ export const BookingProvider = ({ children }) => {
     };
 
     // Delete a booking
-    const deleteBooking = async (id) => {
-        try {
-            const token = sessionStorage.getItem("token");a
-            if (!token) {
-                toast.error("You must be logged in to delete a booking.");
+   // Delete a booking
+const deleteBooking = async (id) => {
+    try {
+        // Send DELETE request to the backend API without JWT
+        const response = await fetch(`https://space-backend-6.onrender.com/bookings/${id}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include", // Keeps session info, if needed for other things like cookies
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                toast.error("Unauthorized! Please log in again.");
                 return;
             }
-    
-            const response = await fetch(`http://127.0.0.1:5000/bookings/${id}`, {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                credentials: "include",
-            });
-    
-            if (!response.ok) {
-                if (response.status === 401) {
-                    toast.error("Unauthorized! Please log in again.");
-                    return;
-                }
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-    
-            // Update the UI without re-fetching from the server
-            setBookings((prevBookings) => prevBookings.filter(booking => booking.id !== id));
-    
-            toast.success("✅ Booking deleted successfully!", { autoClose: 1000 });
-    
-        } catch (error) {
-            console.error("Error deleting booking:", error);
-            toast.error(`❌ ${error.message}`, { autoClose: 1000 });
+            throw new Error(`HTTP error! Status: ${response.status}`);
         }
-    };
-    
+
+        // Show success toast
+        toast.success("✅ Booking deleted successfully!", { autoClose: 1000 });
+
+        // Refetch bookings to ensure UI is up to date with the server
+        fetchBookings(); // Refetch the bookings from the backend
+
+    } catch (error) {
+        console.error("Error deleting booking:", error);
+        toast.error(`❌ ${error.message}`, { autoClose: 1000 });
+    }
+};
+   
     
     return (
         <BookingContext.Provider

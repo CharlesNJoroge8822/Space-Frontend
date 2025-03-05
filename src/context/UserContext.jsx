@@ -29,7 +29,7 @@ export const UserProvider = ({ children }) => {
 
         try {
             console.log("🔄 Fetching users...");
-            const response = await fetch("http://127.0.0.1:5000/users", {
+            const response = await fetch("https://space-backend-6.onrender.com/users", {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -78,48 +78,6 @@ export const UserProvider = ({ children }) => {
 
     console.log("Current user:", current_user);
 
-    /** ✅ Login function */
-const login = async (email, password, role) => {
-    const loadingToast = toast.loading("Logging you in...");
-    try {
-        const response = await fetch("http://127.0.0.1:5000/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password, role }),
-        });
-        const data = await response.json();
-
-        if (data.access_token) {
-            sessionStorage.setItem("token", data.access_token);
-            setAuthToken(data.access_token);
-
-            const userResponse = await fetch("http://127.0.0.1:5000/current_user", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${data.access_token}`,
-                },
-            });
-            const user = await userResponse.json();
-
-            if (user.email) {
-                setCurrentUser(user);
-                sessionStorage.setItem("current_user", JSON.stringify(user));
-                toast.success("Successfully Logged in!");
-
-                navigate(user.role === "Client" ? "/spaces" : "/manage-bookings");
-            }
-        } else {
-            toast.error(data.error || "Failed to login");
-        }
-    } catch (error) {
-        toast.error("An error occurred. Please try again.");
-    } finally {
-        toast.dismiss(loadingToast);
-    }
-};
-
-
     // Function to handle Google login
     const handleGoogleLogin = () => {
         // Extract user data from URL parameters
@@ -151,12 +109,6 @@ const login = async (email, password, role) => {
             }
         }
     };
-    useEffect(() => {
-        const storedUser = sessionStorage.getItem("current_user");
-        if (storedUser) {
-            setCurrentUser(JSON.parse(storedUser));
-        }
-    }, []);
 
     // Check for Google login data on component mount
     useEffect(() => {
@@ -167,49 +119,96 @@ const login = async (email, password, role) => {
     const googleLogin = async (email) => {
         toast.loading("Logging you in ... ");
         try {
-            const response = await fetch("http://127.0.0.1:5000/googlelogin", {
+            const response = await fetch("https://space-backend-6.onrender.com/googlelogin", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email }),
             });
+
             const data = await response.json();
-    
+
             if (data.access_token) {
+                toast.dismiss();
                 sessionStorage.setItem("token", data.access_token);
                 setAuthToken(data.access_token);
-    
-                const userResponse = await fetch("http://127.0.0.1:5000/current_user", {
+
+                const userResponse = await fetch("https://space-backend-6.onrender.com/current_user", {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${data.access_token}`,
                     },
                 });
+
                 const user = await userResponse.json();
-    
                 if (user.email) {
                     setCurrentUser(user);
-                    sessionStorage.setItem("current_user", JSON.stringify(user)); // ✅ Store user in sessionStorage
                     toast.success("Successfully Logged in!");
-    
-                    navigate(user.role === "Client" ? "/spaces" : "/manage-bookings");
+
+                    // Redirect based on role
+                    if (user.role === "Client") {
+                        navigate("/spaces");
+                    } else if (user.role === "Admin") {
+                        navigate("/manage-bookings");
+                    }
                 }
             } else {
+                toast.dismiss();
                 toast.error(data.error || "Failed to login");
             }
         } catch (error) {
-            toast.error("An error occurred. Please try again.");
-        } finally {
             toast.dismiss();
+            toast.error("An error occurred. Please try again.");
         }
     };
-    
+
+    /** ✅ Login function */
+const login = async (email, password, role) => {
+    const loadingToast = toast.loading("Logging you in...");
+    try {
+        const response = await fetch("https://space-backend-6.onrender.com/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password, role }),
+        });
+        const data = await response.json();
+
+        if (data.access_token) {
+            sessionStorage.setItem("token", data.access_token);
+            setAuthToken(data.access_token);
+
+            const userResponse = await fetch("https://space-backend-6.onrender.com/current_user", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${data.access_token}`,
+                },
+            });
+            const user = await userResponse.json();
+
+            if (user.email) {
+                setCurrentUser(user);
+                sessionStorage.setItem("current_user", JSON.stringify(user));
+                toast.success("Successfully Logged in!");
+
+                navigate(user.role === "Client" ? "/spaces" : "/manage-bookings");
+            }
+        } else {
+            toast.error(data.error || "Failed to login");
+        }
+    } catch (error) {
+        toast.error("An error occurred. Please try again.");
+    } finally {
+        toast.dismiss(loadingToast);
+    }
+};
+
     /** ✅ Register a new user */
 const addUser = async (name, email, password, role = "Client") => {
     const loadingToast = toast.loading("Creating your account...");
 
     try {
-        const response = await fetch("http://127.0.0.1:5000//users", {
+        const response = await fetch("https://space-backend-6.onrender.com//users", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name, email, password, role }),
@@ -231,38 +230,43 @@ const addUser = async (name, email, password, role = "Client") => {
         toast.dismiss(loadingToast);
     }
 };  
-        const updateProfile = async (userId, updatedData) => {
-            const token = sessionStorage.getItem("token");
 
-            if (!token) {
-                toast.error("Unauthorized! Please log in.");
-                return;
-            }
+const updateProfile = async (userId, updatedData) => {
+    const token = sessionStorage.getItem("token");
 
-            try {
-                console.log(`✏️ Updating user ${userId}...`, updatedData);
-                const response = await fetch(`http://127.0.0.1:5000/users/${userId}`, {
-                    method: "PATCH",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                    body: JSON.stringify(updatedData),
-                });
+    if (!token) {
+        toast.error("Unauthorized! Please log in.");
+        return;
+    }
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || "Failed to update user.");
-                }
+    try {
+        console.log(`✏️ Updating user ${userId}...`, updatedData);
+        const response = await fetch(`https://space-backend-6.onrender.com/users/${userId}`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(updatedData),
+        });
 
-                toast.success("User updated successfully!");
-                fetchAllUsers(); // Refresh the user list
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to update user.");
+        }
 
-            } catch (error) {
-                console.error("❌ Update user error:", error.message);
-                toast.error(error.message);
-            }
-        };
+        toast.success("User updated successfully!");
+
+        // ✅ Only refresh the user list if the current user is an admin
+        if (current_user?.role === "Admin") {
+            fetchAllUsers(); // Refresh the user list
+        }
+
+    } catch (error) {
+        console.error("❌ Update user error:", error.message);
+        toast.error(error.message);
+    }
+};
 
 
     const deleteUser = async (userId) => {
@@ -275,7 +279,7 @@ const addUser = async (name, email, password, role = "Client") => {
 
         try {
             console.log(`🗑️ Deleting user with ID: ${userId}...`);
-            const response = await fetch(`http://127.0.0.1:5000/users/${userId}`, {
+            const response = await fetch(`https://space-backend-6.onrender.com/users/${userId}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
@@ -303,7 +307,7 @@ const addUser = async (name, email, password, role = "Client") => {
         console.log("🔴 Logging out...");
         const loadingToast = toast.loading("Logging out...");
 
-        fetch("http://127.0.0.1:5000/logout", {
+        fetch("https://space-backend-6.onrender.com/logout", {
             method: "DELETE",
             headers: {
                 "Content-type": "application/json",

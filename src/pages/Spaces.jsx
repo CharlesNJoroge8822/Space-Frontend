@@ -8,7 +8,7 @@ import Swal from "sweetalert2";
 import "../../src/space.css";
 
 const Spaces = () => {
-    const { spaces, fetchSpaces, updateSpaceAvailability, updateBookingStatus } = useContext(SpaceContext);
+    const { spaces, fetchSpaces, updateSpaceAvailability } = useContext(SpaceContext);
     const { stkPush } = useContext(PaymentsContext);
     const { createBooking, fetchUserBookings } = useContext(BookingContext);
     const { current_user } = useContext(UserContext);
@@ -22,9 +22,10 @@ const Spaces = () => {
     const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [paymentStatus, setPaymentStatus] = useState("pending");
     const [agreedToTerms, setAgreedToTerms] = useState(false);
+    const [isTermsModalOpen, setIsTermsModalOpen] = useState(false); // State for terms modal
 
+    // Fetch spaces on component mount
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -39,10 +40,12 @@ const Spaces = () => {
         fetchData();
     }, [fetchSpaces]);
 
+    // Calculate total price based on duration and unit
     const calculateTotalPrice = (space) => {
         return unit === "hour" ? space.price_per_hour * duration : space.price_per_day * duration;
     };
 
+    // Open booking modal only if the space is available
     const openBookingModal = (space) => {
         if (space.availability === "1" || space.availability === true) {
             setSelectedSpace(space);
@@ -56,35 +59,17 @@ const Spaces = () => {
         }
     };
 
-    const handleBooking = async () => {
+    // Handle "Book Now" button click (opens payment modal)
+    const handleBookNow = () => {
         if (!selectedSpace || !current_user) {
             Swal.fire({ icon: "error", title: "Oops...", text: "Please log in to book a space." });
             return;
         }
-
-        const totalCost = calculateTotalPrice(selectedSpace);
-
-        try {
-            Swal.fire({ title: "Creating booking...", text: "Processing...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-
-            const bookingResponse = await createBooking({
-                user_id: current_user.id,
-                space_id: selectedSpace.id,
-                start_time: new Date().toISOString().split(".")[0],
-                end_time: new Date(Date.now() + duration * (unit === "hour" ? 3600000 : 86400000)).toISOString().split(".")[0],
-                total_amount: totalCost,
-                status: "Pending Payment",
-            });
-
-            Swal.fire({ icon: "success", title: "Booking Created!", text: "Please proceed to payment." });
-            setIsBookingModalOpen(false);
-            setIsPaymentModalOpen(true);
-        } catch (error) {
-            Swal.fire({ icon: "error", title: "Booking Failed", text: "Failed to create booking. Try again." });
-            console.error("Create Booking Error:", error);
-        }
+        setIsBookingModalOpen(false);
+        setIsPaymentModalOpen(true);
     };
 
+    // Handle payment and create booking
     const handlePayment = async () => {
         if (!phoneNumber.match(/^2547[0-9]{8}$/)) {
             Swal.fire({
@@ -115,10 +100,27 @@ const Spaces = () => {
                 didOpen: () => Swal.showLoading(),
             });
 
-            const stkResponse = await stkPush(phoneNumber, totalCost, selectedSpace.id);
+            // Simulate M-Pesa payment
+            await stkPush(phoneNumber, totalCost, selectedSpace.id);
 
-            await updateBookingStatus(selectedSpace.id, "Confirmed");
-            setPaymentStatus("confirmed");
+            // Create booking after successful payment
+            const bookingResponse = await createBooking({
+                user_id: current_user.id,
+                space_id: selectedSpace.id,
+                start_time: new Date().toISOString().split(".")[0],
+                end_time: new Date(Date.now() + duration * (unit === "hour" ? 3600000 : 86400000)).toISOString().split(".")[0],
+                total_amount: totalCost,
+                status: "booked", // Set status to "booked"
+            });
+
+            // Update space availability to "booked" in the backend
+            await updateSpaceAvailability(selectedSpace.id, false);
+
+            // Update space availability in the frontend state immediately
+            const updatedSpaces = spaces.map((space) =>
+                space.id === selectedSpace.id ? { ...space, availability: false } : space
+            );
+            fetchSpaces(updatedSpaces); // Update the spaces state
 
             Swal.fire({
                 icon: "success",
@@ -126,11 +128,14 @@ const Spaces = () => {
                 text: "Your booking has been confirmed successfully.",
             });
 
+            // Close modals and reset state
             setIsPaymentModalOpen(false);
             setPhoneNumber("");
             setAgreedToTerms(false);
 
-            fetchUserBookings();
+            // Refresh spaces and bookings
+            await fetchSpaces();
+            await fetchUserBookings();
         } catch (error) {
             Swal.fire({
                 icon: "error",
@@ -143,6 +148,30 @@ const Spaces = () => {
         }
     };
 
+    // Automatically update space availability after booking end time
+    useEffect(() => {
+        const checkBookingEndTimes = () => {
+            const now = new Date();
+            spaces.forEach(async (space) => {
+                if (space.availability === "0" || space.availability === false) {
+                    const booking = space.bookings?.find((b) => new Date(b.end_time) > now);
+                    if (!booking) {
+                        await updateSpaceAvailability(space.id, true);
+                        // Update space availability in the frontend state
+                        const updatedSpaces = spaces.map((s) =>
+                            s.id === space.id ? { ...s, availability: true } : s
+                        );
+                        fetchSpaces(updatedSpaces); // Update the spaces state
+                    }
+                }
+            });
+        };
+
+        // Check every minute
+        const interval = setInterval(checkBookingEndTimes, 60000);
+        return () => clearInterval(interval);
+    }, [spaces, updateSpaceAvailability]);
+
     return (
         <div className="container-center">
             <h2 className="title">Available Spaces</h2>
@@ -153,7 +182,11 @@ const Spaces = () => {
 
             <div className="grid-container">
                 {spaces.map((space) => (
-                    <div key={space.id} className="card cursor-pointer" onClick={() => openBookingModal(space)}>
+                    <div
+                        key={space.id}
+                        className={`card ${space.availability === "1" || space.availability === true ? "cursor-pointer" : "cursor-not-allowed"}`}
+                        onClick={() => (space.availability === "1" || space.availability === true) && openBookingModal(space)}
+                    >
                         <img src={space.images || "https://source.unsplash.com/400x300/?office,workspace"} alt={space.name || "Space"} className="card-image" />
                         <div className="card-content">
                             <h3 className="card-title">{space.name || "Unnamed Space"}</h3>
@@ -167,6 +200,7 @@ const Spaces = () => {
                 ))}
             </div>
 
+            {/* Booking Modal */}
             {isBookingModalOpen && selectedSpace && (
                 <div className="modal-overlay">
                     <div className="modal">
@@ -194,13 +228,14 @@ const Spaces = () => {
 
                         <p className="total-price"><strong>Total Price:</strong> ${calculateTotalPrice(selectedSpace)}</p>
 
-                        <button onClick={handleBooking} className="btn-green">
+                        <button onClick={handleBookNow} className="btn-green">
                             Book Now
                         </button>
                     </div>
                 </div>
             )}
 
+            {/* Payment Modal */}
             {isPaymentModalOpen && selectedSpace && (
                 <div className="modal-overlay">
                     <div className="modal">
@@ -231,7 +266,14 @@ const Spaces = () => {
                                     checked={agreedToTerms}
                                     onChange={(e) => setAgreedToTerms(e.target.checked)}
                                 />
-                                I agree to the <a href="/terms" target="_blank">terms and conditions</a>.
+                                Confirm Consent and agree to the{" "}
+                                <span
+                                    className="terms-link"
+                                    onClick={() => setIsTermsModalOpen(true)}
+                                >
+                                    terms and conditions"Click-To-Open
+                                </span>
+                                .
                             </label>
                         </div>
 
@@ -241,6 +283,58 @@ const Spaces = () => {
                             disabled={isPaymentProcessing || !agreedToTerms}
                         >
                             {isPaymentProcessing ? "Processing..." : "Pay via M-Pesa"}
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Terms and Conditions Modal */}
+            {isTermsModalOpen && (
+                <div className="modal-overlay">
+                    <div className="modal">
+                        <button
+                            className="modal-close"
+                            onClick={() => setIsTermsModalOpen(false)}
+                            aria-label="Close Modal"
+                        >
+                            <X size={24} />
+                        </button>
+
+                        <h3 className="modal-title">Terms and Conditions</h3>
+                        <div className="terms-content">
+                            <p>
+                                By proceeding with this booking, you agree to the following terms and conditions:
+                            </p>
+                            <ol>
+                                <li>
+                                    You are responsible for ensuring that the provided information is accurate.
+                                </li>
+                                <li>
+                                    Payments are non-refundable once the booking is confirmed.
+                                </li>
+                                <li>
+                                    The space must be used responsibly, and any damages will be charged to the user.
+                                </li>
+                                <li>
+                                    The booking duration must be adhered to strictly. Extensions may incur additional charges.
+                                </li>
+                                <li>
+                                    The management reserves the right to cancel bookings in case of emergencies.
+                                </li>
+                                <p style={{color:"red",}}>
+                                DISCLAIMER : Once booked. Can't be refunded ....                            </p>
+                            </ol>
+                            <p>
+                                If you have any questions, please contact support before proceeding.
+                            </p>
+                        
+                        </div>
+
+                        <button
+                            onClick={() => setIsTermsModalOpen(false)}
+                            className="btn-green"
+                        >
+                            Close
                         </button>
                     </div>
                 </div>

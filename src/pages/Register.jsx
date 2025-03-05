@@ -37,7 +37,7 @@ export default function Register() {
     };
 
     const handleGoogleLogin = () => {
-        window.location.href = "http://127.0.0.1:5000/authorize_google";
+        window.location.href = "https://space-backend-6.onrender.com/authorize_google";
         toast.success("Success")
     };
 
@@ -99,7 +99,7 @@ export default function Register() {
                         
                     <button
   type="button"
-  onClick={() => (window.location.href = "http://127.0.0.1:5000/google_login")}
+  onClick={() => (window.location.href = "https://space-backend-6.onrender.com/authorize_google")}
   style={{ cursor: "pointer" }}
 >
   Sign up with Google
