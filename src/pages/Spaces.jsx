@@ -23,9 +23,8 @@ const Spaces = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [agreedToTerms, setAgreedToTerms] = useState(false);
-    const [isTermsModalOpen, setIsTermsModalOpen] = useState(false); // State for terms modal
+    const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
 
-    // Fetch spaces on component mount
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -40,12 +39,10 @@ const Spaces = () => {
         fetchData();
     }, [fetchSpaces]);
 
-    // Calculate total price based on duration and unit
     const calculateTotalPrice = (space) => {
         return unit === "hour" ? space.price_per_hour * duration : space.price_per_day * duration;
     };
 
-    // Open booking modal only if the space is available
     const openBookingModal = (space) => {
         if (space.availability === "1" || space.availability === true) {
             setSelectedSpace(space);
@@ -55,27 +52,41 @@ const Spaces = () => {
                 icon: "error",
                 title: "Space Booked",
                 text: "This space is already booked and cannot be reserved.",
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 2000,
             });
         }
     };
 
-    // Handle "Book Now" button click (opens payment modal)
     const handleBookNow = () => {
         if (!selectedSpace || !current_user) {
-            Swal.fire({ icon: "error", title: "Oops...", text: "Please log in to book a space." });
+            Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "Please log in to book a space.",
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 2000,
+            });
             return;
         }
         setIsBookingModalOpen(false);
         setIsPaymentModalOpen(true);
     };
 
-    // Handle payment and create booking
     const handlePayment = async () => {
         if (!phoneNumber.match(/^2547[0-9]{8}$/)) {
             Swal.fire({
                 icon: "error",
                 title: "Invalid Phone Number",
                 text: "Please enter a valid M-Pesa phone number (2547XXXXXXXX format).",
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 2000,
             });
             return;
         }
@@ -85,6 +96,10 @@ const Spaces = () => {
                 icon: "warning",
                 title: "Agreement Required",
                 text: "You must agree to the terms before proceeding with the payment.",
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 2000,
             });
             return;
         }
@@ -98,42 +113,41 @@ const Spaces = () => {
                 text: "Please wait while we process your payment.",
                 allowOutsideClick: false,
                 didOpen: () => Swal.showLoading(),
+                timer: 2000,
             });
 
-            // Simulate M-Pesa payment
             await stkPush(phoneNumber, totalCost, selectedSpace.id);
 
-            // Create booking after successful payment
             const bookingResponse = await createBooking({
                 user_id: current_user.id,
                 space_id: selectedSpace.id,
                 start_time: new Date().toISOString().split(".")[0],
                 end_time: new Date(Date.now() + duration * (unit === "hour" ? 3600000 : 86400000)).toISOString().split(".")[0],
                 total_amount: totalCost,
-                status: "booked", // Set status to "booked"
+                status: "booked",
             });
 
-            // Update space availability to "booked" in the backend
             await updateSpaceAvailability(selectedSpace.id, false);
 
-            // Update space availability in the frontend state immediately
             const updatedSpaces = spaces.map((space) =>
                 space.id === selectedSpace.id ? { ...space, availability: false } : space
             );
-            fetchSpaces(updatedSpaces); // Update the spaces state
+            fetchSpaces(updatedSpaces);
 
             Swal.fire({
                 icon: "success",
                 title: "Payment Confirmed!",
                 text: "Your booking has been confirmed successfully.",
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 2000,
             });
 
-            // Close modals and reset state
             setIsPaymentModalOpen(false);
             setPhoneNumber("");
             setAgreedToTerms(false);
 
-            // Refresh spaces and bookings
             await fetchSpaces();
             await fetchUserBookings();
         } catch (error) {
@@ -141,6 +155,10 @@ const Spaces = () => {
                 icon: "error",
                 title: "Payment Failed",
                 text: "Failed to process payment. Please try again.",
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: 2000,
             });
             console.error("Error during payment:", error);
         } finally {
@@ -148,7 +166,6 @@ const Spaces = () => {
         }
     };
 
-    // Automatically update space availability after booking end time
     useEffect(() => {
         const checkBookingEndTimes = () => {
             const now = new Date();
@@ -157,17 +174,15 @@ const Spaces = () => {
                     const booking = space.bookings?.find((b) => new Date(b.end_time) > now);
                     if (!booking) {
                         await updateSpaceAvailability(space.id, true);
-                        // Update space availability in the frontend state
                         const updatedSpaces = spaces.map((s) =>
                             s.id === space.id ? { ...s, availability: true } : s
                         );
-                        fetchSpaces(updatedSpaces); // Update the spaces state
+                        fetchSpaces(updatedSpaces);
                     }
                 }
             });
         };
 
-        // Check every minute
         const interval = setInterval(checkBookingEndTimes, 60000);
         return () => clearInterval(interval);
     }, [spaces, updateSpaceAvailability]);
