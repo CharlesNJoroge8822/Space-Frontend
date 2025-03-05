@@ -4,7 +4,7 @@ import { UserContext } from "../context/UserContext";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode"; // Updated import
 import "../App.css";
 
 export default function Login() {
@@ -40,7 +40,7 @@ export default function Login() {
         }
 
         try {
-            const response = await fetch("https://space-backend-8.onrender.com/request_password_reset", {
+            const response = await fetch("https://space-backend-7.onrender.com/request_password_reset", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email: resetEmail }),
@@ -59,7 +59,7 @@ export default function Login() {
     };
 
     const handleGoogleSuccess = (credentialResponse) => {
-        const userDetails = jwtDecode(credentialResponse.credential);
+        const userDetails = jwtDecode(credentialResponse.credential); // Updated usage
         googleLogin(userDetails.email);
         toast.success("Google login successful!");
         navigate("/");
