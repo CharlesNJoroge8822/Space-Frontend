@@ -12,7 +12,7 @@ const ManageBookings = () => {
     const fetchBookings = async () => {
         setLoading(true);
         try {
-            const response = await fetch("https://space-backend-6.onrender.com/bookings", {
+            const response = await fetch("https://space-backend-7.onrender.com/bookings", {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -52,7 +52,7 @@ const ManageBookings = () => {
     // Delete a booking
     const deleteBooking = async (id) => {
         try {
-            const response = await fetch(`https://space-backend-6.onrender.com/bookings/${id}`, {
+            const response = await fetch(`https://space-backend-7.onrender.com/bookings/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
