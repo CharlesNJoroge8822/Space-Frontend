@@ -190,7 +190,6 @@ const Spaces = () => {
     return (
         <div className="container-center">
             <h2 className="title">Available Spaces</h2>
-            <h2 className="title">All The Spaces</h2>
 
             {loading && <p className="text-muted">Loading spaces...</p>}
             {error && <p className="text-error">{error}</p>}
