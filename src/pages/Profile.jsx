@@ -23,8 +23,8 @@ const Profile = () => {
     }, [current_user]);
 
     useEffect(() => {
-        fetchCurrentUser();
-    }, []);
+        fetchCurrentUser(); // ✅ Only runs when `current_user` changes
+    }, [current_user]);
 
     const handleChange = (e) => {
         setProfileData({ ...profileData, [e.target.name]: e.target.value });
@@ -42,11 +42,9 @@ const Profile = () => {
         const token = sessionStorage.getItem("token");
 
         try {
-            const response = await fetch("https://space-backend-2-p4kd.onrender.com/upload-image", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                },
+            const response = await fetch(`https://space-backend-2-p4kd.onrender.com/users/${current_user.id}/update-image`, {
+                method: "PATCH",
+                headers: { "Authorization": `Bearer ${token}` },
                 body: formData,
             });
 
@@ -55,15 +53,11 @@ const Profile = () => {
             if (response.ok) {
                 const newImageUrl = data.image_url;
 
-                // ✅ Update the profile with only the image
-                await updateProfile(current_user.id, { image: newImageUrl });
-
-                // ✅ Update UI state and sessionStorage
+                // ✅ Update UI state
                 setProfileData((prev) => ({ ...prev, image: newImageUrl }));
-                sessionStorage.setItem(
-                    "current_user",
-                    JSON.stringify({ ...current_user, image: newImageUrl })
-                );
+
+                // ✅ Fetch latest user data
+                fetchCurrentUser();
 
                 toast.dismiss();
                 toast.success("Image uploaded successfully!");
@@ -80,17 +74,17 @@ const Profile = () => {
         const defaultImage = "default.jpg";
 
         try {
-            await updateProfile(current_user.id, { image: defaultImage });
+            const response = await updateProfile(current_user.id, { image: defaultImage });
 
-            setProfileData((prev) => ({ ...prev, image: defaultImage }));
-            sessionStorage.setItem(
-                "current_user",
-                JSON.stringify({ ...current_user, image: defaultImage })
-            );
-
-            toast.success("Profile image removed!");
+            if (response.ok) {
+                setProfileData((prev) => ({ ...prev, image: defaultImage }));
+                fetchCurrentUser();
+                toast.success("Profile image removed!");
+            } else {
+                throw new Error("Failed to remove image.");
+            }
         } catch (error) {
-            toast.error("Failed to remove image.");
+            toast.error(error.message);
         }
     };
 
@@ -103,16 +97,10 @@ const Profile = () => {
         }
 
         try {
-            await updateProfile(current_user.id, {
-                name: profileData.name,
-                image: profileData.image, 
-            });
+            await updateProfile(current_user.id, { name: profileData.name });
 
-            // ✅ Ensure UI state updates
-            sessionStorage.setItem(
-                "current_user",
-                JSON.stringify({ ...current_user, name: profileData.name })
-            );
+            // ✅ Fetch updated user data
+            fetchCurrentUser();
 
             toast.success("Profile updated successfully!");
         } catch (error) {
@@ -255,9 +243,7 @@ const Profile = () => {
                     fontSize: "18px",
                     fontFamily: "Inria Serif",
                     transition: "background-color 0.3s ease",
-                }}
-                onMouseOver={(e) => (e.target.style.backgroundColor = "#256a57")}
-                onMouseOut={(e) => (e.target.style.backgroundColor = "#104436")}>
+                }}>
                     Logout
                 </button>
             </div>
