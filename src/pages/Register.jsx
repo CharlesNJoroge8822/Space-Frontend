@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import { toast } from "react-toastify";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode"; // Corrected import
 import "../App.css";
 
 export default function Register() {
@@ -39,7 +39,7 @@ export default function Register() {
     };
 
     const handleGoogleSuccess = (credentialResponse) => {
-        const userDetails = jwtDecode(credentialResponse.credential);
+        const userDetails = jwtDecode(credentialResponse.credential); // Correct usage
         addUser(userDetails.name, userDetails.email, "", "Client"); // Add user with Google details
         toast.success("Google sign-up successful!");
         navigate("/");
@@ -122,4 +122,4 @@ export default function Register() {
             </div>
         </div>
     );
-}   
+}
