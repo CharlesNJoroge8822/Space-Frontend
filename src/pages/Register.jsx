@@ -39,7 +39,7 @@ export default function Register() {
     };
 
     const handleGoogleLogin = () => {
-        window.location.href = "https://space-backend-9.onrender.com/authorize_google";
+        window.location.href = "https://space-backend-2-p4kd.onrender.com/authorize_google";
         toast.success("Success")
     };
 
