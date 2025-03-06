@@ -29,7 +29,7 @@ export const UserProvider = ({ children }) => {
 
         try {
             console.log("🔄 Fetching users...");
-            const response = await fetch("https://space-backend-8.onrender.com/users", {
+            const response = await fetch("https://space-backend-9.onrender.com/users", {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -119,7 +119,7 @@ export const UserProvider = ({ children }) => {
     const googleLogin = async (email) => {
         toast.loading("Logging you in ... ");
         try {
-            const response = await fetch("https://space-backend-8.onrender.com/googlelogin", {
+            const response = await fetch("https://space-backend-9.onrender.com/googlelogin", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email }),
@@ -132,7 +132,7 @@ export const UserProvider = ({ children }) => {
                 sessionStorage.setItem("token", data.access_token);
                 setAuthToken(data.access_token);
 
-                const userResponse = await fetch("https://space-backend-8.onrender.com/current_user", {
+                const userResponse = await fetch("https://space-backend-9.onrender.com/current_user", {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -166,7 +166,7 @@ export const UserProvider = ({ children }) => {
 const login = async (email, password, role) => {
     const loadingToast = toast.loading("Logging you in...");
     try {
-        const response = await fetch("https://space-backend-8.onrender.com/login", {
+        const response = await fetch("https://space-backend-9.onrender.com/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password, role }),
@@ -177,7 +177,7 @@ const login = async (email, password, role) => {
             sessionStorage.setItem("token", data.access_token);
             setAuthToken(data.access_token);
 
-            const userResponse = await fetch("https://space-backend-8.onrender.com/current_user", {
+            const userResponse = await fetch("https://space-backend-9.onrender.com/current_user", {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -208,7 +208,7 @@ const addUser = async (name, email, password, role = "Client") => {
     const loadingToast = toast.loading("Creating your account...");
 
     try {
-        const response = await fetch("https://space-backend-8.onrender.com/users", {
+        const response = await fetch("https://space-backend-9.onrender.com/users", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name, email, password, role }),
@@ -241,7 +241,7 @@ const updateProfile = async (userId, updatedData) => {
 
     try {
         console.log(`✏️ Updating user ${userId}...`, updatedData);
-        const response = await fetch(`https://space-backend-8.onrender.com/users/${userId}`, {
+        const response = await fetch(`https://space-backend-9.onrender.com/users/${userId}`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
@@ -279,7 +279,7 @@ const updateProfile = async (userId, updatedData) => {
 
         try {
             console.log(`🗑️ Deleting user with ID: ${userId}...`);
-            const response = await fetch(`https://space-backend-8.onrender.com/users/${userId}`, {
+            const response = await fetch(`https://space-backend-9.onrender.com/users/${userId}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
@@ -307,7 +307,7 @@ const updateProfile = async (userId, updatedData) => {
         console.log("🔴 Logging out...");
         const loadingToast = toast.loading("Logging out...");
 
-        fetch("https://space-backend-8.onrender.com/logout", {
+        fetch("https://space-backend-9.onrender.com/logout", {
             method: "DELETE",
             headers: {
                 "Content-type": "application/json",
