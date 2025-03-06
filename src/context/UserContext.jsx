@@ -241,6 +241,7 @@ const updateProfile = async (userId, updatedData) => {
 
     try {
         console.log(`✏️ Updating user ${userId}...`, updatedData);
+
         const response = await fetch(`https://space-backend-2-p4kd.onrender.com/users/${userId}`, {
             method: "PATCH",
             headers: {
@@ -255,18 +256,26 @@ const updateProfile = async (userId, updatedData) => {
             throw new Error(errorData.error || "Failed to update user.");
         }
 
-        toast.success("User updated successfully!");
+        const updatedUser = await response.json(); // ✅ Get updated user object from API
+        toast.success("Profile updated successfully!");
 
-        // ✅ Only refresh the user list if the current user is an admin
-        if (current_user?.role === "Admin") {
-            fetchAllUsers(); // Refresh the user list
-        }
+        // ✅ Update current_user state
+        setCurrentUser(updatedUser);
 
+        // ✅ Update sessionStorage
+        sessionStorage.setItem("current_user", JSON.stringify(updatedUser));
+
+        // ✅ Fetch latest user data
+        fetchCurrentUser();
+
+        return updatedUser; // Return updated user if needed
     } catch (error) {
         console.error("❌ Update user error:", error.message);
         toast.error(error.message);
+        return null;
     }
 };
+
 
 
     const deleteUser = async (userId) => {
