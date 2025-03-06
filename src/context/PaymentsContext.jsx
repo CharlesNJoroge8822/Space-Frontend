@@ -23,7 +23,7 @@ export const PaymentsProvider = ({ children }) => {
                 order_id: bookingId, // Booking ID used for order reference
             };
 
-            const response = await fetch("https://space-backend-8.onrender.com/stkpush", {
+            const response = await fetch("https://space-backend-9.onrender.com/stkpush", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
@@ -55,7 +55,7 @@ export const PaymentsProvider = ({ children }) => {
      */
     const checkPaymentStatus = useCallback(async (transactionId) => {
         try {
-            const response = await fetch(`https://space-backend-8.onrender.com/payments/${transactionId}`);
+            const response = await fetch(`https://space-backend-9.onrender.com/payments/${transactionId}`);
             if (!response.ok) throw new Error("Failed to fetch payment status.");
             const data = await response.json();
             console.log(`🔍 Payment Status: ${data.status}`);
@@ -71,7 +71,7 @@ export const PaymentsProvider = ({ children }) => {
      */
     const updateBookingStatusAfterPayment = async (bookingId) => {
         try {
-            const response = await fetch(`https://space-backend-8.onrender.com/bookings/${bookingId}/status`, {
+            const response = await fetch(`https://space-backend-9.onrender.com/bookings/${bookingId}/status`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ status: "Booked" }),
@@ -98,7 +98,7 @@ export const PaymentsProvider = ({ children }) => {
                 return;
             }
 
-            const response = await fetch(`https://space-backend-8.onrender.com/payments/${id}`, {
+            const response = await fetch(`https://space-backend-9.onrender.com/payments/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
