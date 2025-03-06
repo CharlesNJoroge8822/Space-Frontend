@@ -18,8 +18,8 @@ export const UserProvider = ({ children }) => {
         return storedUsers ? JSON.parse(storedUsers) : [];
     });
 
-    /** ✅ Fetch all users (Admin Only) */
-    const fetchAllUsers = async () => {
+/** ✅ Fetch all users (Admin Only) */
+const fetchAllUsers = async () => {
     const token = sessionStorage.getItem("token");
 
     if (!token) {

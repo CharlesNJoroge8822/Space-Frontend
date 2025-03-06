@@ -124,8 +124,9 @@ const ManageUsers = () => {
                     zIndex: 1000,
                 }}>
                     <div style={{
-                        backgroundColor: "#fff",
+                        backgroundColor: "#F1EDE5",
                         padding: "20px",
+                        paddingRight: "34px",
                         borderRadius: "12px",
                         width: "90%",
                         border: "3px solid #104436",
@@ -256,7 +257,7 @@ const ManageUsers = () => {
                         <h2 style={{ fontFamily: "Inria Serif", textAlign: "center", color: "#104436", fontSize: "30px", marginBottom: "20px" }}>
                             Edit User
                         </h2>
-                        <form onSubmit={handleUpdateUser} style={{ display: "grid", gap: "20px" }}>
+                        <form onSubmit={handleUpdateUser} style={{ display: "grid", gap: "20px", paddingRight: "30px",}}>
                             <input
                                 type="text"
                                 placeholder="Name"
@@ -312,7 +313,9 @@ const ManageUsers = () => {
                                     flexDirection: "column",
                                     gap: "20px",
                                     boxShadow: "0 8px 16px rgba(0, 0, 0, 0.1)",
-                                    backgroundColor: "#fff",
+                                    backgroundColor: "#F1EDE5",
+                                    borderBottomWidth: "10px",
+                                    borderRightWidth: "10px",
                                 }}
                             >
                                 <p style={{ fontFamily: "Inria Serif", color: "#104436", fontSize: "20px", marginBottom: "10px" }}>{user.name}</p>

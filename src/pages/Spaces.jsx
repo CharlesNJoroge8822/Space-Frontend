@@ -4,11 +4,19 @@ import { PaymentsContext } from "../context/PaymentsContext";
 import { BookingContext } from "../context/BookingContext";
 import { UserContext } from "../context/UserContext";
 import { X } from "lucide-react";
-import Swal from "sweetalert2";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "../../src/space.css";
 
 const Spaces = () => {
-    const { spaces, fetchSpaces, updateSpaceAvailability, setSpaces } = useContext(SpaceContext);
+    const {
+        spaces,
+        fetchSpaces,
+        updateSpaceAvailability,
+        handleBookingAndPayment,
+        loading: spacesLoading,
+        error: spacesError,
+    } = useContext(SpaceContext);
     const { stkPush, checkPaymentStatus } = useContext(PaymentsContext);
     const { createBooking, fetchUserBookings } = useContext(BookingContext);
     const { current_user } = useContext(UserContext);
@@ -20,11 +28,8 @@ const Spaces = () => {
     const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [agreedToTerms, setAgreedToTerms] = useState(false);
-    const [isTermsModalOpen, setIsTermsModalOpen] = useState(false); // ✅ FIXED: Added missing state
-
+    const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
 
     // Fetch spaces on component mount
     useEffect(() => {
@@ -33,9 +38,7 @@ const Spaces = () => {
                 await fetchSpaces();
             } catch (err) {
                 console.error("Error fetching spaces:", err);
-                setError("Failed to fetch spaces. Please try again.");
-            } finally {
-                setLoading(false);
+                toast.error("Failed to fetch spaces. Please try again.");
             }
         };
         fetchData();
@@ -52,233 +55,69 @@ const Spaces = () => {
             setSelectedSpace(space);
             setIsBookingModalOpen(true);
         } else {
-            Swal.fire({
-                icon: "error",
-                title: "Space Booked",
-                text: "This space is already booked and cannot be reserved.",
-            });
+            toast.error("This space is already booked and cannot be reserved.");
         }
     };
 
     // Handle "Book Now" button click (opens payment modal)
     const handleBookNow = () => {
         if (!selectedSpace || !current_user) {
-            Swal.fire({ icon: "error", title: "Oops...", text: "Please log in to book a space." });
+            toast.error("Please log in to book a space.");
             return;
         }
         setIsBookingModalOpen(false);
         setIsPaymentModalOpen(true);
     };
 
+    // Handle payment and booking
     const handlePayment = async () => {
         if (!phoneNumber.match(/^2547[0-9]{8}$/)) {
-            Swal.fire({
-                icon: "error",
-                title: "Invalid Phone Number",
-                text: "Please enter a valid M-Pesa phone number (2547XXXXXXXX format).",
-            });
+            toast.error("Enter a valid M-Pesa number (2547XXXXXXXX format).");
             return;
         }
-    
+
         if (!agreedToTerms) {
-            Swal.fire({
-                icon: "warning",
-                title: "Agreement Required",
-                text: "You must agree to the terms before proceeding with the payment.",
-            });
+            toast.warning("You must agree to the terms before proceeding with the payment.");
             return;
         }
-    
+
         const totalCost = calculateTotalPrice(selectedSpace);
         setIsPaymentProcessing(true);
-    
+
         try {
-            Swal.fire({
-                title: "Processing Payment...",
-                text: "Please wait while we process your payment.",
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading(),
-            });
-    
-            // ✅ Ensure payment response is valid
-            const paymentResponse = await stkPush(phoneNumber, totalCost, selectedSpace.id);
-            console.log("Payment Response:", paymentResponse);
-    
-            if (!paymentResponse || !paymentResponse.mpesa_transaction_id) {
-                throw new Error("Payment request failed. No transaction ID received.");
-            }
-    
-            const transactionId = paymentResponse.mpesa_transaction_id;
-    
-            // ✅ Wait for payment confirmation
-            let paymentStatus = "Processing";
-            let retries = 0;
-            while (paymentStatus === "Processing" && retries < 6) {
-                await new Promise(resolve => setTimeout(resolve, 10000)); // Check every 10s for 1 min
-                const statusResponse = await checkPaymentStatus(transactionId);
-                console.log("Payment Status:", statusResponse);
-                paymentStatus = statusResponse || "Processing";
-                retries++;
-            }
-    
-            if (paymentStatus !== "Confirmed") {
-                throw new Error("Payment was not confirmed. Please try again.");
-            }
-    
-            // ✅ Create booking ONLY if payment is confirmed
-            const bookingResponse = await createBooking({
+            // Show loading toast
+            toast.loading("Processing payment and booking...");
+
+            // Call handleBookingAndPayment from SpaceContext
+            await handleBookingAndPayment(selectedSpace.id, {
                 user_id: current_user.id,
-                space_id: selectedSpace.id,
-                start_time: new Date().toISOString().split(".")[0],
-                end_time: new Date(Date.now() + duration * (unit === "hour" ? 3600000 : 86400000)).toISOString().split(".")[0],
+                start_time: new Date().toISOString(),
+                end_time: new Date(Date.now() + duration * (unit === "hour" ? 3600000 : 86400000)).toISOString(),
                 total_amount: totalCost,
-                status: "booked",
+            }, {
+                phoneNumber,
+                amount: totalCost,
             });
-    
-            await updateSpaceAvailability(selectedSpace.id, false);
-            if (spaces.length > 0) {
-                await fetchSpaces();
-            }
-    
-            Swal.fire({
-                icon: "success",
-                title: "Payment Confirmed!",
-                text: "Your booking has been confirmed successfully.",
-            });
-    
+
+            // Success message
+            toast.success("Booking and payment successful!");
+
+            // Close modals and reset state
             setIsPaymentModalOpen(false);
             setPhoneNumber("");
             setAgreedToTerms(false);
-    
-            if (current_user) {
-                await fetchUserBookings();
-            }
+
+            // Fetch updated spaces and user bookings
+            await fetchSpaces();
+            await fetchUserBookings();
         } catch (error) {
-            Swal.fire({
-                icon: "error",
-                title: "Payment Failed",
-                text: error?.message || "Failed to process payment. Please try again.",
-            });
+            toast.error(error.message || "Failed to process payment. Please try again.");
             console.error("Error during payment:", error);
         } finally {
             setIsPaymentProcessing(false);
+            toast.dismiss(); // Dismiss loading toast
         }
     };
-    
-
-    // const handlePayment = async () => {
-    //     // Validate phone number and terms agreement
-    //     if (!phoneNumber.match(/^2547[0-9]{8}$/)) {
-    //         Swal.fire({
-    //             icon: "error",
-    //             title: "Invalid Phone Number",
-    //             text: "Please enter a valid M-Pesa phone number (2547XXXXXXXX format).",
-    //         });
-    //         return;
-    //     }
-    
-    //     if (!agreedToTerms) {
-    //         Swal.fire({
-    //             icon: "warning",
-    //             title: "Agreement Required",
-    //             text: "You must agree to the terms before proceeding with the payment.",
-    //         });
-    //         return;
-    //     }
-    
-    //     const totalCost = calculateTotalPrice(selectedSpace);
-    //     setIsPaymentProcessing(true);
-    
-    //     try {
-    //         // Show loading indicator
-    //         Swal.fire({
-    //             title: "Processing Payment...",
-    //             text: "Please wait while we process your payment.",
-    //             allowOutsideClick: false,
-    //             didOpen: () => Swal.showLoading(),
-    //         });
-    
-    //         // ✅ Step 1: Initiate STK Push
-    //         const paymentResponse = await stkPush(phoneNumber, totalCost, selectedSpace.id);
-            
-    //         // Expecting mpesa_transaction_id from backend response
-    //         if (!paymentResponse || !paymentResponse.mpesa_transaction_id) {
-    //             throw new Error("Payment request failed. No transaction ID received.");
-    //         }
-    
-    //         const transactionId = paymentResponse.mpesa_transaction_id;
-    
-    //         // ✅ Step 2: Wait for payment confirmation
-    //         let paymentStatus = "Processing";
-    //         let retries = 0;
-    //         while (paymentStatus === "Processing" && retries < 6) {
-    //             await new Promise((resolve) => setTimeout(resolve, 10000)); // Check every 10s for 1 min
-    //             const statusResponse = await checkPaymentStatus(transactionId);
-    //             paymentStatus = statusResponse?.status || "Processing";
-    //             retries++;
-    //         }
-    
-    //         if (paymentStatus !== "Confirmed") {
-    //             throw new Error("Payment was not confirmed. Please try again.");
-    //         }
-    
-    //         // ✅ Step 3: Create booking with transaction ID
-    //         const bookingData = {
-    //             user_id: current_user.id,
-    //             space_id: selectedSpace.id,
-    //             start_time: new Date().toISOString(), // Use dynamic start time based on user input
-    //             end_time: new Date(Date.now() + duration * (unit === "hour" ? 3600000 : 86400000)).toISOString(), // Use dynamic end time
-    //             total_amount: totalCost,
-    //             status: "booked",
-    //             mpesa_transaction_id: transactionId, // Include transaction ID in booking
-    //         };
-    
-    //         const bookingResponse = await createBooking(bookingData);
-    //         if (!bookingResponse || !bookingResponse.id) {
-    //             throw new Error("Failed to create booking. Please try again.");
-    //         }
-    
-    //         // ✅ Step 4: Update space availability
-    //         const updateResponse = await updateSpaceAvailability(selectedSpace.id, false);
-    //         if (!updateResponse || !updateResponse.success) {
-    //             throw new Error("Failed to update space availability. Please contact support.");
-    //         }
-    
-    //         // Refresh spaces if needed
-    //         if (spaces.length > 0) {
-    //             await fetchSpaces();
-    //         }
-    
-    //         // Show success message
-    //         Swal.fire({
-    //             icon: "success",
-    //             title: "Payment Confirmed!",
-    //             text: "Your booking has been confirmed successfully.",
-    //         });
-    
-    //         // Reset form and close modal
-    //         setIsPaymentModalOpen(false);
-    //         setPhoneNumber("");
-    //         setAgreedToTerms(false);
-    
-    //         // Fetch user bookings if logged in
-    //         if (current_user) {
-    //             await fetchUserBookings();
-    //         }
-    //     } catch (error) {
-    //         // Handle errors
-    //         Swal.fire({
-    //             icon: "error",
-    //             title: "Payment Failed",
-    //             text: error?.message || "Failed to process payment. Please try again.",
-    //         });
-    //         console.error("Error during payment:", error);
-    //     } finally {
-    //         // Reset processing state
-    //         setIsPaymentProcessing(false);
-    //     }
-    // };
-    
 
     // Automatically update space availability after booking end time
     useEffect(() => {
@@ -298,25 +137,23 @@ const Spaces = () => {
             });
 
             if (updatesNeeded) {
-                setSpaces(updatedSpaces);
-                if (spaces.length > 0) {
-                    await fetchSpaces();
-                }
+                await fetchSpaces();
             }
         };
 
         const interval = setInterval(checkBookingEndTimes, 60000);
         return () => clearInterval(interval);
-    }, [spaces, updateSpaceAvailability]);
-    
+    }, [spaces, fetchSpaces]);
 
     return (
-        <div className="container-center" style={{minHeight: "100vh",}}>
+        <div className="container-center" style={{ minHeight: "100vh", minWidth: "1400px", }}>
             <h2 className="title">Available Spaces</h2>
 
-            {loading && <p className="text-muted">Loading spaces...</p>}
-            {error && <p className="text-error">{error}</p>}
-            {!loading && !error && spaces.length === 0 && <p className="text-muted">No spaces available.</p>}
+            {spacesLoading && <p className="text-muted">Loading spaces...</p>}
+            {spacesError && <p className="text-error">{spacesError}</p>}
+            {!spacesLoading && !spacesError && spaces.length === 0 && (
+                <p className="text-muted">No spaces available.</p>
+            )}
 
             <div className="grid-container">
                 {spaces.map((space) => (
@@ -325,7 +162,11 @@ const Spaces = () => {
                         className={`card ${space.availability === "1" || space.availability === true ? "cursor-pointer" : "cursor-not-allowed"}`}
                         onClick={() => (space.availability === "1" || space.availability === true) && openBookingModal(space)}
                     >
-                        <img src={space.images || "https://source.unsplash.com/400x300/?office,workspace"} alt={space.name || "Space"} className="card-image" />
+                        <img
+                            src={space.images || "https://source.unsplash.com/400x300/?office,workspace"}
+                            alt={space.name || "Space"}
+                            className="card-image"
+                        />
                         <div className="card-content">
                             <h3 className="card-title">{space.name || "Unnamed Space"}</h3>
                             <p><strong>Location:</strong> {space.location || "Unknown"}</p>
@@ -357,8 +198,18 @@ const Spaces = () => {
                         </div>
 
                         <div className="modal-label">
-                            <input type="number" min="1" value={duration} onChange={(e) => setDuration(Number(e.target.value))} className="input" />
-                            <select value={unit} onChange={(e) => setUnit(e.target.value)} className="input">
+                            <input
+                                type="number"
+                                min="1"
+                                value={duration}
+                                onChange={(e) => setDuration(Number(e.target.value))}
+                                className="input"
+                            />
+                            <select
+                                value={unit}
+                                onChange={(e) => setUnit(e.target.value)}
+                                className="input"
+                            >
                                 <option value="hour">Hours</option>
                                 <option value="day">Days</option>
                             </select>
@@ -409,7 +260,7 @@ const Spaces = () => {
                                     className="terms-link"
                                     onClick={() => setIsTermsModalOpen(true)}
                                 >
-                                    
+                                    (view terms)
                                 </span>
                                 .
                             </label>
@@ -444,28 +295,14 @@ const Spaces = () => {
                                 By proceeding with this booking, you agree to the following terms and conditions:
                             </p>
                             <ol>
-                                <li>
-                                    You are responsible for ensuring that the provided information is accurate.
-                                </li>
-                                <li>
-                                    Payments are non-refundable once the booking is confirmed.
-                                </li>
-                                <li>
-                                    The space must be used responsibly, and any damages will be charged to the user.
-                                </li>
-                                <li>
-                                    The booking duration must be adhered to strictly. Extensions may incur additional charges.
-                                </li>
-                                <li>
-                                    The management reserves the right to cancel bookings in case of emergencies.
-                                </li>
-                                <p style={{color:"red",}}>
-                                DISCLAIMER : Once booked. Can't be refunded ....                            </p>
+                                <li>You are responsible for ensuring that the provided information is accurate.</li>
+                                <li>Payments are non-refundable once the booking is confirmed.</li>
+                                <li>The space must be used responsibly, and any damages will be charged to the user.</li>
+                                <li>The booking duration must be adhered to strictly. Extensions may incur additional charges.</li>
+                                <li>The management reserves the right to cancel bookings in case of emergencies.</li>
+                                <p style={{ color: "red" }}>DISCLAIMER: Once booked, it cannot be refunded.</p>
                             </ol>
-                            <p>
-                                If you have any questions, please contact support before proceeding.
-                            </p>
-                        
+                            <p>If you have any questions, please contact support before proceeding.</p>
                         </div>
 
                         <button
@@ -477,6 +314,8 @@ const Spaces = () => {
                     </div>
                 </div>
             )}
+
+            <ToastContainer position="top-right" autoClose={3000} />
         </div>
     );
 };

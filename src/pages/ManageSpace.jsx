@@ -126,7 +126,7 @@ const ManageSpace = () => {
                     zIndex: 1000,
                 }}>
                     <div style={{
-                        backgroundColor: "#fff",
+                        backgroundColor: "#F1EDE5",
                         padding: "20px",
                         borderRadius: "12px",
                         width: "90%",
@@ -269,7 +269,8 @@ const ManageSpace = () => {
                                         flexDirection: "column",
                                         gap: "20px",
                                         boxShadow: "0 8px 16px rgba(0, 0, 0, 0.1)",
-                                        backgroundColor: "#fff",
+                                        backgroundColor: "#F1EDE5",
+                                        borderBottomWidth: "10px",
                                     }}
                                 >
                                     <img

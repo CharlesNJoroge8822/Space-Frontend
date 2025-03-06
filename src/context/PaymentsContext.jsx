@@ -10,74 +10,78 @@ export const PaymentsProvider = ({ children }) => {
     const { fetchBookings } = useContext(BookingContext);
     const { fetchSpaces } = useContext(SpaceContext);
 
-    const stkPush = useCallback(async (phoneNumber, amount, orderId) => {
-        console.log(`STK Push Initiated: 
-            📞 Phone Number: ${phoneNumber}
-            💰 Amount: ${amount} 
-            🛒 Order ID: ${orderId}`);
-    
-        setIsPaymentProcessing(true);
-    
-        try {
-            const payload = {
-                phone_number: phoneNumber,  
-                amount: amount,
-                order_id: orderId
-            };
-    
-            const response = await fetch("http://127.0.0.1:5000/stkpush", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload), 
-            });
-    
-            if (!response.ok) {
-                const errorText = await response.text(); // Capture error response
-                throw new Error(`Payment request failed. Status: ${response.status}, Error: ${errorText}`);
-            }
-    
-            const data = await response.json();
-            console.log("STK Push Response:", data); // Debugging
-    
-            if (!data.mpesa_transaction_id) {
-                throw new Error("Invalid STK Push response. No transaction ID received.");
-            }
-    
-            toast.success("✅ M-Pesa STK Push request sent! Approve the prompt on your phone.");
-            return data;
-        } catch (error) {
-            toast.error(`❌ STK Push Failed: ${error.message}`);
-            console.error("STK Push Error:", error);
-            throw error;
-        } finally {
-            setIsPaymentProcessing(false);
+    // ✅ Initiate M-Pesa STK Push
+const stkPush = useCallback(async (phoneNumber, amount, bookingId) => {
+    setIsPaymentProcessing(true);
+    try {
+        const payload = {
+            phone_number: Number(phoneNumber),
+            amount: amount,
+            booking_id: bookingId,
+            user_id: sessionStorage.getItem("user_id"), // Ensure user is included
+        };
+
+        const response = await fetch("http://127.0.0.1:5000/payments", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to initiate STK push.");
         }
-    }, []);
+
+        const data = await response.json();
+        toast.success("✅ M-Pesa STK Push request sent! Approve the prompt.");
+        return data;
+    } catch (error) {
+        toast.error("❌ STK Push Failed.");
+        console.error("STK Push Error:", error);
+        throw error;
+    } finally {
+        setIsPaymentProcessing(false);
+    }
+}, []);
+
+// ✅ Check Payment Status
+const checkPaymentStatus = useCallback(async (transactionId) => {
+    try {
+        const response = await fetch(`http://127.0.0.1:5000/payments/${transactionId}`);
+        if (!response.ok) throw new Error("Failed to fetch payment status.");
+        
+        const data = await response.json();
+        return data.status;
+    } catch (error) {
+        console.error("Error checking payment status:", error);
+        throw error;
+    }
+}, []);
+    
         
 
     // ✅ Check Payment Status
-    const checkPaymentStatus = useCallback(async (transactionId) => {
-        try {
-            const response = await fetch(`http://127.0.0.1:5000/payments/${transactionId}`, {
-                method: "GET",
-                headers: { "Content-Type": "application/json" },
-            });
+    // const checkPaymentStatus = useCallback(async (transaction_id) => {
+    //     try {
+    //         const response = await fetch(`http://127.0.0.1:5000/payments/${transaction_id}`, {
+    //             method: "GET",
+    //             headers: { "Content-Type": "application/json" },
+    //         });
 
-            if (!response.ok) throw new Error("Failed to fetch payment status.");
-            const data = await response.json();
+    //         if (!response.ok) throw new Error("Failed to fetch payment status.");
+    //         const data = await response.json();
 
-            // ✅ If payment is confirmed, refresh bookings & spaces
-            if (data.status === "Confirmed") {
-                fetchBookings();
-                fetchSpaces();
-            }
+    //         // ✅ If payment is confirmed, refresh bookings & spaces
+    //         if (data.status === "Confirmed") {
+    //             fetchBookings();
+    //             fetchSpaces();
+    //         }
 
-            return data.status; // e.g., "Completed", "Processing"
-        } catch (error) {
-            console.error("Error checking payment status:", error);
-            throw error;
-        }
-    }, [fetchBookings, fetchSpaces]);
+    //         return data.status; // e.g., "Completed", "Processing"
+    //     } catch (error) {
+    //         console.error("Error checking payment status:", error);
+    //         throw error;
+    //     }
+    // }, [fetchBookings, fetchSpaces]);
 
     // ✅ Delete Payment & Update Bookings
     const deletePayment = async (id) => {
