@@ -25,7 +25,7 @@ const Spaces = () => {
     const [agreedToTerms, setAgreedToTerms] = useState(false);
     const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
 
-    // Fetch spaces on component mount and every 30 seconds
+    // Fetch spaces on component mount
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -39,10 +39,6 @@ const Spaces = () => {
         };
 
         fetchData(); // Initial fetch
-
-        // Refresh spaces every 30 seconds
-        const interval = setInterval(fetchData, 30000);
-        return () => clearInterval(interval); // Cleanup interval on unmount
     }, [fetchSpaces]);
 
     // Calculate total price based on duration and unit
@@ -50,18 +46,10 @@ const Spaces = () => {
         return unit === "hour" ? space.price_per_hour * duration : space.price_per_day * duration;
     };
 
-    // Open booking modal only if the space is available
+    // Open booking modal for any space (all spaces are available)
     const openBookingModal = (space) => {
-        if (space.availability === "Available" || space.availability === true) {
-            setSelectedSpace(space);
-            setIsBookingModalOpen(true);
-        } else {
-            Swal.fire({
-                icon: "error",
-                title: "Space Booked",
-                text: "This space is already booked and cannot be reserved.",
-            });
-        }
+        setSelectedSpace(space);
+        setIsBookingModalOpen(true);
     };
 
     // Handle "Book Now" button click (opens payment modal)
@@ -153,30 +141,6 @@ const Spaces = () => {
         }
     };
 
-    // Automatically update space availability after booking end time
-    useEffect(() => {
-        const checkBookingEndTimes = () => {
-            const now = new Date();
-            spaces.forEach(async (space) => {
-                if (space.availability === "Booked" || space.availability === false) {
-                    const booking = space.bookings?.find((b) => new Date(b.end_time) > now);
-                    if (!booking) {
-                        await updateSpaceAvailability(space.id, true);
-                        // Update space availability in the frontend state
-                        const updatedSpaces = spaces.map((s) =>
-                            s.id === space.id ? { ...s, availability: true } : s
-                        );
-                        fetchSpaces(updatedSpaces); // Update the spaces state
-                    }
-                }
-            });
-        };
-
-        // Check every minute
-        const interval = setInterval(checkBookingEndTimes, 60000);
-        return () => clearInterval(interval);
-    }, [spaces, updateSpaceAvailability]);
-
     return (
         <div className="container-center">
             <h2 className="title">Available Spaces</h2>
@@ -189,16 +153,16 @@ const Spaces = () => {
                 {spaces.map((space) => (
                     <div
                         key={space.id}
-                        className={`card ${space.availability === "Available" || space.availability === true ? "cursor-pointer" : "cursor-not-allowed"}`}
-                        onClick={() => (space.availability === "Available" || space.availability === true) && openBookingModal(space)}
+                        className="card cursor-pointer"
+                        onClick={() => openBookingModal(space)}
                     >
                         <img src={space.images || "https://source.unsplash.com/400x300/?office,workspace"} alt={space.name || "Space"} className="card-image" />
                         <div className="card-content">
                             <h3 className="card-title">{space.name || "Unnamed Space"}</h3>
                             <p><strong>Location:</strong> {space.location || "Unknown"}</p>
                             <p><strong>Price per Day:</strong> ${space.price_per_day || 0}</p>
-                            <p className={`text-${space.availability === "Available" || space.availability === true ? "success" : "error"}`}>
-                                <strong>Availability:</strong> {space.availability === "Available" || space.availability === true ? "Available" : "Booked"}
+                            <p className="text-success">
+                                <strong>Availability:</strong> Available
                             </p>
                         </div>
                     </div>
@@ -276,7 +240,7 @@ const Spaces = () => {
                                     className="terms-link"
                                     onClick={() => setIsTermsModalOpen(true)}
                                 >
-                                    terms and conditions"Click-To-Open
+                                    terms and conditions
                                 </span>
                                 .
                             </label>
@@ -326,13 +290,13 @@ const Spaces = () => {
                                 <li>
                                     The management reserves the right to cancel bookings in case of emergencies.
                                 </li>
-                                <p style={{color:"red",}}>
-                                DISCLAIMER : Once booked. Can't be refunded ....                            </p>
+                                <p style={{ color: "red" }}>
+                                    DISCLAIMER: Once booked, it cannot be refunded.
+                                </p>
                             </ol>
                             <p>
                                 If you have any questions, please contact support before proceeding.
                             </p>
-                        
                         </div>
 
                         <button
