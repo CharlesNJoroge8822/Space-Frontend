@@ -1,117 +1,84 @@
-import { createContext, useCallback, useState } from "react";
-import { toast } from "react-toastify";
+import React, { useState, useEffect } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "../App.css"; // Ensure this file has improved styles
 
-export const BookingContext = createContext();
-
-export const BookingProvider = ({ children }) => {
+const MyBookings = () => {
     const [bookings, setBookings] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
-    // Create a new booking
-    const createBooking = useCallback(async (bookingData) => {
+    // Fetch bookings for the current user
+    const fetchUserBookings = async () => {
+        setLoading(true);
         try {
-            console.log("Sending Booking Payload:", bookingData);
-
-            const response = await fetch("https://space-backend-6.onrender.com/bookings", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(bookingData),
-            });
-
-            if (!response.ok) throw new Error("Failed to create booking.");
-
-            const data = await response.json();
-            toast.success("✅ Booking created successfully!");
-            return data;
-        } catch (error) {
-            toast.error("❌ Failed to create booking. Please try again.");
-            console.error("Create Booking Error:", error);
-            throw error;
-        }
-    }, []);
-
-    // Fetch all bookings
-    const fetchBookings = useCallback(async () => {
-        try {
-            const response = await fetch("https://space-backend-6.onrender.com/bookings", {
+            const response = await fetch("http://127.0.0.1:5000/my-bookings", {
                 method: "GET",
-                // headers: { "Content-Type": "application/json" },
-            });
-
-            // if (!response.ok) throw new Error("Failed to fetch bookings.");
-
-            const data = await response.json();
-            setBookings(data.bookings || []); // Ensure we set an array
-            return data;
-        } catch (error) {
-            // toast.error("Failed to fetch bookings. Please try again.");
-            console.error("Fetch Bookings Error:", error);
-            throw error;
-        }
-    }, []);
-
-    // Fetch bookings for a specific user
-    const fetchUserBookings = async (userId) => {
-        try {
-            const response = await fetch(`https://space-backend-6.onrender.com/bookings?user_id=${userId}`, {
-                method: "GET",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${sessionStorage.getItem("token")}`
+                },
+                credentials: "include",
             });
 
             if (!response.ok) throw new Error("Failed to fetch user bookings.");
 
             const data = await response.json();
-            setBookings(data.bookings || []); // Ensure it's an array
+            console.log("🔍 My Bookings API Response:", data);
+
+            setBookings(Array.isArray(data.bookings) ? data.bookings : []);
         } catch (error) {
-            toast.error("❌ Failed to fetch user bookings. Please try again.");
-            console.error("Fetch User Bookings Error:", error);
+            toast.error("❌ Failed to fetch bookings.");
+            console.error("Fetch Bookings Error:", error);
         }
+        setLoading(false);
     };
 
-    // Delete a booking
-   // Delete a booking
-const deleteBooking = async (id) => {
-    try {
-        // Send DELETE request to the backend API without JWT
-        const response = await fetch(`https://space-backend-6.onrender.com/bookings/${id}`, {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            credentials: "include", // Keeps session info, if needed for other things like cookies
-        });
+    useEffect(() => {
+        fetchUserBookings();
+    }, []);
 
-        if (!response.ok) {
-            if (response.status === 401) {
-                toast.error("Unauthorized! Please log in again.");
-                return;
-            }
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        // Show success toast
-        toast.success("✅ Booking deleted successfully!", { autoClose: 1000 });
-
-        // Refetch bookings to ensure UI is up to date with the server
-        fetchBookings(); // Refetch the bookings from the backend
-
-    } catch (error) {
-        console.error("Error deleting booking:", error);
-        toast.error(`❌ ${error.message}`, { autoClose: 1000 });
-    }
-};
-   
-    
     return (
-        <BookingContext.Provider
-            value={{
-                bookings,
-                createBooking,
-                fetchBookings,
-                fetchUserBookings,
-                deleteBooking,
-            }}
-        >
-            {children}
-        </BookingContext.Provider>
+        <div className="manage-bookings-container">
+            <h1 className="manage-bookings-heading">My Bookings</h1>
+
+            {loading && <p>Loading bookings...</p>}
+            {error && <p className="error">{error}</p>}
+
+            <table className="bookings-table">
+                <thead>
+                    <tr>
+                        <th>Space Name</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {bookings.length > 0 ? (
+                        bookings.map((booking) => (
+                            <tr key={booking.id}>
+                                <td>{booking.space?.name || "Unknown Space"}</td> {/* ✅ Fix here */}
+                                <td>{new Date(booking.start_time).toLocaleString()}</td>
+                                <td>{new Date(booking.end_time).toLocaleString()}</td>
+                                <td>${booking.total_amount.toFixed(2)}</td>
+                                <td className={`status ${booking.status.toLowerCase().replace(" ", "-")}`}>
+                                    {booking.status}
+                                </td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan="5" style={{ textAlign: "center" }}>No bookings found</td>
+                        </tr>
+                    )}
+                </tbody>
+            </table>
+
+            <ToastContainer position="top-right" autoClose={2000} />
+        </div>
     );
 };
+
+export default MyBookings;

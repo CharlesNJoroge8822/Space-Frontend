@@ -20,40 +20,46 @@ export const UserProvider = ({ children }) => {
 
     /** ✅ Fetch all users (Admin Only) */
     const fetchAllUsers = async () => {
-        const token = sessionStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
 
-        if (!token) {
-            toast.error("Unauthorized! Please log in.");
-            return;
+    if (!token) {
+        toast.error("Unauthorized! Please log in.");
+        return;
+    }
+
+    // Check if the current user is an admin
+    if (current_user?.role !== "Admin") {
+        toast.error("Only admins can access this resource.");
+        return;
+    }
+
+    try {
+        console.log("🔄 Fetching users...");
+        const response = await fetch("http://127.0.0.1:5000/users", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to fetch users.");
         }
 
-        try {
-            console.log("🔄 Fetching users...");
-            const response = await fetch("https://space-backend-6.onrender.com/users", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+        const data = await response.json();
+        console.log("✅ Users fetched successfully:", data.users);
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || "Failed to fetch users.");
-            }
+        setAllUsers([...data.users]); // ✅ Ensures React state updates
+        sessionStorage.setItem("all_users", JSON.stringify(data.users)); // ✅ Cache users
 
-            const data = await response.json();
-            console.log("✅ Users fetched successfully:", data.users);
-
-            setAllUsers([...data.users]); // ✅ Ensures React state updates
-            sessionStorage.setItem("all_users", JSON.stringify(data.users)); // ✅ Cache users
-
-        } catch (error) {
-            console.error("❌ Fetch Users Error:", error.message);
-            setAllUsers([]); // Prevent stale data
-            toast.error(error.message);
-        }
-    };
+    } catch (error) {
+        console.error("❌ Fetch Users Error:", error.message);
+        setAllUsers([]); // Prevent stale data
+        toast.error(error.message);
+    }
+};
 
     /** ✅ Load current user from sessionStorage */
     useEffect(() => {
@@ -119,7 +125,7 @@ export const UserProvider = ({ children }) => {
     const googleLogin = async (email) => {
         toast.loading("Logging you in ... ");
         try {
-            const response = await fetch("https://space-backend-6.onrender.com/googlelogin", {
+            const response = await fetch("http://127.0.0.1:5000/googlelogin", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email }),
@@ -132,7 +138,7 @@ export const UserProvider = ({ children }) => {
                 sessionStorage.setItem("token", data.access_token);
                 setAuthToken(data.access_token);
 
-                const userResponse = await fetch("https://space-backend-6.onrender.com/current_user", {
+                const userResponse = await fetch("http://127.0.0.1:5000/current_user", {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -166,7 +172,7 @@ export const UserProvider = ({ children }) => {
 const login = async (email, password, role) => {
     const loadingToast = toast.loading("Logging you in...");
     try {
-        const response = await fetch("https://space-backend-6.onrender.com/login", {
+        const response = await fetch("http://127.0.0.1:5000/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password, role }),
@@ -177,7 +183,7 @@ const login = async (email, password, role) => {
             sessionStorage.setItem("token", data.access_token);
             setAuthToken(data.access_token);
 
-            const userResponse = await fetch("https://space-backend-6.onrender.com/current_user", {
+            const userResponse = await fetch("http://127.0.0.1:5000/current_user", {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -208,7 +214,7 @@ const addUser = async (name, email, password, role = "Client") => {
     const loadingToast = toast.loading("Creating your account...");
 
     try {
-        const response = await fetch("https://space-backend-6.onrender.com/users", {
+        const response = await fetch("http://127.0.0.1:5000/users", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name, email, password, role }),
@@ -241,7 +247,7 @@ const updateProfile = async (userId, updatedData) => {
 
     try {
         console.log(`✏️ Updating user ${userId}...`, updatedData);
-        const response = await fetch(`https://space-backend-6.onrender.com/users/${userId}`, {
+        const response = await fetch(`http://127.0.0.1:5000/users/${userId}`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
@@ -279,7 +285,7 @@ const updateProfile = async (userId, updatedData) => {
 
         try {
             console.log(`🗑️ Deleting user with ID: ${userId}...`);
-            const response = await fetch(`https://space-backend-6.onrender.com/users/${userId}`, {
+            const response = await fetch(`http://127.0.0.1:5000/users/${userId}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
@@ -307,7 +313,7 @@ const updateProfile = async (userId, updatedData) => {
         console.log("🔴 Logging out...");
         const loadingToast = toast.loading("Logging out...");
 
-        fetch("https://space-backend-6.onrender.com/logout", {
+        fetch("http://127.0.0.1:5000/logout", {
             method: "DELETE",
             headers: {
                 "Content-type": "application/json",

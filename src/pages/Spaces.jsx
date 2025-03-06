@@ -266,12 +266,12 @@ const Spaces = () => {
                                     checked={agreedToTerms}
                                     onChange={(e) => setAgreedToTerms(e.target.checked)}
                                 />
-                                Confirm Consent and agree to the{" "}
+                                I agree to the terms{" "}
                                 <span
                                     className="terms-link"
                                     onClick={() => setIsTermsModalOpen(true)}
                                 >
-                                    terms and conditions"Click-To-Open
+                                    
                                 </span>
                                 .
                             </label>

@@ -1,42 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import React, { useContext, useEffect } from "react";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { BookingContext } from "../context/BookingContext";
 import "../App.css"; // Ensure this file has improved styles
 
 const MyBookings = () => {
-    const [bookings, setBookings] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const { bookings, fetchUserBookings, loading, error } = useContext(BookingContext);
 
-    // Fetch bookings for the current user
-    const fetchUserBookings = async () => {
-        setLoading(true);
-        try {
-            const response = await fetch("https://space-backend-6.onrender.com/my-bookings", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${sessionStorage.getItem("token")}`
-                },
-                credentials: "include",
-            });
-
-            if (!response.ok) throw new Error("Failed to fetch user bookings.");
-
-            const data = await response.json();
-            console.log("🔍 My Bookings API Response:", data);
-
-            setBookings(Array.isArray(data.bookings) ? data.bookings : []);
-        } catch (error) {
-            toast.error("❌ Failed to fetch bookings.");
-            console.error("Fetch Bookings Error:", error);
-        }
-        setLoading(false);
-    };
-
+    // Fetch bookings when the component mounts
     useEffect(() => {
         fetchUserBookings();
-    }, []);
+    }, [fetchUserBookings]);
 
     return (
         <div className="manage-bookings-container">
@@ -59,7 +33,7 @@ const MyBookings = () => {
                     {bookings.length > 0 ? (
                         bookings.map((booking) => (
                             <tr key={booking.id}>
-                                <td>{booking.space?.name || "Unknown Space"}</td> {/* ✅ Fix here */}
+                                <td>{booking.space?.name || "Unknown Space"}</td>
                                 <td>{new Date(booking.start_time).toLocaleString()}</td>
                                 <td>{new Date(booking.end_time).toLocaleString()}</td>
                                 <td>${booking.total_amount.toFixed(2)}</td>

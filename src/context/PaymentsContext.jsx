@@ -20,7 +20,7 @@ export const PaymentsProvider = ({ children }) => {
                 order_id: orderId
             };
 
-            const response = await fetch("https://space-backend-6.onrender.com/stkpush", {
+            const response = await fetch("http://127.0.0.1:5000/stkpush", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload), // Send the correct payload
@@ -42,7 +42,7 @@ export const PaymentsProvider = ({ children }) => {
 
     const checkPaymentStatus = useCallback(async (transactionId) => {
         try {
-            const response = await fetch(`https://space-backend-6.onrender.com/${transactionId}`);
+            const response = await fetch(`http://127.0.0.1:5000/${transactionId}`);
             if (!response.ok) throw new Error("Failed to fetch payment status.");
             const data = await response.json();
             return data.status; // e.g., "Completed", "Processing"
@@ -63,7 +63,7 @@ export const PaymentsProvider = ({ children }) => {
     
             console.log("JWT Token being sent:", token); // Debugging
     
-            const response = await fetch(`https://space-backend-6.onrender.com/payments/${id}`, {
+            const response = await fetch(`http://127.0.0.1:5000/payments/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
