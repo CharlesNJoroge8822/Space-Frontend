@@ -40,7 +40,7 @@ export default function Login() {
         }
 
         try {
-            const response = await fetch("https://space-backend-7.onrender.com/request_password_reset", {
+            const response = await fetch("https://space-backend-9.onrender.com/request_password_reset", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email: resetEmail }),
