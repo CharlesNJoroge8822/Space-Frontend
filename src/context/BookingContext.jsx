@@ -54,22 +54,18 @@ export const BookingProvider = ({ children }) => {
     }, []);
 
     // Fetch bookings for a specific user
-    const fetchUserBookings = async () => {
+    const fetchUserBookings = async (userId) => {
         try {
-            const response = await fetch("http://127.0.0.1:5000/my-bookings", {
-                method: "GET",
-                headers: { "Content-Type": "application/json" },
-            });
-
-            if (!response.ok) throw new Error("Failed to fetch user bookings.");
-
-            const data = await response.json();
-            setBookings(data.bookings || []); // Ensure it's an array
+          const response = await fetch(`http://127.0.0.1:5000/my-bookings?user_id=${userId}`, {
+            method: "GET",
+          });
+          const data = await response.json();
+          console.log(data);
         } catch (error) {
-            toast.error("❌ Failed to fetch user bookings. Please try again.");
-            console.error("Fetch User Bookings Error:", error);
+          console.error("Fetch User Bookings Error:", error);
         }
-    };
+      };
+      
 
     // Delete a booking
     const deleteBooking = async (id) => {
