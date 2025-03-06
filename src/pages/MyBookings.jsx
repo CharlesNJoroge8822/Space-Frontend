@@ -12,7 +12,7 @@ const MyBookings = () => {
     const fetchUserBookings = async () => {
         setLoading(true);
         try {
-            const response = await fetch("https://space-backend-9.onrender.com/my-bookings", {
+            const response = await fetch("https://space-backend-2-p4kd.onrender.com/my-bookings", {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
