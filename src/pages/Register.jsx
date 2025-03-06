@@ -38,15 +38,9 @@ export default function Register() {
         addUser(name, email, password, role);
     };
 
-    const handleGoogleSuccess = (credentialResponse) => {
-        const userDetails = jwtDecode(credentialResponse.credential); // Correct usage
-        addUser(userDetails.name, userDetails.email, "", "Client"); // Add user with Google details
-        toast.success("Google sign-up successful!");
-        navigate("/");
-    };
-
-    const handleGoogleFailure = () => {
-        toast.error("Google sign-up failed. Please try again.");
+    const handleGoogleLogin = () => {
+        window.location.href = "https://space-backend-9.onrender.com/authorize_google";
+        toast.success("Success")
     };
 
     return (
@@ -105,12 +99,13 @@ export default function Register() {
                     <button type="submit">REGISTER</button>
                     <br /><br />
 
-                    <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
-                        <GoogleLogin
-                            onSuccess={handleGoogleSuccess}
-                            onError={handleGoogleFailure}
-                        />
-                    </GoogleOAuthProvider>
+                    <button
+                        type="button"
+                        onClick={handleGoogleLogin}
+                        style={{ cursor: "pointer" }}
+                    >
+                        Sign up with Google
+                    </button>
 
                     <br /><br />
 
