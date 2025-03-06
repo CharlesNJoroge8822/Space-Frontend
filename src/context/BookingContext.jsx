@@ -13,7 +13,7 @@ export const BookingProvider = ({ children }) => {
         try {
             console.log("Sending Booking Payload:", bookingData);
 
-            const response = await fetch("https://space-backend-8.onrender.com/bookings", {
+            const response = await fetch("https://space-backend-9.onrender.com/bookings", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ ...bookingData, status: "Pending Payment" }),
@@ -36,7 +36,7 @@ export const BookingProvider = ({ children }) => {
      */
     const fetchBookings = useCallback(async () => {
         try {
-            const response = await fetch("https://space-backend-8.onrender.com/bookings", {
+            const response = await fetch("https://space-backend-9.onrender.com/bookings", {
                 method: "GET",
             });
 
@@ -54,7 +54,7 @@ export const BookingProvider = ({ children }) => {
      */
     const fetchUserBookings = async (userId) => {
         try {
-            const response = await fetch(`https://space-backend-8.onrender.com/bookings?user_id=${userId}`, {
+            const response = await fetch(`https://space-backend-9.onrender.com/bookings?user_id=${userId}`, {
                 method: "GET",
                 headers: { "Content-Type": "application/json" },
             });
@@ -74,7 +74,7 @@ export const BookingProvider = ({ children }) => {
      */
     const deleteBooking = async (id) => {
         try {
-            const response = await fetch(`https://space-backend-8.onrender.com/bookings/${id}`, {
+            const response = await fetch(`https://space-backend-9.onrender.com/bookings/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
