@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode"; // Updated import
 import "../App.css";
 
@@ -58,17 +58,11 @@ export default function Login() {
         }
     };
 
-    const handleGoogleSuccess = (credentialResponse) => {
-        const userDetails = jwtDecode(credentialResponse.credential); // Updated usage
-        googleLogin(userDetails.email);
-        toast.success("Google login successful!");
-        navigate("/");
-    };
-
-    const handleGoogleFailure = () => {
-        toast.error("Google login failed. Please try again.");
-    };
-
+    function google_login(token) {
+        const user_details = jwtDecode(token);
+        googleLogin(user_details.email);
+    }
+    
     return (
         <div className="login-container">
             <div className="form-box">
@@ -95,12 +89,16 @@ export default function Login() {
                         Forgot password?
                     </p>
 
-                    <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
+                    <div className="google-login-btn">
                         <GoogleLogin
-                            onSuccess={handleGoogleSuccess}
-                            onError={handleGoogleFailure}
+                            onSuccess={credentialResponse => {
+                                google_login(credentialResponse.credential);
+                            }}
+                            onError={() => {
+                                console.log('Login Failed');
+                            }}
                         />
-                    </GoogleOAuthProvider>
+                    </div>
 
                     <br />
                     <button type="submit">LOGIN</button>
