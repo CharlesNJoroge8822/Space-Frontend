@@ -23,8 +23,8 @@ const Profile = () => {
     }, [current_user]);
 
     useEffect(() => {
-        fetchCurrentUser(); // Fetch updated user info on component mount
-    }, [fetchCurrentUser]);
+        fetchCurrentUser();
+    }, []);
 
     const handleChange = (e) => {
         setProfileData({ ...profileData, [e.target.name]: e.target.value });
@@ -55,11 +55,15 @@ const Profile = () => {
             if (response.ok) {
                 const newImageUrl = data.image_url;
 
-                // ✅ Update the profile with the new image
+                // ✅ Update the profile with only the image
                 await updateProfile(current_user.id, { image: newImageUrl });
 
-                // ✅ Update UI state
+                // ✅ Update UI state and sessionStorage
                 setProfileData((prev) => ({ ...prev, image: newImageUrl }));
+                sessionStorage.setItem(
+                    "current_user",
+                    JSON.stringify({ ...current_user, image: newImageUrl })
+                );
 
                 toast.dismiss();
                 toast.success("Image uploaded successfully!");
@@ -79,6 +83,10 @@ const Profile = () => {
             await updateProfile(current_user.id, { image: defaultImage });
 
             setProfileData((prev) => ({ ...prev, image: defaultImage }));
+            sessionStorage.setItem(
+                "current_user",
+                JSON.stringify({ ...current_user, image: defaultImage })
+            );
 
             toast.success("Profile image removed!");
         } catch (error) {
@@ -99,6 +107,12 @@ const Profile = () => {
                 name: profileData.name,
                 image: profileData.image, 
             });
+
+            // ✅ Ensure UI state updates
+            sessionStorage.setItem(
+                "current_user",
+                JSON.stringify({ ...current_user, name: profileData.name })
+            );
 
             toast.success("Profile updated successfully!");
         } catch (error) {
