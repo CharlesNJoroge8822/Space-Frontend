@@ -79,7 +79,7 @@ const ManageUsers = () => {
     }
 
     return (
-        <div className="manage-users" style={{ padding: "20px", margin: "0 auto", maxWidth: "1400px" }}>
+        <div className="manage-users" style={{ padding: "20px", margin: "0 auto", maxWidth: "1400px", minHeight: "100vh", }}>
             <h1 style={{ fontFamily: "Inria Serif", textAlign: "center", color: "#104436", fontSize: "30px", marginBottom: "20px" }}>
                 Manage Users
             </h1>

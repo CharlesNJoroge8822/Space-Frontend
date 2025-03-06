@@ -1032,6 +1032,7 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  min-height: 100vh;
 }
 
 /* Heading */
@@ -1100,9 +1101,10 @@ body {
 }
 
 .bookings-table th {
-  background-color: #2d5c13;
+  background-color: #104436;
   color: white;
   font-weight: bold;
+  font-family: "Inria Serif";
 }
 
 .bookings-table tr {

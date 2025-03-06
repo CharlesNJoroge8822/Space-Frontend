@@ -14,13 +14,13 @@ const MyBookings = () => {
 
     return (
         <div className="manage-bookings-container">
-            <h1 className="manage-bookings-heading">My Bookings</h1>
+            <h1 className="manage-bookings-heading" >My Bookings</h1>
 
             {loading && <p>Loading bookings...</p>}
             {error && <p className="error">{error}</p>}
 
             <table className="bookings-table">
-                <thead>
+                <thead> 
                     <tr>
                         <th>Space Name</th>
                         <th>Start Time</th>

@@ -76,7 +76,7 @@ const ManageBookings = () => {
 
     return (
         <div className="manage-bookings-container">
-            <h1 className="manage-bookings-heading">Manage Bookings</h1>
+            <h1 className="manage-bookings-heading" style={{fontFamily: "Inria Serif", color: "#104436", fontSize: "30px",}}>Manage Bookings</h1>
 
             {/* Bookings Table */}
             <table className="bookings-table">

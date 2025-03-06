@@ -12,6 +12,7 @@ export const SpaceProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
+
     // Fetch Spaces
     const fetchSpaces = useCallback(async () => {
         setLoading(true);
@@ -20,26 +21,28 @@ export const SpaceProvider = ({ children }) => {
                 method: "GET",
                 headers: { "Content-Type": "application/json" },
             });
-
-            if (!response.ok) throw new Error("Failed to fetch spaces.");
-
+    
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
+            }
+    
             const data = await response.json();
-            console.log("Fetched spaces:", data);
-
-            if (Array.isArray(data.spaces) && data.spaces.length > 0) {
-                setSpaces([...data.spaces]);
-                console.log("Updated Spaces State:", data.spaces);
+            console.log("Fetched spaces:", data); // Debugging
+    
+            if (Array.isArray(data.spaces)) {
+                setSpaces(data.spaces); // ✅ Ensure it's always an array
             } else {
-                setSpaces([]);
-                toast.warning("⚠️ No spaces found.");
+                setSpaces([]); // ✅ Prevent "map is not a function" error
             }
         } catch (error) {
             console.error("Error fetching spaces:", error);
-            setError("Error fetching spaces. Please try again later.");
+            setError(`Error fetching spaces: ${error.message}`);
+            setSpaces([]); // ✅ Ensure spaces is always an array
         } finally {
             setLoading(false);
         }
     }, []);
+    
 
     // Create Space
     const createSpace = async (spaceData) => {
@@ -62,7 +65,7 @@ export const SpaceProvider = ({ children }) => {
             if (!response.ok) throw new Error("Failed to create space.");
 
             const data = await response.json();
-            setSpaces((prev) => [...prev, data.space]);
+            setSpaces((prev) => [...prev, data]);
 
             toast.update(toastId, {
                 render: "✅ Space created successfully!",
@@ -127,7 +130,10 @@ export const SpaceProvider = ({ children }) => {
                 },
             });
 
-            if (!response.ok) throw new Error("Failed to delete space.");
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to delete space.");
+            }
 
             setSpaces((prev) => prev.filter((space) => space.id !== spaceId));
 
@@ -139,7 +145,7 @@ export const SpaceProvider = ({ children }) => {
             });
         } catch (error) {
             toast.update(toastId, {
-                render: `🚨 ${error.message || "Network error, please try again."}`,
+                render: `🚨 ${error.message}`,
                 type: "error",
                 isLoading: false,
                 autoClose: 3000,
@@ -147,12 +153,12 @@ export const SpaceProvider = ({ children }) => {
         }
     };
 
-    // Update Space Availability
+    // Update Space Availability (Fixing API Call)
     const updateSpaceAvailability = async (spaceId, availability) => {
         const toastId = toast.loading("⏳ Updating space availability...");
         try {
             const response = await fetch(`http://127.0.0.1:5000/spaces/${spaceId}/availability`, {
-                method: "PUT",
+                method: "PATCH", // ✅ Fix: Changed from PUT to PATCH
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${authToken}`,
@@ -160,7 +166,10 @@ export const SpaceProvider = ({ children }) => {
                 body: JSON.stringify({ availability }),
             });
 
-            if (!response.ok) throw new Error("Failed to update space availability.");
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to update space availability.");
+            }
 
             setSpaces((prev) =>
                 prev.map((space) =>
@@ -176,7 +185,7 @@ export const SpaceProvider = ({ children }) => {
             });
         } catch (error) {
             toast.update(toastId, {
-                render: `🚨 ${error.message || "Network error, please try again."}`,
+                render: `🚨 ${error.message}`,
                 type: "error",
                 isLoading: false,
                 autoClose: 3000,
@@ -198,7 +207,7 @@ export const SpaceProvider = ({ children }) => {
                 createSpace,
                 updateSpace,
                 deleteSpace,
-                updateSpaceAvailability, // Add this function to the context value
+                updateSpaceAvailability, // ✅ Added for availability sync
                 loading,
                 error,
             }}

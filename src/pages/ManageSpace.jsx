@@ -86,7 +86,7 @@ const ManageSpace = () => {
     };
 
     return (
-        <div className="manage-space" style={{ padding: "20px", margin: "0 auto", maxWidth: "1400px" }}>
+        <div className="manage-space" style={{ padding: "20px", margin: "0 auto", maxWidth: "1400px", minHeight: "100vh", }}>
             {/* Button to open the modal */}
             <button
                 onClick={() => {

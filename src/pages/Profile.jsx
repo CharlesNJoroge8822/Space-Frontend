@@ -87,6 +87,7 @@ const Profile = () => {
         <div className="profile-container" style={{maxWidth: "600px",
             margin: "auto",
             padding: "20px",
+            backgroundColor: "#F1EDE5",
             borderStyle: "solid",
             borderColor: "#103436",
             boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
