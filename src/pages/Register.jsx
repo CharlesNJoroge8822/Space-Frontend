@@ -37,7 +37,7 @@ export default function Register() {
     };
 
     const handleGoogleLogin = () => {
-        window.location.href = "https://space-backend-77u4.onrender.com/authorize_google";
+        window.location.href = "http://127.0.0.1:5000/authorize_google";
         toast.success("Success")
     };
 
@@ -94,28 +94,17 @@ export default function Register() {
                     {confirmError && <p className="error">⚠️ {confirmError}</p>}
                     <br /><br />
 
-                    {/* <label style={{fontFamily: "Inria Serif"}}>
-                     Are you an admin?
-                     <br /><br />
-                        <input 
-                            type="checkbox" 
-                            checked={role === 'Admin'} 
-                            onChange={(e) => setRole(e.target.checked ? 'Admin' : 'Client')} 
-                        />
-                     
-                    </label> */}
-                    <br /><br />
-
                     <button type="submit">REGISTER</button>
                     <br /><br />
-
+                        
                     <button
-                        type="button"
-                        onClick={handleGoogleLogin}
-                        style={{ cursor: "pointer" }}
-                    >
-                        Sign up with Google
-                    </button>
+  type="button"
+  onClick={() => (window.location.href = "http://127.0.0.1:5000/google_login")}
+  style={{ cursor: "pointer" }}
+>
+  Sign up with Google
+</button>
+
                     <br /><br />
 
                     <p>
