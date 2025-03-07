@@ -1,56 +1,74 @@
-import React, { useContext, useEffect } from "react";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import React, { useContext, useEffect, useState } from "react";
 import { BookingContext } from "../context/BookingContext";
-import "../App.css"; // Ensure this file has improved styles
+import { toast } from "react-toastify";
 
 const MyBookings = () => {
-    const { bookings, fetchUserBookings, loading, error } = useContext(BookingContext);
+    const { bookings, fetchUserBookings } = useContext(BookingContext);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    // Fetch bookings when the component mounts
+    // Fetch user bookings on component mount
     useEffect(() => {
-        fetchUserBookings();
+        const loadBookings = async () => {
+            try {
+                await fetchUserBookings();
+            } catch (error) {
+                console.error("Error loading bookings:", error);
+                setError("Failed to load bookings. Please try again later.");
+                toast.error("❌ Failed to load bookings.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadBookings();
     }, [fetchUserBookings]);
 
+    if (loading) {
+        return <div style={{ textAlign: "center", marginTop: "20px", fontSize: "18px" }}>Loading bookings...</div>;
+    }
+
+    if (error) {
+        return <div style={{ textAlign: "center", marginTop: "20px", color: "red", fontSize: "18px" }}>{error}</div>;
+    }
+
     return (
-        <div className="manage-bookings-container">
-            <h1 className="manage-bookings-heading" >My Bookings</h1>
-
-            {loading && <p>Loading bookings...</p>}
-            {error && <p className="error">{error}</p>}
-
-            <table className="bookings-table">
-                <thead> 
-                    <tr>
-                        <th>Space Name</th>
-                        <th>Start Time</th>
-                        <th>End Time</th>
-                        <th>Total Amount</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {bookings.length > 0 ? (
-                        bookings.map((booking) => (
-                            <tr key={booking.id}>
-                                <td>{booking.space?.name || "Unknown Space"}</td>
-                                <td>{new Date(booking.start_time).toLocaleString()}</td>
-                                <td>{new Date(booking.end_time).toLocaleString()}</td>
-                                <td>${booking.total_amount.toFixed(2)}</td>
-                                <td className={`status ${booking.status.toLowerCase().replace(" ", "-")}`}>
-                                    {booking.status}
-                                </td>
-                            </tr>
-                        ))
-                    ) : (
+        <div style={{ padding: "20px", minHeight: "100vh", }}>
+            <h1 style={{ textAlign: "center", color: "#104436", marginBottom: "60px", fontFamily: "Inria Serif", fontSize: "40px" }}>
+                My Bookings
+            </h1>
+            {bookings.length === 0 ? (
+                <p style={{ textAlign: "center", fontSize: "16px", color: "#666", fontFamily: "Red Hat Display" }}>No bookings found.</p>
+            ) : (
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                    <thead>
                         <tr>
-                            <td colSpan="5" style={{ textAlign: "center" }}>No bookings found</td>
+                            <th style={{ border: "1px solid #ddd", padding: "20px", backgroundColor: "#104436", color: "white", textAlign: "left", fontFamily: "Inria Serif", }}>Space Name</th>
+                            <th style={{ border: "1px solid #ddd", padding: "20px", backgroundColor: "#104436", color: "white", textAlign: "left", fontFamily: "Inria Serif",}}>Status</th>
+                            <th style={{ border: "1px solid #ddd", padding: "20px", backgroundColor: "#104436", color: "white", textAlign: "left", fontFamily: "Inria Serif", }}>Start Time</th>
+                            <th style={{ border: "1px solid #ddd", padding: "20px", backgroundColor: "#104436", color: "white", textAlign: "left" , fontFamily: "Inria Serif",}}>End Time</th>
+                            <th style={{ border: "1px solid #ddd", padding: "20px", backgroundColor: "#104436", color: "white", textAlign: "left", fontFamily: "Inria Serif", }}>Total Amount</th>
                         </tr>
-                    )}
-                </tbody>
-            </table>
-
-            <ToastContainer position="top-right" autoClose={2000} />
+                    </thead>
+                    <tbody>
+                        {bookings.map((booking) => (
+                            <tr key={booking.id}>
+                                <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                                    {booking.space_name || "No space name available"}
+                                </td>
+                                <td style={{ border: "1px solid #ddd", padding: "20px" }}>{booking.status}</td>
+                                <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                                    {new Date(booking.start_time).toLocaleString()}
+                                </td>
+                                <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                                    {new Date(booking.end_time).toLocaleString()}
+                                </td>
+                                <td style={{ border: "1px solid #ddd", padding: "8px" }}>${booking.total_amount}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            )}
         </div>
     );
 };

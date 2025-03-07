@@ -209,7 +209,7 @@ const login = async (email, password, role) => {
     }
 };
 
-    /** ✅ Register a new user */
+/** ✅ Register a new user */
 const addUser = async (name, email, password, role = "Client") => {
     const loadingToast = toast.loading("Creating your account...");
 
@@ -224,9 +224,6 @@ const addUser = async (name, email, password, role = "Client") => {
 
         if (response.ok) {
             toast.success("Account created successfully!");
-
-            // ✅ Auto-login after successful registration
-            await login(email, password, role);
         } else {
             throw new Error(data.error || "Registration failed.");
         }
@@ -235,7 +232,7 @@ const addUser = async (name, email, password, role = "Client") => {
     } finally {
         toast.dismiss(loadingToast);
     }
-};  
+};
 
 const updateProfile = async (userId, updatedData) => {
     const token = sessionStorage.getItem("token");

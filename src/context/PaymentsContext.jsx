@@ -56,32 +56,7 @@ const checkPaymentStatus = useCallback(async (transactionId) => {
         throw error;
     }
 }, []);
-    
-        
 
-    // ✅ Check Payment Status
-    // const checkPaymentStatus = useCallback(async (transaction_id) => {
-    //     try {
-    //         const response = await fetch(`http://127.0.0.1:5000/payments/${transaction_id}`, {
-    //             method: "GET",
-    //             headers: { "Content-Type": "application/json" },
-    //         });
-
-    //         if (!response.ok) throw new Error("Failed to fetch payment status.");
-    //         const data = await response.json();
-
-    //         // ✅ If payment is confirmed, refresh bookings & spaces
-    //         if (data.status === "Confirmed") {
-    //             fetchBookings();
-    //             fetchSpaces();
-    //         }
-
-    //         return data.status; // e.g., "Completed", "Processing"
-    //     } catch (error) {
-    //         console.error("Error checking payment status:", error);
-    //         throw error;
-    //     }
-    // }, [fetchBookings, fetchSpaces]);
 
     // ✅ Delete Payment & Update Bookings
     const deletePayment = async (id) => {

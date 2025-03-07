@@ -1,24 +1,21 @@
 import { useContext, useEffect, useState } from "react";
 import { SpaceContext } from "../context/SpaceContext";
-import { PaymentsContext } from "../context/PaymentsContext";
-import { BookingContext } from "../context/BookingContext";
 import { UserContext } from "../context/UserContext";
 import { X } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../../src/space.css";
 
+// ksh 
 const Spaces = () => {
     const {
         spaces,
         fetchSpaces,
+        createBooking,
         updateSpaceAvailability,
-        handleBookingAndPayment,
         loading: spacesLoading,
         error: spacesError,
     } = useContext(SpaceContext);
-    const { stkPush, checkPaymentStatus } = useContext(PaymentsContext);
-    const { createBooking, fetchUserBookings } = useContext(BookingContext);
     const { current_user } = useContext(UserContext);
 
     const [duration, setDuration] = useState(1);
@@ -59,17 +56,43 @@ const Spaces = () => {
         }
     };
 
-    // Handle "Book Now" button click (opens payment modal)
-    const handleBookNow = () => {
-        if (!selectedSpace || !current_user) {
-            toast.error("Please log in to book a space.");
+    // Handle "Book Now" button click (books the space immediately)
+    const handleBookNow = async () => {
+        if (!selectedSpace) {
+            toast.error("Please select a space.");
             return;
         }
-        setIsBookingModalOpen(false);
-        setIsPaymentModalOpen(true);
+
+        const totalCost = calculateTotalPrice(selectedSpace);
+
+        // Format start_time and end_time without milliseconds
+        const startTime = new Date().toISOString().split(".")[0] + "Z";
+        const endTime = new Date(Date.now() + duration * (unit === "hour" ? 3600000 : 86400000))
+            .toISOString()
+            .split(".")[0] + "Z";
+
+        const bookingData = {
+            user_id: current_user.id,
+            space_id: selectedSpace.id,
+            start_time: startTime,
+            end_time: endTime,
+            total_amount: totalCost,
+        };
+
+        console.log("Booking Payload:", bookingData); // Log the payload
+
+        try {
+            await createBooking(selectedSpace.id, bookingData);
+            setIsBookingModalOpen(false);
+            setIsPaymentModalOpen(true); // Open payment modal
+            toast.success("Booking created successfully! Proceed to payment simulation.");
+        } catch (error) {
+            console.error("Booking failed:", error);
+            toast.error("Failed to create booking. Please try again.");
+        }
     };
 
-    // Handle payment and booking
+    // Simulate payment process
     const handlePayment = async () => {
         if (!phoneNumber.match(/^2547[0-9]{8}$/)) {
             toast.error("Enter a valid M-Pesa number (2547XXXXXXXX format).");
@@ -81,38 +104,27 @@ const Spaces = () => {
             return;
         }
 
-        const totalCost = calculateTotalPrice(selectedSpace);
         setIsPaymentProcessing(true);
 
         try {
-            // Show loading toast
-            toast.loading("Processing payment and booking...");
+            toast.loading("Simulating payment...");
 
-            // Call handleBookingAndPayment from SpaceContext
-            await handleBookingAndPayment(selectedSpace.id, {
-                user_id: current_user.id,
-                start_time: new Date().toISOString(),
-                end_time: new Date(Date.now() + duration * (unit === "hour" ? 3600000 : 86400000)).toISOString(),
-                total_amount: totalCost,
-            }, {
-                phoneNumber,
-                amount: totalCost,
-            });
+            // Simulate STK push with a 3-second delay
+            setTimeout(() => {
+                toast.success("Payment simulation successful! Booking confirmed.");
+                setIsPaymentModalOpen(false);
+                setPhoneNumber("");
+                setAgreedToTerms(false);
 
-            // Success message
-            toast.success("Booking and payment successful!");
+                // Update space availability to "Booked"
+                updateSpaceAvailability(selectedSpace.id, false);
 
-            // Close modals and reset state
-            setIsPaymentModalOpen(false);
-            setPhoneNumber("");
-            setAgreedToTerms(false);
-
-            // Fetch updated spaces and user bookings
-            await fetchSpaces();
-            await fetchUserBookings();
+                // Fetch updated spaces
+                fetchSpaces();
+            }, 3000); // Simulate a 3-second delay for the STK push
         } catch (error) {
-            toast.error(error.message || "Failed to process payment. Please try again.");
-            console.error("Error during payment:", error);
+            toast.error("Failed to simulate payment. Please try again.");
+            console.error("Error during payment simulation:", error);
         } finally {
             setIsPaymentProcessing(false);
             toast.dismiss(); // Dismiss loading toast
@@ -146,7 +158,7 @@ const Spaces = () => {
     }, [spaces, fetchSpaces]);
 
     return (
-        <div className="container-center" style={{ minHeight: "100vh", minWidth: "1400px", }}>
+        <div className="container-center" style={{ minHeight: "100vh", minWidth: "1400px" }}>
             <h2 className="title">Available Spaces</h2>
 
             {spacesLoading && <p className="text-muted">Loading spaces...</p>}
@@ -159,7 +171,7 @@ const Spaces = () => {
                 {spaces.map((space) => (
                     <div
                         key={space.id}
-                        className={`card ${space.availability === "1" || space.availability === true ? "cursor-pointer" : "cursor-not-allowed"}`}
+                        className={`card ksh {space.availability === "1" || space.availability === true ? "cursor-pointer" : "cursor-not-allowed"}`}
                         onClick={() => (space.availability === "1" || space.availability === true) && openBookingModal(space)}
                     >
                         <img
@@ -170,15 +182,15 @@ const Spaces = () => {
                         <div className="card-content">
                             <h3 className="card-title">{space.name || "Unnamed Space"}</h3>
                             <p><strong>Location:</strong> {space.location || "Unknown"}</p>
-                            <p><strong>Price per Day:</strong> ${space.price_per_day || 0}</p>
-                            <p className={`text-${space.availability === "1" || space.availability === true ? "success" : "error"}`}>
+                            <p><strong>Price per Day:</strong> ksh {space.price_per_day || 0}</p>
+                            <p className={`text-ksh {space.availability === "1" || space.availability === true ? "success" : "error"}`}>
                                 <strong>Availability:</strong> {space.availability === "1" || space.availability === true ? "Available" : "Booked"}
                             </p>
                         </div>
                     </div>
                 ))}
             </div>
-
+{/* ksh */}
             {/* Booking Modal */}
             {isBookingModalOpen && selectedSpace && (
                 <div className="modal-overlay">
@@ -189,8 +201,8 @@ const Spaces = () => {
 
                         <h5><strong>{selectedSpace.name}</strong></h5>
                         <p><strong>Location:</strong> {selectedSpace.location}</p>
-                        <p><strong>Price per Hour:</strong> ${selectedSpace.price_per_hour}</p>
-                        <p><strong>Price per Day:</strong> ${selectedSpace.price_per_day}</p>
+                        <p><strong>Price per Hour:</strong> ksh{selectedSpace.price_per_hour}</p>
+                        <p><strong>Price per Day:</strong> ksh{selectedSpace.price_per_day}</p>
 
                         <div className="label-modal">
                             <label>Duration</label>
@@ -215,8 +227,7 @@ const Spaces = () => {
                             </select>
                         </div>
 
-                        <p className="total-price"><strong>Total Price:</strong> ${calculateTotalPrice(selectedSpace)}</p>
-
+                        <p className="total-price"><strong>Total Price:</strong> ksh{calculateTotalPrice(selectedSpace)}</p>
                         <button onClick={handleBookNow} className="btn-green">
                             Book Now
                         </button>
@@ -237,7 +248,7 @@ const Spaces = () => {
                         </button>
 
                         <h3 className="modal-title">Pay for: {selectedSpace.name}</h3>
-                        <p><strong>Total Amount:</strong> ${calculateTotalPrice(selectedSpace)}</p>
+                        <p><strong>Total Amount:</strong> ksh{calculateTotalPrice(selectedSpace)}</p>
 
                         <label>Phone Number:</label>
                         <input
@@ -271,7 +282,7 @@ const Spaces = () => {
                             className="btn-green"
                             disabled={isPaymentProcessing || !agreedToTerms}
                         >
-                            {isPaymentProcessing ? "Processing..." : "Pay via M-Pesa"}
+                            {isPaymentProcessing ? "Processing..." : "Simulate Payment"}
                         </button>
                     </div>
                 </div>
