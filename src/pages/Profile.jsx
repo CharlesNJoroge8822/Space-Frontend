@@ -37,7 +37,7 @@ const Profile = () => {
         const token = sessionStorage.getItem("token") || localStorage.getItem("jwt_token");
     
         try {
-            const response = await fetch("https://space-backend-77u4.onrender.com/upload-image", {
+            const response = await fetch("https://space-backend-gu2q.onrender.com/upload-image", {
                 method: "POST",
                 headers: {
                     // Do NOT set "Content-Type" manually for FormData
