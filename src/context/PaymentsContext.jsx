@@ -21,7 +21,7 @@ const stkPush = useCallback(async (phoneNumber, amount, bookingId) => {
             user_id: sessionStorage.getItem("user_id"), // Ensure user is included
         };
 
-        const response = await fetch("https://space-backend-gu2q.onrender.com/payments", {
+        const response = await fetch("http://127.0.0.1:5000/payments", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
@@ -46,7 +46,7 @@ const stkPush = useCallback(async (phoneNumber, amount, bookingId) => {
 // ✅ Check Payment Status
 const checkPaymentStatus = useCallback(async (transactionId) => {
     try {
-        const response = await fetch(`https://space-backend-gu2q.onrender.com/payments/${transactionId}`);
+        const response = await fetch(`http://127.0.0.1:5000/payments/${transactionId}`);
         if (!response.ok) throw new Error("Failed to fetch payment status.");
         
         const data = await response.json();
@@ -70,7 +70,7 @@ const checkPaymentStatus = useCallback(async (transactionId) => {
 
             console.log("JWT Token being sent:", token); // Debugging
 
-            const response = await fetch(`https://space-backend-gu2q.onrender.com/payments/${id}`, {
+            const response = await fetch(`http://127.0.0.1:5000/payments/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",

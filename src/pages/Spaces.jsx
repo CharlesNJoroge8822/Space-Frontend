@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useCallback } from "react";
 import { SpaceContext } from "../context/SpaceContext";
 import { UserContext } from "../context/UserContext";
 import { X } from "lucide-react";
@@ -6,7 +6,6 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../../src/space.css";
 
-// ksh 
 const Spaces = () => {
     const {
         spaces,
@@ -65,11 +64,21 @@ const Spaces = () => {
 
         const totalCost = calculateTotalPrice(selectedSpace);
 
-        // Format start_time and end_time without milliseconds
-        const startTime = new Date().toISOString().split(".")[0] + "Z";
-        const endTime = new Date(Date.now() + duration * (unit === "hour" ? 3600000 : 86400000))
-            .toISOString()
-            .split(".")[0] + "Z";
+        // Function to format the date as "YYYY-MM-DD HH:mm:ss"
+        const formatDate = (date) => {
+            const d = new Date(date);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0'); // Month is 0-based
+            const day = String(d.getDate()).padStart(2, '0');
+            const hours = String(d.getHours()).padStart(2, '0');
+            const minutes = String(d.getMinutes()).padStart(2, '0');
+            const seconds = String(d.getSeconds()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        };
+
+        // Format start_time and end_time
+        const startTime = formatDate(new Date());
+        const endTime = formatDate(new Date(Date.now() + duration * (unit === "hour" ? 3600000 : 86400000)));
 
         const bookingData = {
             user_id: current_user.id,
@@ -85,16 +94,53 @@ const Spaces = () => {
             await createBooking(selectedSpace.id, bookingData);
             setIsBookingModalOpen(false);
             setIsPaymentModalOpen(true); // Open payment modal
-            toast.success("Booking created successfully! Proceed to payment simulation.");
+            toast.success("Booking created successfully! Proceed to payment.");
         } catch (error) {
             console.error("Booking failed:", error);
             toast.error("Failed to create booking. Please try again.");
         }
     };
 
-    // Simulate payment process
+    // ✅ Initiate M-Pesa STK Push
+    const stkPush = useCallback(async (phoneNumber, amount, bookingId) => {
+        setIsPaymentProcessing(true);
+        try {
+            const payload = {
+                phone_number: Number(phoneNumber),
+                amount: amount,
+                booking_id: bookingId,
+                user_id: current_user.id, // Use current user's ID
+            };
+
+            const response = await fetch("http://127.0.0.1:5000/payments", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to initiate STK push.");
+            }
+
+            const data = await response.json();
+            toast.success("✅ M-Pesa STK Push request sent! Approve the prompt.");
+            return data;
+        } catch (error) {
+            toast.error("❌ STK Push Failed.");
+            console.error("STK Push Error:", error);
+            throw error;
+        } finally {
+            setIsPaymentProcessing(false);
+        }
+    }, [current_user]);
+
+    // Handle payment process
     const handlePayment = async () => {
-        if (!phoneNumber.match(/^2547[0-9]{8}$/)) {
+        // Ensure the phone number is trimmed of extra spaces and is in the correct format
+        let formattedPhoneNumber = phoneNumber.trim();
+
+        // Check if the phone number matches the correct format: "2547XXXXXXXX"
+        if (!formattedPhoneNumber.match(/^2547[0-9]{8}$/)) {
             toast.error("Enter a valid M-Pesa number (2547XXXXXXXX format).");
             return;
         }
@@ -104,27 +150,35 @@ const Spaces = () => {
             return;
         }
 
-        setIsPaymentProcessing(true);
-
         try {
-            toast.loading("Simulating payment...");
+            toast.loading("Initiating M-Pesa STK Push...");
 
-            // Simulate STK push with a 3-second delay
-            setTimeout(() => {
-                toast.success("Payment simulation successful! Booking confirmed.");
-                setIsPaymentModalOpen(false);
-                setPhoneNumber("");
-                setAgreedToTerms(false);
+            // Calculate the total amount
+            const totalAmount = calculateTotalPrice(selectedSpace);
 
-                // Update space availability to "Booked"
-                updateSpaceAvailability(selectedSpace.id, false);
+            // Call the STK Push function
+            const stkPushResponse = await stkPush(formattedPhoneNumber, totalAmount, selectedSpace.id);
 
-                // Fetch updated spaces
-                fetchSpaces();
-            }, 3000); // Simulate a 3-second delay for the STK push
+            if (stkPushResponse) {
+                toast.success("✅ M-Pesa STK Push request sent! Approve the prompt on your phone.");
+
+                // Wait for a few seconds to simulate waiting for the user to approve the STK Push
+                setTimeout(() => {
+                    toast.success("Payment successful! Booking confirmed.");
+                    setIsPaymentModalOpen(false);
+                    setPhoneNumber("");
+                    setAgreedToTerms(false);
+
+                    // Update space availability to "Booked"
+                    updateSpaceAvailability(selectedSpace.id, false);
+
+                    // Fetch updated spaces
+                    fetchSpaces();
+                }, 5000); // Adjust the delay as needed
+            }
         } catch (error) {
-            toast.error("Failed to simulate payment. Please try again.");
-            console.error("Error during payment simulation:", error);
+            toast.error("❌ STK Push Failed. Please try again.");
+            console.error("Error during STK Push:", error);
         } finally {
             setIsPaymentProcessing(false);
             toast.dismiss(); // Dismiss loading toast
@@ -171,7 +225,7 @@ const Spaces = () => {
                 {spaces.map((space) => (
                     <div
                         key={space.id}
-                        className={`card ksh {space.availability === "1" || space.availability === true ? "cursor-pointer" : "cursor-not-allowed"}`}
+                        className={`card ksh ${space.availability === "1" || space.availability === true ? "cursor-pointer" : "cursor-not-allowed"}`}
                         onClick={() => (space.availability === "1" || space.availability === true) && openBookingModal(space)}
                     >
                         <img
@@ -183,14 +237,14 @@ const Spaces = () => {
                             <h3 className="card-title">{space.name || "Unnamed Space"}</h3>
                             <p><strong>Location:</strong> {space.location || "Unknown"}</p>
                             <p><strong>Price per Day:</strong> ksh {space.price_per_day || 0}</p>
-                            <p className={`text-ksh {space.availability === "1" || space.availability === true ? "success" : "error"}`}>
+                            <p className={`text-ksh ${space.availability === "1" || space.availability === true ? "success" : "error"}`}>
                                 <strong>Availability:</strong> {space.availability === "1" || space.availability === true ? "Available" : "Booked"}
                             </p>
                         </div>
                     </div>
                 ))}
             </div>
-{/* ksh */}
+
             {/* Booking Modal */}
             {isBookingModalOpen && selectedSpace && (
                 <div className="modal-overlay">
@@ -282,7 +336,7 @@ const Spaces = () => {
                             className="btn-green"
                             disabled={isPaymentProcessing || !agreedToTerms}
                         >
-                            {isPaymentProcessing ? "Processing..." : "Simulate Payment"}
+                            {isPaymentProcessing ? "Processing..." : "Make Payment"}
                         </button>
                     </div>
                 </div>

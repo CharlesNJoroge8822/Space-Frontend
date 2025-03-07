@@ -44,7 +44,7 @@ export default function Register() {
     };
     
     const handleGoogleLogin = () => {
-        window.location.href = "https://space-backend-gu2q.onrender.com/authorize_google";
+        window.location.href = "http://127.0.0.1:5000/authorize_google";
         toast.success("Success")
     };
 
