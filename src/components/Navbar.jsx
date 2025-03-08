@@ -1,6 +1,8 @@
 import React, { useContext, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUserCircle } from "@fortawesome/free-solid-svg-icons";
 import "../App.css";
 import logoPhoto from "../assets/logoPhoto.png";
 
@@ -55,13 +57,13 @@ export default function Navbar() {
                                 >
                                     Manage Spaces
                                 </Link>
-                                <ul className="navbar-nav">
-                                    <li className="nav-item">
-                                        <button onClick={logout} className="btn btn-danger ms-3">
+                                
+                                    
+                                        <button onClick={logout} style={{backgroundColor: "#104436", color: "white", fontFamily:"Inria Serif", fontSize: "20px", border: "none", }}>
                                             Logout
                                         </button>
-                                    </li>
-                                </ul>
+                                    
+                                
                             </>
                         )}
 
@@ -79,11 +81,8 @@ export default function Navbar() {
                                 >
                                     My Bookings
                                 </Link>
-                                <Link
-                                    to="/profile"
-                                    className={`navbar-link ${location.pathname === "/profile" ? "active" : ""}`}
-                                >
-                                    Profile
+                                <Link to="/profile" className={`navbar-link ${location.pathname === "/profile" ? "active" : ""}`}>
+                                    <FontAwesomeIcon icon={faUserCircle} className="profile-icon" />
                                 </Link>
                             </>
                         )}

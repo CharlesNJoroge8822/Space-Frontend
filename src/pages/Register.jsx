@@ -21,7 +21,7 @@ export default function Register() {
         return regex.test(pwd);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validatePassword(password)) {
             setPasswordError("Password must have at least 6 characters, one uppercase letter, one number, and one special character.");
@@ -33,11 +33,18 @@ export default function Register() {
         }
         setPasswordError('');
         setConfirmError('');
-        addUser(name, email, password, role);
+    
+        try {
+            await addUser(name, email, password, role); // Assuming addUser is async and returns a success
+            toast.success("User registered successfully!");
+            navigate("/login"); // Navigate to Space page after successful registration
+        } catch (error) {
+            toast.error("Failed to register user.");
+        }
     };
-
+    
     const handleGoogleLogin = () => {
-        window.location.href = "http://127.0.0.1:5000/authorize_google";
+        window.location.href = "https://space-backend-gu2q.onrender.com/authorize_google";
         toast.success("Success")
     };
 
@@ -98,12 +105,12 @@ export default function Register() {
                     <br /><br />
                         
                     <button
-  type="button"
-  onClick={() => (window.location.href = "http://127.0.0.1:5000/google_login")}
-  style={{ cursor: "pointer" }}
->
-  Sign up with Google
-</button>
+                        type="button"
+                        onClick={handleGoogleLogin}
+                        style={{ cursor: 'pointer' }}
+                        >
+                        Sign up with Google
+                    </button>
 
                     <br /><br />
 

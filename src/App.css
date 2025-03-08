@@ -83,6 +83,10 @@ html, body {
 }
 
 /* HOME ===================================================================== */
+.home {
+  min-height: 100vh;
+}
+
 .home img {
   padding-top: 10px;
   width: 100%;
@@ -195,12 +199,16 @@ html, body {
   margin-bottom: 20px;
   text-decoration: none;
   font-size: 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition */
 }
+
 
 .product-item a:hover {
   background-color: #256a57;
   color: white;
   text-decoration: none;
+  transform: scale(1.1); /* Scale the button up to 110% */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Add shadow for depth */
 }
 
 .third-container {
@@ -245,6 +253,19 @@ html, body {
 .icons p .svg-inline--fa {
   margin-right: 10px; /* Adjust the value as needed */
 }
+
+.fade-up {
+  opacity: 0;
+  transform: translateY(40px); /* Increase Y-axis movement for more noticeable effect */
+  transition: opacity 1s ease-out, transform 1s ease-out; /* Slower transition */
+}
+
+.fade-up.show {
+  opacity: 1;
+  transform: translateY(0); /* Move element to original position */
+}
+
+
 
 
 /* END OF HOME ============================================================== */
@@ -1032,6 +1053,7 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  min-height: 100vh;
 }
 
 /* Heading */
@@ -1100,9 +1122,10 @@ body {
 }
 
 .bookings-table th {
-  background-color: #2d5c13;
+  background-color: #104436;
   color: white;
   font-weight: bold;
+  font-family: "Inria Serif";
 }
 
 .bookings-table tr {

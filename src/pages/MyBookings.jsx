@@ -1,74 +1,73 @@
 import React, { useContext, useEffect, useState } from "react";
 import { BookingContext } from "../context/BookingContext";
-import "../App.css" 
+import { toast } from "react-toastify";
 
 const MyBookings = () => {
-    const { bookings, fetchBookings, deleteBooking, updateBookingStatus } =
-        useContext(BookingContext);
+    const { bookings, fetchUserBookings } = useContext(BookingContext);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
+    // Fetch user bookings on component mount
     useEffect(() => {
         const loadBookings = async () => {
-            await fetchBookings();
-            setLoading(false);
+            try {
+                await fetchUserBookings();
+            } catch (error) {
+                console.error("Error loading bookings:", error);
+                setError("Failed to load bookings. Please try again later.");
+                toast.error("❌ Failed to load bookings.");
+            } finally {
+                setLoading(false);
+            }
         };
+
         loadBookings();
-    }, [fetchBookings]);
+    }, [fetchUserBookings]);
 
     if (loading) {
-        return <div>Loading...</div>;
+        return <div style={{ textAlign: "center", marginTop: "20px", fontSize: "18px" }}>Loading bookings...</div>;
+    }
+
+    if (error) {
+        return <div style={{ textAlign: "center", marginTop: "20px", color: "red", fontSize: "18px" }}>{error}</div>;
     }
 
     return (
-        <div className="my-bookings-container">
-            <h1>My Bookings</h1>
+        <div style={{ padding: "20px", minHeight: "100vh", }}>
+            <h1 style={{ textAlign: "center", color: "#104436", marginBottom: "60px", fontFamily: "Inria Serif", fontSize: "40px" }}>
+                My Bookings
+            </h1>
             {bookings.length === 0 ? (
-                <p>No bookings found.</p>
+                <p style={{ textAlign: "center", fontSize: "16px", color: "#666", fontFamily: "Red Hat Display" }}>No bookings found.</p>
             ) : (
-                <ul className="bookings-list">
-                    {bookings.map((booking) => (
-                        <li key={booking.id} className="booking-item">
-                            <div className="booking-details">
-                                <p>
-                                    <strong>Booking ID:</strong> {booking.id}
-                                </p>
-                                <p>
-                                    <strong>Space ID:</strong> {booking.space_id}
-                                </p>
-                                <p>
-                                    <strong>Start Time:</strong> {booking.start_time}
-                                </p>
-                                <p>
-                                    <strong>End Time:</strong> {booking.end_time}
-                                </p>
-                                <p>
-                                    <strong>Total Amount:</strong> ${booking.total_amount}
-                                </p>
-                                <p>
-                                    <strong>Status:</strong> {booking.status}
-                                </p>
-                            </div>
-                            <div className="booking-actions">
-                                <button
-                                    className="delete-button"
-                                    onClick={() => deleteBooking(booking.id)}
-                                >
-                                    Delete
-                                </button>
-                                <select
-                                    className="status-select"
-                                    value={booking.status}
-                                    onChange={(e) =>
-                                        updateBookingStatus(booking.id, e.target.value)
-                                    }
-                                >
-                                    {/* <option value="Pending Payment">Pending Payment</option> */}
-                                   
-                                </select>
-                            </div>
-                        </li>
-                    ))}
-                </ul>
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                    <thead>
+                        <tr>
+                            <th style={{ border: "1px solid #ddd", padding: "20px", backgroundColor: "#104436", color: "white", textAlign: "left", fontFamily: "Inria Serif", }}>Space Name</th>
+                            <th style={{ border: "1px solid #ddd", padding: "20px", backgroundColor: "#104436", color: "white", textAlign: "left", fontFamily: "Inria Serif",}}>Status</th>
+                            <th style={{ border: "1px solid #ddd", padding: "20px", backgroundColor: "#104436", color: "white", textAlign: "left", fontFamily: "Inria Serif", }}>Start Time</th>
+                            <th style={{ border: "1px solid #ddd", padding: "20px", backgroundColor: "#104436", color: "white", textAlign: "left" , fontFamily: "Inria Serif",}}>End Time</th>
+                            <th style={{ border: "1px solid #ddd", padding: "20px", backgroundColor: "#104436", color: "white", textAlign: "left", fontFamily: "Inria Serif", }}>Total Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {bookings.map((booking) => (
+                            <tr key={booking.id}>
+                                <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                                    {booking.space_name || "No space name available"}
+                                </td>
+                                <td style={{ border: "1px solid #ddd", padding: "20px" }}>{booking.status}</td>
+                                <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                                    {new Date(booking.start_time).toLocaleString()}
+                                </td>
+                                <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                                    {new Date(booking.end_time).toLocaleString()}
+                                </td>
+                                <td style={{ border: "1px solid #ddd", padding: "8px" }}>${booking.total_amount}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             )}
         </div>
     );

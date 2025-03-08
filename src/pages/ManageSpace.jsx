@@ -9,6 +9,7 @@ const ManageSpace = () => {
     const { spaces, createSpace, updateSpace, deleteSpace, fetchSpaces } = useContext(SpaceContext);
     const [currentSpace, setCurrentSpace] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const [spaceForm, setSpaceForm] = useState({
         name: "",
@@ -53,6 +54,7 @@ const ManageSpace = () => {
             }
             resetForm();
             await fetchSpaces();
+            setIsModalOpen(false);
         } catch (error) {
             toast.error("Action failed!");
             console.error("Error submitting form:", error);
@@ -73,6 +75,7 @@ const ManageSpace = () => {
             images: space.images || ""
             images: space.images || "",
         });
+        setIsModalOpen(true);
     };
 
     const resetForm = () => {
@@ -90,164 +93,239 @@ const ManageSpace = () => {
     };
 
     return (
-        <div className="admin-box">
-            <h2>Create a New Space</h2>
-            <br />
-            <br />
-            <form onSubmit={handleSubmit}>
-                <label>Name of the space</label>
-                <br />
-                <br />
-                <input
-                    type="text"
-                    name="name"
-                    placeholder="Name of the space"
-                    value={spaceForm.name}
-                    onChange={handleChange}
-                    required
-                />
-                <br />
-                <br />
-                <br />
-                <label>Description</label>
-                <br />
-                <br />
-                <textarea
-                    name="description"
-                    placeholder="Description"
-                    value={spaceForm.description}
-                    onChange={handleChange}
-                    required
-                />
-                <br />
-                <br />
-                <br />
-                <label>Add a location</label>
-                <br />
-                <br />
-                <input
-                    type="text"
-                    name="location"
-                    placeholder="Location"
-                    value={spaceForm.location}
-                    onChange={handleChange}
-                    required
-                />
-                <br />
-                <br />
-                <br />
-                <label>Prices</label>
-                <br />
-                <br />
-                <input
-                    type="number"
-                    name="price_per_hour"
-                    placeholder="Price per hour"
-                    value={spaceForm.price_per_hour}
-                    onChange={handleChange}
-                    required
-                />
-                <br />
-                <br />
-                <input
-                    type="number"
-                    name="price_per_day"
-                    placeholder="Price per day"
-                    value={spaceForm.price_per_day}
-                    onChange={handleChange}
-                    required
-                />
-                <br />
-                <br />
-                <br />
-                <label>Availability</label>
-                <br />
-                <br />
-                <select
-                    name="availability"
-                    value={spaceForm.availability}
-                    onChange={handleChange}
-                    required
-                >
-                    <option value={true}>Available</option>
-                    <option value={false}>Booked</option>
-                </select>
-                <br />
-                <br />
-                <br />
-                <label>Add Images</label>
-                <br />
-                <br />
-                <input
-                    type="text"
-                    name="images"
-                    placeholder="Image URLs (comma-separated)"
-                    value={spaceForm.images}
-                    onChange={handleChange}
-                    required
-                />
-                <br />
-                <br />
-                <br />
-                <button type="submit">SUBMIT</button>
-            </form>
+        <div className="manage-space" style={{ padding: "20px", margin: "0 auto", maxWidth: "1400px", minHeight: "100vh", }}>
+            {/* Button to open the modal */}
+            <button
+                onClick={() => {
+                    resetForm();
+                    setIsModalOpen(true);
+                }}
+                style={{
+                    padding: "20px",
+                    backgroundColor: "#104436",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "20px",
+                    cursor: "pointer",
+                    fontFamily: "Inria Serif",
+                    fontSize: "16px",
+                    transition: "background-color 0.3s ease",
+                    marginBottom: "20px",
+                }}
+                onMouseOver={(e) => (e.target.style.backgroundColor = "#256a57")}
+                onMouseOut={(e) => (e.target.style.backgroundColor = "#104436")}
+            >
+                Create New Space
+            </button>
 
-            <div className="max-w-6xl mx-auto p-6 space-y-8 bg-red-500">
-                <div className="bg-white shadow-lg rounded-lg p-6">
-                    <h2 className="text-3xl font-semibold mb-4 text-gray-800 text-center">
-                        {currentSpace ? "Update Space" : "Manage Spaces"}
-                    </h2>
-                    <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {Object.keys(spaceForm).map((key) => (
-                            <input
-                                key={key}
-                                type={key === "images" ? "text" : key.includes("price") ? "number" : "text"}
-                                name={key}
-                                placeholder={key.replace("_", " ").toUpperCase()}
-                                className="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500"
-                                value={spaceForm[key]}
-                                onChange={handleChange}
-                                required={key !== "images"}
-                            />
-                        ))}
-                        <button type="submit" className="bg-blue-600 text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-700 col-span-2" disabled={loading}>
-                            {loading ? "Processing..." : currentSpace ? "Update Space" : "Create Space"}
+            {/* Modal for the form */}
+            {isModalOpen && (
+                <div style={{
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    zIndex: 1000,
+                }}>
+                    <div style={{
+                        backgroundColor: "#F1EDE5",
+                        padding: "20px",
+                        borderRadius: "12px",
+                        width: "90%",
+                        border: "3px solid #104436",
+                        maxWidth: "600px",
+                        maxHeight: "90vh",
+                        overflowY: "auto",
+                        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+                        position: "relative",
+                    }}>
+                        {/* "X" button to close the modal */}
+                        <button
+                            onClick={() => setIsModalOpen(false)}
+                            style={{
+                                position: "absolute",
+                                top: "10px",
+                                right: "10px",
+                                backgroundColor: "transparent",
+                                border: "none",
+                                fontSize: "20px",
+                                cursor: "pointer",
+                                color: "#104436",
+                            }}
+                        >
+                            ×
                         </button>
-                    </form>
-                </div>
 
+                        <h2 style={{ fontFamily: "Inria Serif", textAlign: "center", color: "#104436", fontSize: "30px", marginBottom: "20px" }}>
+                            {currentSpace ? "Update Space" : "Create New Space"}
+                        </h2>
+                        <form onSubmit={handleSubmit} style={{ display: "grid", gap: "20px" }}>
+                            <label style={{ fontFamily: "Inria Serif", fontWeight: "600" }}>Name of the space</label>
+                            <input
+                                type="text"
+                                name="name"
+                                placeholder="Name of the space"
+                                value={spaceForm.name}
+                                onChange={handleChange}
+                                required
+                                style={{ padding: "20px", borderRadius: "20px", border: "3px solid #104436", width: "95%", fontFamily: "Red Hat Display" }}
+                            />
+                            <label style={{ fontFamily: "Inria Serif", fontWeight: "600" }}>Description</label>
+                            <textarea
+                                name="description"
+                                placeholder="Description"
+                                value={spaceForm.description}
+                                onChange={handleChange}
+                                required
+                                style={{ padding: "20px", borderRadius: "20px", border: "3px solid #104436", width: "97%", height: "20vh", fontFamily: "Red Hat Display" }}
+                            />
+                            <label style={{ fontFamily: "Inria Serif", fontWeight: "600" }}>Add a location</label>
+                            <input
+                                type="text"
+                                name="location"
+                                placeholder="Location"
+                                value={spaceForm.location}
+                                onChange={handleChange}
+                                required
+                                style={{ padding: "20px", borderRadius: "20px", border: "3px solid #104436", width: "95%", fontFamily: "Red Hat Display" }}
+                            />
+                            <label style={{ fontFamily: "Inria Serif", fontWeight: "600" }}>Prices</label>
+                            <input
+                                type="number"
+                                name="price_per_hour"
+                                placeholder="Price per hour"
+                                value={spaceForm.price_per_hour}
+                                onChange={handleChange}
+                                required
+                                style={{ padding: "20px", borderRadius: "20px", border: "3px solid #104436", width: "95%", fontFamily: "Red Hat Display" }}
+                            />
+                            <input
+                                type="number"
+                                name="price_per_day"
+                                placeholder="Price per day"
+                                value={spaceForm.price_per_day}
+                                onChange={handleChange}
+                                required
+                                style={{ padding: "20px", borderRadius: "20px", border: "3px solid #104436", width: "95%", fontFamily: "Red Hat Display" }}
+                            />
+                            <label style={{ fontFamily: "Inria Serif", fontWeight: "600" }}>Availability</label>
+                            <select
+                                name="availability"
+                                value={spaceForm.availability}
+                                onChange={handleChange}
+                                required
+                                style={{ padding: "20px", borderRadius: "20px", border: "3px solid #104436", width: "103%", fontFamily: "Red Hat Display", fontSize: "16px", backgroundColor: "#104436", color: "white" }}
+                            >
+                                <option value={true}>Available</option>
+                                <option value={false}>Booked</option>
+                            </select>
+                            <label style={{ fontFamily: "Inria Serif", fontWeight: "600" }}>Add Images</label>
+                            <input
+                                type="text"
+                                name="images"
+                                placeholder="Image URLs (comma-separated)"
+                                value={spaceForm.images}
+                                onChange={handleChange}
+                                required
+                                style={{ padding: "20px", borderRadius: "20px", border: "3px solid #104436", width: "95%", fontFamily: "Red Hat Display" }}
+                            />
+                            <button
+                                type="submit"
+                                style={{
+                                    padding: "20px",
+                                    backgroundColor: "#104436",
+                                    color: "#fff",
+                                    border: "none",
+                                    borderRadius: "20px",
+                                    cursor: "pointer",
+                                    fontFamily: "Inria Serif",
+                                    fontSize: "16px",
+                                    transition: "background-color 0.3s ease",
+                                    width: "103%",
+                                }}
+                                onMouseOver={(e) => (e.target.style.backgroundColor = "#256a57")}
+                                onMouseOut={(e) => (e.target.style.backgroundColor = "#104436")}
+                            >
+                                {loading ? "Processing..." : currentSpace ? "Update Space" : "Create Space"}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Display spaces */}
+            <div style={{ marginTop: "40px", marginBottom: "50px" }}>
                 {loading ? (
-                    <p className="text-center text-gray-500">Loading spaces...</p>
+                    <p>Loading spaces...</p>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px" }}>
                         {spaces.length > 0 ? (
                             spaces.map(space => (
-                                <div key={space.id} className="p-4 shadow-lg rounded-lg border bg-white">
-                                    <img 
-                                        src={space.images && (space.images.startsWith("data:image") || space.images.startsWith("http"))
-                                            ? space.images 
-                                            : "https://source.unsplash.com/400x300/?office,workspace"} 
-                                        alt="Space" 
-                                        className="w-full h-48 object-cover rounded-lg" 
-                                        onError={(e) => { e.target.src = "https://dummyimage.com/400x300/000/fff&text=No+Image"; }} 
+                                <div
+                                    key={space.id}
+                                    style={{
+                                        border: "3px solid #104436",
+                                        borderRadius: "10px",
+                                        padding: "20px",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "20px",
+                                        boxShadow: "0 8px 16px rgba(0, 0, 0, 0.1)",
+                                        backgroundColor: "#F1EDE5",
+                                        borderBottomWidth: "10px",
+                                    }}
+                                >
+                                    <img
+                                        src={space.images}
+                                        alt="Space"
+                                        style={{ width: "100%", height: "200px", borderRadius: "10px", objectFit: "cover" }}
+                                        onError={(e) => { e.target.src = "https://dummyimage.com/400x300/000/fff&text=No+Image"; }}
                                     />
-                                    <div className="p-4">
-                                        <h3 className="text-xl font-semibold text-gray-800">{space.name || "Unnamed Space"}</h3>
-                                        <p className="text-gray-600">{space.description || "No description available"}</p>
-                                        <p><strong>Location:</strong> {space.location || "Unknown"}</p>
-                                        <p><strong>Price per Hour:</strong> ${space.price_per_hour || 0}</p>
-                                        <p><strong>Price per Day:</strong> ${space.price_per_day || 0}</p>
-                                        <p><strong>Availability:</strong> <span className={`font-bold ${space.availability ? "text-green-700" : "text-red-700"}`}>
-                                            {space.availability ? "Available" : "Booked"}
-                                        </span></p>
-                                        <div className="flex justify-between mt-4">
-                                            <button onClick={() => updateSpace(space.id, { availability: !space.availability })} className="px-4 py-2 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600">
-                                                Toggle Availability
-                                            </button>
-                                            <button onClick={() => deleteSpace(space.id)} className="px-4 py-2 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600">
+                                    <div style={{ flex: 1 }}>
+                                        <h3 style={{ marginBottom: "10px", fontFamily: "Inria Serif", color: "#104436" }}>{space.name}</h3>
+                                        <p style={{ fontFamily: "Red Hat Display", color: "#333" }}>{space.description}</p>
+                                        <p style={{ fontFamily: "Red Hat Display", color: "#333" }}><strong>Location:</strong> {space.location}</p>
+                                        <p style={{ fontFamily: "Red Hat Display", color: "#333" }}><strong>Price per Hour:</strong> ${space.price_per_hour}</p>
+                                        <p style={{ fontFamily: "Red Hat Display", color: "#333" }}><strong>Price per Day:</strong> ${space.price_per_day}</p>
+                                        <p style={{ fontFamily: "Red Hat Display", color: "#333" }}><strong>Availability:</strong> {space.availability ? "Available" : "Booked"}</p>
+                                        <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+                                            <button
+                                                onClick={() => deleteSpace(space.id)}
+                                                style={{
+                                                    padding: "10px 20px",
+                                                    backgroundColor: "#ff4d4d",
+                                                    color: "#fff",
+                                                    border: "none",
+                                                    borderRadius: "20px",
+                                                    cursor: "pointer",
+                                                    fontFamily: "Red Hat Display",
+                                                    transition: "background-color 0.3s ease",
+                                                }}
+                                                onMouseOver={(e) => (e.target.style.backgroundColor = "#cc0000")}
+                                                onMouseOut={(e) => (e.target.style.backgroundColor = "#ff4d4d")}
+                                            >
                                                 Delete
                                             </button>
-                                            <button onClick={() => handleEdit(space)} className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600">
+                                            <button
+                                                onClick={() => handleEdit(space)}
+                                                style={{
+                                                    padding: "10px 20px",
+                                                    backgroundColor: "#104436",
+                                                    color: "#fff",
+                                                    border: "none",
+                                                    borderRadius: "20px",
+                                                    cursor: "pointer",
+                                                    fontFamily: "Red Hat Display",
+                                                    transition: "background-color 0.3s ease",
+                                                }}
+                                                onMouseOver={(e) => (e.target.style.backgroundColor = "#256a57")}
+                                                onMouseOut={(e) => (e.target.style.backgroundColor = "#104436")}
+                                            >
                                                 Update
                                             </button>
                                         </div>
@@ -255,7 +333,7 @@ const ManageSpace = () => {
                                 </div>
                             ))
                         ) : (
-                            <p className="text-center text-gray-500">No spaces available.</p>
+                            <p>No spaces available.</p>
                         )}
                     </div>
                 )}

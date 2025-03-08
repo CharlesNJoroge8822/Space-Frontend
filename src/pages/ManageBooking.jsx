@@ -1,152 +1,136 @@
-import React, { useState, useEffect } from "react";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import "../App.css"; // Ensure this file has improved styles
-
+import React, { useContext, useEffect, useState } from "react";
+import { BookingContext } from "../context/BookingContext";
+import { toast } from "react-toastify";
+// $
 const ManageBookings = () => {
-    const [bookings, setBookings] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const { bookings, fetchAllBookings, deleteBooking, completePayment } = useContext(BookingContext);
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [isEditing, setIsEditing] = useState(false);
-    const [currentBooking, setCurrentBooking] = useState({
-        id: null,
-        user_id: "",
-        space_id: "",
-        start_time: "",
-        end_time: "",
-        status: ""
-    });
 
-    // Fetch bookings from the backend
-    const fetchBookings = async () => {
-        setLoading(true);
-        try {
-            const response = await fetch("http://127.0.0.1:5000/bookings", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${sessionStorage.getItem("token")}`
-                },
-                credentials: "include",
-            });
-
-            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-            const data = await response.json();
-            setBookings(Array.isArray(data.bookings) ? data.bookings : []);
-            if (!data.bookings.length) {
-                toast.warning("⚠️ No bookings found.", { autoClose: 1000 });
-            }
-        } catch (error) {
-            setError("Error fetching bookings. Please try again.");
-            toast.error("❌ Error fetching bookings.", { autoClose: 1000 });
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Create or update a booking
-    const saveBooking = async (e) => {
-        e.preventDefault();
-        const url = isEditing
-            ? `http://127.0.0.1:5000/bookings/${currentBooking.id}`
-            : "http://127.0.0.1:5000/bookings";
-        const method = isEditing ? "PATCH" : "POST";
-
-        try {
-            const response = await fetch(url, {
-                method,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${sessionStorage.getItem("token")}`
-                },
-                credentials: "include",
-                body: JSON.stringify(currentBooking),
-            });
-
-            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-            toast.success(isEditing ? "✅ Booking updated!" : "✅ Booking created!", { autoClose: 1000 });
-
-            fetchBookings();
-            setIsEditing(false);
-            setCurrentBooking({ id: null, user_id: "", space_id: "", start_time: "", end_time: "", status: "" });
-        } catch (error) {
-            toast.error(`❌ ${error.message}`, { autoClose: 1000 });
-        }
-    };
-
-    // Delete a booking
-    const deleteBooking = async (id) => {
-        try {
-            const response = await fetch(`http://127.0.0.1:5000/bookings/${id}`, {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${sessionStorage.getItem("token")}`
-                },
-                credentials: "include",
-            });
-
-            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-
-            setBookings((prev) => prev.filter(booking => booking.id !== id));
-            toast.success("✅ Booking deleted!", { autoClose: 1000 });
-        } catch (error) {
-            toast.error(`❌ ${error.message}`, { autoClose: 1000 });
-        }
-    };
-
-    // Handle input changes
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setCurrentBooking({ ...currentBooking, [name]: value });
-    };
-
+    // Fetch all bookings on component mount
     useEffect(() => {
-        fetchBookings();
-    }, []);
+        const loadBookings = async () => {
+            try {
+                await fetchAllBookings(); // Fetch all bookings
+            } catch (error) {
+                console.error("Error loading bookings:", error);
+                setError("Failed to load bookings. Please try again later.");
+                toast.error("❌ Failed to load bookings.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadBookings();
+    }, [fetchAllBookings]);
+
+    // Handle deleting a booking
+    const handleDeleteBooking = async (id) => {
+        if (window.confirm("Are you sure you want to delete this booking?")) {
+            try {
+                await deleteBooking(id);
+                toast.success("✅ Booking deleted successfully!");
+            } catch (error) {
+                toast.error("❌ Failed to delete booking.");
+            }
+        }
+    };
+
+    // Handle completing payment for a booking
+    const handleCompletePayment = async (id) => {
+        if (window.confirm("Are you sure you want to mark this booking as paid?")) {
+            try {
+                await completePayment(id);
+                toast.success("✅ Payment completed successfully!");
+            } catch (error) {
+                toast.error("❌ Failed to complete payment.");
+            }
+        }
+    };
+
+    if (loading) {
+        return <div style={{ textAlign: "center", marginTop: "20px", fontSize: "18px" }}>Loading bookings...</div>;
+    }
+
+    if (error) {
+        return <div style={{ textAlign: "center", marginTop: "20px", color: "red", fontSize: "18px" }}>{error}</div>;
+    }
 
     return (
-        <div className="manage-bookings-container">
-            <h1 className="manage-bookings-heading">Manage Bookings</h1>
-
-
-
-            {/* Bookings Table */}
-            <table className="bookings-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>User ID</th>
-                        <th>Space ID</th>
-                        <th>Start Time</th>
-                        <th>End Time</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {bookings.map((booking) => (
-                        <tr key={booking.id}>
-                            <td>{booking.id}</td>
-                            <td>{booking.user_id}</td>
-                            <td>{booking.space_id}</td>
-                            <td>{new Date(booking.start_time).toLocaleString()}</td>
-                            <td>{new Date(booking.end_time).toLocaleString()}</td>
-                            <td>{booking.status}</td>
-                            <td>
-
-                                <button onClick={() => deleteBooking(booking.id)} className="delete-button">
-                                    Delete
-                                </button>
-                            </td>
+        <div style={{ padding: "40px", minHeight: "100vh" }}>
+            <h1 style={{ textAlign: "center", color: "#104436", marginBottom: "60px", fontFamily: "Inria Serif", fontSize: "40px" }}>Manage Bookings</h1>
+            {bookings.length === 0 ? (
+                <p style={{ textAlign: "center", fontFamily: "Red Hat Display", fontSize: "16px", color: "#666" }}>No bookings found.</p>
+            ) : (
+                <table
+                    style={{
+                        width: "100%",
+                        borderCollapse: "collapse",
+                        boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                    }}
+                >
+                    <thead>
+                        <tr style={{ backgroundColor: "#104436", color: "#fff", fontFamily: "Inria Serif" }}>
+                            <th style={{ padding: "12px", textAlign: "left" }}>Booking ID</th>
+                            <th style={{ padding: "12px", textAlign: "left" }}>User Name</th>
+                            <th style={{ padding: "12px", textAlign: "left" }}>Space Name</th>
+                            <th style={{ padding: "12px", textAlign: "left" }}>Start Time</th>
+                            <th style={{ padding: "12px", textAlign: "left" }}>End Time</th>
+                            <th style={{ padding: "12px", textAlign: "left" }}>Total Amount</th>
+                            <th style={{ padding: "12px", textAlign: "left" }}>Status</th>
+                            <th style={{ padding: "12px", textAlign: "left" }}>Actions</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
-
-            <ToastContainer position="top-right" autoClose={2000} />
+                    </thead>
+                    <tbody>
+                        {bookings.map((booking) => (
+                            <tr
+                                key={booking.id}
+                                style={{
+                                    backgroundColor: "#F1EDE5",
+                                    borderBottom: "1px solid #ddd",
+                                    transition: "background-color 0.3s",
+                                }}
+                            >
+                                <td style={{ padding: "12px", color: "#333" }}>{booking.id}</td>
+                                {/* Update user name to use correct field */}
+                                <td style={{ padding: "12px", color: "#333" }}>{booking.user_name}</td>
+                                {/* Update space name to use correct field */}
+                                <td style={{ padding: "12px", color: "#333" }}>{booking.space_name}</td>
+                                <td style={{ padding: "12px", color: "#333" }}>
+                                    {new Date(booking.start_time).toLocaleString()}
+                                </td>
+                                <td style={{ padding: "12px", color: "#333" }}>
+                                    {new Date(booking.end_time).toLocaleString()}
+                                </td>
+                                <td style={{ padding: "12px", color: "#333" }}>$. {booking.total_amount}</td>
+                                <td style={{ padding: "12px", color: "#333" }}>{booking.status}</td>
+                                <td style={{ padding: "12px" }}>
+                                    <button
+                                        onClick={() => handleDeleteBooking(booking.id)}
+                                        style={{
+                                            marginLeft: "10px",
+                                            padding: "10px 12px",
+                                            backgroundColor: "#dc3545",
+                                            fontFamily: "Inria Serif",
+                                            color: "#fff",
+                                            border: "none",
+                                            borderRadius: "4px",
+                                            fontSize: "16px",
+                                            cursor: "pointer",
+                                            transition: "background-color 0.3s",
+                                        }}
+                                    >
+                                        Delete
+                                    </button>
+                                   
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            )}
         </div>
     );
 };
