@@ -15,7 +15,7 @@ const ManageBookings = () => {
             } catch (error) {
                 console.error("Error loading bookings:", error);
                 setError("Failed to load bookings. Please try again later.");
-                toast.error("❌ Failed to load bookings.");
+                toast.error(" Failed to load bookings.");
             } finally {
                 setLoading(false);
             }
@@ -29,9 +29,9 @@ const ManageBookings = () => {
         if (window.confirm("Are you sure you want to delete this booking?")) {
             try {
                 await deleteBooking(id);
-                toast.success("✅ Booking deleted successfully!");
+                toast.success(" Booking deleted successfully!");
             } catch (error) {
-                toast.error("❌ Failed to delete booking.");
+                toast.error(" Failed to delete booking.");
             }
         }
     };
@@ -41,9 +41,9 @@ const ManageBookings = () => {
         if (window.confirm("Are you sure you want to mark this booking as paid?")) {
             try {
                 await completePayment(id);
-                toast.success("✅ Payment completed successfully!");
+                toast.success(" Payment completed successfully!");
             } catch (error) {
-                toast.error("❌ Failed to complete payment.");
+                toast.error(" Failed to complete payment.");
             }
         }
     };

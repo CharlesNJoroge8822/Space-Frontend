@@ -1,7 +1,7 @@
 import { createContext, useState, useCallback, useContext } from "react";
 import { toast } from "react-toastify";
-import { BookingContext } from "./BookingContext"; // ✅ Ensure bookings update
-import { SpaceContext } from "./SpaceContext"; // ✅ Ensure spaces update
+import { BookingContext } from "./BookingContext"; 
+import { SpaceContext } from "./SpaceContext"; 
 
 export const PaymentsContext = createContext();
 
@@ -10,7 +10,6 @@ export const PaymentsProvider = ({ children }) => {
     const { fetchBookings } = useContext(BookingContext);
     const { fetchSpaces } = useContext(SpaceContext);
 
-    // ✅ Initiate M-Pesa STK Push
 const stkPush = useCallback(async (phoneNumber, amount, bookingId) => {
     setIsPaymentProcessing(true);
     try {
@@ -18,7 +17,7 @@ const stkPush = useCallback(async (phoneNumber, amount, bookingId) => {
             phone_number: Number(phoneNumber),
             amount: amount,
             booking_id: bookingId,
-            user_id: sessionStorage.getItem("user_id"), // Ensure user is included
+            user_id: sessionStorage.getItem("user_id"), 
         };
 
         const response = await fetch("https://space-backend-gu2q.onrender.com/payments", {
@@ -32,10 +31,10 @@ const stkPush = useCallback(async (phoneNumber, amount, bookingId) => {
         }
 
         const data = await response.json();
-        toast.success("✅ M-Pesa STK Push request sent! Approve the prompt.");
+        toast.success("M-Pesa STK Push request sent! Approve the prompt.");
         return data;
     } catch (error) {
-        toast.error("❌ STK Push Failed.");
+        toast.error(" STK Push Failed.");
         console.error("STK Push Error:", error);
         throw error;
     } finally {
@@ -43,7 +42,7 @@ const stkPush = useCallback(async (phoneNumber, amount, bookingId) => {
     }
 }, []);
 
-// ✅ Check Payment Status
+
 const checkPaymentStatus = useCallback(async (transactionId) => {
     try {
         const response = await fetch(`https://space-backend-gu2q.onrender.com/payments/${transactionId}`);
@@ -58,7 +57,7 @@ const checkPaymentStatus = useCallback(async (transactionId) => {
 }, []);
 
 
-    // ✅ Delete Payment & Update Bookings
+    // Delete Payment & Update Bookings
     const deletePayment = async (id) => {
         try {
             const token = sessionStorage.getItem("token");
@@ -87,14 +86,14 @@ const checkPaymentStatus = useCallback(async (transactionId) => {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
 
-            toast.success("✅ Payment deleted successfully!", { autoClose: 1000 });
+            toast.success(" Payment deleted successfully!", { autoClose: 1000 });
 
-            // ✅ After deletion, refresh bookings & spaces
+            //  After deletion, refresh bookings & spaces
             fetchBookings();
             fetchSpaces();
         } catch (error) {
             console.error("Error deleting payment:", error);
-            toast.error(`❌ ${error.message}`, { autoClose: 1000 });
+            toast.error(` ${error.message}`, { autoClose: 1000 });
         }
     };
 

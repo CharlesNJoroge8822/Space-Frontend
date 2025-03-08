@@ -18,7 +18,7 @@ export const UserProvider = ({ children }) => {
         return storedUsers ? JSON.parse(storedUsers) : [];
     });
 
-/** ✅ Fetch all users (Admin Only) */
+/** Fetch all users (Admin Only) */
 const fetchAllUsers = async () => {
     const token = sessionStorage.getItem("token");
 
@@ -34,7 +34,7 @@ const fetchAllUsers = async () => {
     }
 
     try {
-        console.log("🔄 Fetching users...");
+        console.log("Fetching users...");
         const response = await fetch("https://space-backend-gu2q.onrender.com/users", {
             method: "GET",
             headers: {
@@ -49,19 +49,19 @@ const fetchAllUsers = async () => {
         }
 
         const data = await response.json();
-        console.log("✅ Users fetched successfully:", data.users);
+        console.log("Users fetched successfully:", data.users);
 
-        setAllUsers([...data.users]); // ✅ Ensures React state updates
-        sessionStorage.setItem("all_users", JSON.stringify(data.users)); // ✅ Cache users
+        setAllUsers([...data.users]); // Ensures React state updates
+        sessionStorage.setItem("all_users", JSON.stringify(data.users)); //  Cache users
 
     } catch (error) {
-        console.error("❌ Fetch Users Error:", error.message);
+        console.error(" Fetch Users Error:", error.message);
         setAllUsers([]); // Prevent stale data
         toast.error(error.message);
     }
 };
 
-    /** ✅ Load current user from sessionStorage */
+    /**  Load current user from sessionStorage */
     useEffect(() => {
         const storedUser = sessionStorage.getItem("current_user");
         if (storedUser) {
@@ -69,7 +69,7 @@ const fetchAllUsers = async () => {
         }
     }, []);
 
-    /** ✅ Ensure fetchAllUsers runs when Admin logs in */
+    /**  Ensure fetchAllUsers runs when Admin logs in */
     useEffect(() => {
         if (current_user?.role === "Admin") {
             console.log("👤 Admin detected, fetching all users...");
@@ -77,7 +77,7 @@ const fetchAllUsers = async () => {
         }
     }, [current_user]); 
 
-    /** ✅ Log `allUsers` updates */
+    /**  Log `allUsers` updates */
     useEffect(() => {
         console.log("📌 `allUsers` updated:", allUsers);
     }, [allUsers]); 
@@ -168,7 +168,7 @@ const fetchAllUsers = async () => {
         }
     };
 
-    /** ✅ Login function */
+    /**  Login function */
 const login = async (email, password, role) => {
     const loadingToast = toast.loading("Logging you in...");
     try {
@@ -209,7 +209,7 @@ const login = async (email, password, role) => {
     }
 };
 
-/** ✅ Register a new user */
+/**  Register a new user */
 const addUser = async (name, email, password, role = "Client") => {
     const loadingToast = toast.loading("Creating your account...");
 
@@ -260,13 +260,13 @@ const updateProfile = async (userId, updatedData) => {
 
         toast.success("User updated successfully!");
 
-        // ✅ Only refresh the user list if the current user is an admin
+        //  Only refresh the user list if the current user is an admin
         if (current_user?.role === "Admin") {
             fetchAllUsers(); // Refresh the user list
         }
 
     } catch (error) {
-        console.error("❌ Update user error:", error.message);
+        console.error(" Update user error:", error.message);
         toast.error(error.message);
     }
 };
@@ -281,7 +281,7 @@ const updateProfile = async (userId, updatedData) => {
         }
 
         try {
-            console.log(`🗑️ Deleting user with ID: ${userId}...`);
+            console.log(` Deleting user with ID: ${userId}...`);
             const response = await fetch(`https://space-backend-gu2q.onrender.com/users/${userId}`, {
                 method: "DELETE",
                 headers: {
@@ -299,13 +299,13 @@ const updateProfile = async (userId, updatedData) => {
             fetchAllUsers(); // Refresh the user list
 
         } catch (error) {
-            console.error("❌ Delete user error:", error.message);
+            console.error(" Delete user error:", error.message);
             toast.error(error.message);
         }
     };
 
 
-    /** ✅ Logout */
+    /**  Logout */
     const logout = () => {
         console.log("🔴 Logging out...");
         const loadingToast = toast.loading("Logging out...");
@@ -354,7 +354,7 @@ const updateProfile = async (userId, updatedData) => {
             handleGoogleLogin,
             googleLogin ,
             addUser,
-            deleteUser,  // ✅ Add deleteUser to context
+            deleteUser,  //  Add deleteUser to context
             updateProfile // 
 
         }}>

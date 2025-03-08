@@ -30,14 +30,14 @@ export const SpaceProvider = ({ children }) => {
             console.log("Fetched spaces:", data); // Debugging
 
             if (Array.isArray(data.spaces)) {
-                setSpaces(data.spaces); // ✅ Ensure it's always an array
+                setSpaces(data.spaces); // Ensure it's always an array
             } else {
-                setSpaces([]); // ✅ Prevent "map is not a function" error
+                setSpaces([]); // Prevent "map is not a function" error
             }
         } catch (error) {
             console.error("Error fetching spaces:", error);
             setError(`Error fetching spaces: ${error.message}`);
-            setSpaces([]); // ✅ Ensure spaces is always an array
+            setSpaces([]); // Ensure spaces is always an array
         } finally {
             setLoading(false);
         }
@@ -46,11 +46,11 @@ export const SpaceProvider = ({ children }) => {
     // Create Space
     const createSpace = async (spaceData) => {
         if (!spaceData.name || !spaceData.description || !spaceData.location) {
-            toast.error("⚠️ All fields are required!");
+            toast.error("All fields are required!");
             return;
         }
 
-        const toastId = toast.loading("⏳ Creating space...");
+        const toastId = toast.loading("Creating space...");
         try {
             const response = await fetch("https://space-backend-gu2q.onrender.com/spaces", {
                 method: "POST",
@@ -67,14 +67,14 @@ export const SpaceProvider = ({ children }) => {
             setSpaces((prev) => [...prev, data]);
 
             toast.update(toastId, {
-                render: "✅ Space created successfully!",
+                render: "Space created successfully!",
                 type: "success",
                 isLoading: false,
                 autoClose: 3000,
             });
         } catch (error) {
             toast.update(toastId, {
-                render: `🚨 ${error.message || "Network error, please try again."}`,
+                render: `${error.message || "Network error, please try again."}`,
                 type: "error",
                 isLoading: false,
                 autoClose: 3000,
@@ -84,7 +84,7 @@ export const SpaceProvider = ({ children }) => {
 
     // Update Space
     const updateSpace = async (spaceId, updatedData) => {
-        const toastId = toast.loading("⏳ Updating space...");
+        const toastId = toast.loading("Updating space...");
         try {
             const response = await fetch(`https://space-backend-gu2q.onrender.com/spaces/${spaceId}`, {
                 method: "PATCH",
@@ -102,14 +102,14 @@ export const SpaceProvider = ({ children }) => {
             );
 
             toast.update(toastId, {
-                render: "✅ Space updated successfully!",
+                render: "Space updated successfully!",
                 type: "success",
                 isLoading: false,
                 autoClose: 3000,
             });
         } catch (error) {
             toast.update(toastId, {
-                render: `🚨 ${error.message || "Network error, please try again."}`,
+                render: `${error.message || "Network error, please try again."}`,
                 type: "error",
                 isLoading: false,
                 autoClose: 3000,
@@ -129,7 +129,7 @@ export const SpaceProvider = ({ children }) => {
             return;
         }
 
-        const toastId = toast.loading("⏳ Deleting space...");
+        const toastId = toast.loading("Deleting space...");
         try {
             const response = await fetch(`https://space-backend-gu2q.onrender.com/spaces/${spaceId}`, {
                 method: "DELETE",
@@ -149,14 +149,14 @@ export const SpaceProvider = ({ children }) => {
             setSpaces((prev) => prev.filter((space) => space.id !== parseInt(spaceId)));
 
             toast.update(toastId, {
-                render: "✅ Space deleted successfully!",
+                render: "Space deleted successfully!",
                 type: "success",
                 isLoading: false,
                 autoClose: 3000,
             });
         } catch (error) {
             toast.update(toastId, {
-                render: `🚨 ${error.message}`,
+                render: `${error.message}`,
                 type: "error",
                 isLoading: false,
                 autoClose: 3000,
@@ -187,7 +187,7 @@ export const SpaceProvider = ({ children }) => {
 
     // Create Booking (without payment)
     const createBooking = async (spaceId, bookingData) => {
-        const toastId = toast.loading("⏳ Creating booking...");
+        const toastId = toast.loading("Creating booking...");
         try {
             const response = await fetch("https://space-backend-gu2q.onrender.com/bookings", {
                 method: "POST",
@@ -206,7 +206,7 @@ export const SpaceProvider = ({ children }) => {
     
             const data = await response.json();
             toast.update(toastId, {
-                render: "✅ Booking created successfully! Proceed to payment.",
+                render: "Booking created successfully! Proceed to payment.",
                 type: "success",
                 isLoading: false,
                 autoClose: 3000,
@@ -214,7 +214,7 @@ export const SpaceProvider = ({ children }) => {
             return data;
         } catch (error) {
             toast.update(toastId, {
-                render: `🚨 ${error.message}`,
+                render: `${error.message}`,
                 type: "error",
                 isLoading: false,
                 autoClose: 3000,

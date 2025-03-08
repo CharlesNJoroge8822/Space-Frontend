@@ -18,7 +18,6 @@ const ManageSpace = () => {
         price_per_hour: "",
         price_per_day: "",
         availability: true,
-        images: ""
         images: "",
     });
 
@@ -72,7 +71,6 @@ const ManageSpace = () => {
             price_per_hour: space.price_per_hour || "",
             price_per_day: space.price_per_day || "",
             availability: space.availability ?? true,
-            images: space.images || ""
             images: space.images || "",
         });
         setIsModalOpen(true);
@@ -86,7 +84,6 @@ const ManageSpace = () => {
             price_per_hour: "",
             price_per_day: "",
             availability: true,
-            images: ""
             images: "",
         });
         setCurrentSpace(null);
@@ -433,4 +430,4 @@ const ManageSpace = () => {
 };
 
 export default ManageSpace;
-export default ManageSpace;
+

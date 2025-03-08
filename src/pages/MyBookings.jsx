@@ -15,7 +15,7 @@ const MyBookings = () => {
             } catch (error) {
                 console.error("Error loading bookings:", error);
                 setError("Failed to load bookings. Please try again later.");
-                toast.error("❌ Failed to load bookings.");
+                toast.error("Failed to load bookings.");
             } finally {
                 setLoading(false);
             }

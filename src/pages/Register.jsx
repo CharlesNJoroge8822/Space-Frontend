@@ -83,7 +83,7 @@ export default function Register() {
                     />
                     {password && !validatePassword(password) && (
                         <p className="error">
-                            ⚠️ Password must have at least 6 characters, one uppercase letter, one number, and one special character.
+                            Password must have at least 6 characters, one uppercase letter, one number, and one special character.
                         </p>
                     )}
                     <br /><br />
@@ -98,7 +98,7 @@ export default function Register() {
                         placeholder="Confirm Password" 
                         required 
                     />
-                    {confirmError && <p className="error">⚠️ {confirmError}</p>}
+                    {confirmError && <p className="error">{confirmError}</p>}
                     <br /><br />
 
                     <button type="submit">REGISTER</button>

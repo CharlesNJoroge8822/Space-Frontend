@@ -30,7 +30,7 @@ export const BookingProvider = ({ children }) => {
     
             const data = await response.json();
             toast.update(toastId, {
-                render: "✅ Booking created successfully! Proceed to payment.",
+                render: "Booking created successfully! Proceed to payment.",
                 type: "success",
                 isLoading: false,
                 autoClose: 3000,
@@ -68,42 +68,13 @@ export const BookingProvider = ({ children }) => {
         }
     }, []);
 
-//    const fetchUserBookings = async () => {
-//     const userId = sessionStorage.getItem("user_id");
-//     if (!userId) {
-//         console.log("No user ID found in sessionStorage. Please log in again.");
-//         return; // You can also return a fallback response or error here
-//     }
-    
-//     try {
-//         const response = await fetch(`https://space-backend-gu2q.onrender.com/bookings/${userId}`, {
-//             method: "GET",
-//             headers: {
-//                 "Content-Type": "application/json",
-//                 "Authorization": `Bearer ${authToken}`,
-//             },
-//         });
-        
-//         if (!response.ok) {
-//             throw new Error("Failed to fetch bookings");
-//         }
-        
-//         // Handle the response
-//         const bookings = await response.json();
-//         console.log(bookings);
-//     } catch (error) {
-//         console.error("Error fetching bookings:", error);
-//     }
-// };
-
-
 // Fetch the current user's bookings
 const fetchUserBookings = useCallback(async () => {
     try {
         const token = sessionStorage.getItem("token");
         if (!token) {
             console.error("User is not authenticated. Token is missing.");
-            toast.error("❌ User is not authenticated.");
+            toast.error("User is not authenticated.");
             return;
         }
 
@@ -120,7 +91,7 @@ const fetchUserBookings = useCallback(async () => {
         const data = await response.json();
         setBookings(data.bookings || []); // Ensure it's always an array
     } catch (error) {
-        toast.error("❌ Failed to fetch user bookings. Please try again.");
+        toast.error(" Failed to fetch user bookings. Please try again.");
         console.error("Fetch User Bookings Error:", error);
         setBookings([]); // Clear bookings on error
     }
@@ -142,13 +113,13 @@ const fetchUserBookings = useCallback(async () => {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
 
-            toast.success("✅ Booking deleted successfully!", { autoClose: 1000 });
+            toast.success("Booking deleted successfully!", { autoClose: 1000 });
 
             fetchBookings(); // Refetch bookings from the backend
             fetchSpaces(); // Update spaces after booking deletion
         } catch (error) {
             console.error("Error deleting booking:", error);
-            toast.error(`❌ ${error.message}`, { autoClose: 1000 });
+            toast.error(` ${error.message}`, { autoClose: 1000 });
         }
     };
 
@@ -158,7 +129,7 @@ const fetchUserBookings = useCallback(async () => {
             const token = sessionStorage.getItem("token");
             if (!token) {
                 console.error("User is not authenticated. Token is missing.");
-                toast.error("❌ User is not authenticated.");
+                toast.error(" User is not authenticated.");
                 return;
             }
 
@@ -175,7 +146,7 @@ const fetchUserBookings = useCallback(async () => {
             const data = await response.json();
             setBookings(data || []); // Ensure it's always an array
         } catch (error) {
-            toast.error("❌ Failed to fetch all bookings. Please try again.");
+            toast.error(" Failed to fetch all bookings. Please try again.");
             console.error("Fetch All Bookings Error:", error);
             setBookings([]); // Clear bookings on error
         }
