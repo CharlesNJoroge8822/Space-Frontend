@@ -2,7 +2,7 @@ import { useContext, useState, useEffect } from "react";
 import { SpaceContext } from "../context/SpaceContext";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-// Manage Spaces
+
 const ManageSpace = () => {
     const { spaces, createSpace, updateSpace, deleteSpace, fetchSpaces } = useContext(SpaceContext);
     const [currentSpace, setCurrentSpace] = useState(null);
