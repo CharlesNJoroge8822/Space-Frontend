@@ -105,11 +105,12 @@ export default function Register() {
                     <br /><br />
                         
                     <button
-  type="button"
-  onClick={handleGoogleLogin}
->
-  Sign up with Google
-</button>
+                        type="button"
+                        onClick={handleGoogleLogin}
+                        style={{ cursor: 'pointer' }}
+                        >
+                        Sign up with Google
+                    </button>
 
                     <br /><br />
 
