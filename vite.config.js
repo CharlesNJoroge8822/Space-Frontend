@@ -1,49 +1,38 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-
-// https://vite.dev/config/
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    port: process.env.PORT || 5173,  // Use the PORT environment variable or fallback to 5173 locally
-    host: '0.0.0.0',  // Expose the server on all network interfaces
-  },
-})
-
-
 const login = async (email, password, role, navigate) => {
-  try {
+    try {
       if (!role) {
-          toast.error("Role is required for login.");
-          return;
+        toast.error("Role is required for login.");
+        return;
       }
-
+  
       const loginEndpoint = "https://backend-student-motivation-app-1.onrender.com/login";
       const response = await fetch(loginEndpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ email, password }),
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email, password, role }), // Include role in the request body
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-          setAuthToken(data.access_token);
-          setCurrentUser(data);
-          localStorage.setItem("token", data.access_token);
-          localStorage.setItem("user", JSON.stringify(data));
-
-          toast.success("Login successful!");
-          navigate(data.role === "admin" ? "/admin" : "/student");
-      } else {
-          toast.error(data.error || "Invalid login credentials.");
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        toast.error(errorData.error || "Invalid login credentials.");
+        return;
       }
-  } catch (error) {
+  
+      const data = await response.json();
+  
+      // Assuming these functions are defined elsewhere
+      setAuthToken(data.access_token);
+      setCurrentUser(data);
+  
+      // Save token and user data to localStorage
+      localStorage.setItem("token", data.access_token);
+      localStorage.setItem("user", JSON.stringify(data));
+  
+      toast.success("Login successful!");
+      navigate(data.role === "admin" ? "/admin" : "/student");
+    } catch (error) {
       console.error("Login error:", error);
       toast.error("Failed to connect to the server.");
-  }
-};
+    }
+  };
