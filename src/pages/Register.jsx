@@ -21,7 +21,7 @@ export default function Register() {
         return regex.test(pwd);
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         if (!validatePassword(password)) {
             setPasswordError("Password must have at least 6 characters, one uppercase letter, one number, and one special character.");
@@ -33,19 +33,7 @@ export default function Register() {
         }
         setPasswordError('');
         setConfirmError('');
-    
-        try {
-            await addUser(name, email, password, role); // Assuming addUser is async and returns a success
-            toast.success("User registered successfully!");
-            navigate("/login"); // Navigate to Space page after successful registration
-        } catch (error) {
-            toast.error("Failed to register user.");
-        }
-    };
-    
-    const handleGoogleLogin = () => {
-        window.location.href = "http://127.0.0.1:5000/authorize_google";
-        toast.success("Success")
+        addUser(name, email, password, role);
     };
 
     return (
@@ -101,16 +89,26 @@ export default function Register() {
                     {confirmError && <p className="error">⚠️ {confirmError}</p>}
                     <br /><br />
 
+                    <label>
+                        <input 
+                            type="checkbox" 
+                            checked={role === 'Admin'} 
+                            onChange={(e) => setRole(e.target.checked ? 'Admin' : 'Client')} 
+                        />
+                        Register as Admin
+                    </label>
+                    <br /><br />
+
                     <button type="submit">REGISTER</button>
                     <br /><br />
-                        
-                    <button
-  type="button"
-  onClick={handleGoogleLogin}
->
-  Sign up with Google
-</button>
 
+                    <button
+                        type="button"
+                        onClick={() => (window.location.href = "https://space-backend-6.onrender.com/authorize_google")}
+                        style={{ cursor: "pointer" }}
+                    >
+                        Sign up with Google
+                    </button>
                     <br /><br />
 
                     <p>

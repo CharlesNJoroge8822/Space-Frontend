@@ -14,7 +14,7 @@ export const BookingProvider = ({ children }) => {
         try {
             console.log("Booking Data:", bookingData); // Log the payload
     
-            const response = await fetch("http://127.0.0.1:5000/bookings", {
+            const response = await fetch("https://space-backend-10.onrender.com/bookings", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -51,7 +51,7 @@ export const BookingProvider = ({ children }) => {
     //! Fetch all bookings
     const fetchBookings = useCallback(async () => {
         try {
-            const response = await fetch("http://127.0.0.1:5000/bookings", {
+            const response = await fetch("https://space-backend-10.onrender.com/bookings", {
                 method: "GET",
                 headers: { "Content-Type": "application/json" },
             });
@@ -76,7 +76,7 @@ export const BookingProvider = ({ children }) => {
 //     }
     
 //     try {
-//         const response = await fetch(`http://127.0.0.1:5000/bookings/${userId}`, {
+//         const response = await fetch(`https://space-backend-10.onrender.com/bookings/${userId}`, {
 //             method: "GET",
 //             headers: {
 //                 "Content-Type": "application/json",
@@ -107,7 +107,7 @@ const fetchUserBookings = useCallback(async () => {
             return;
         }
 
-        const response = await fetch("http://127.0.0.1:5000/my-bookings", {
+        const response = await fetch("https://space-backend-10.onrender.com/my-bookings", {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -129,7 +129,7 @@ const fetchUserBookings = useCallback(async () => {
     // Delete a booking
     const deleteBooking = async (id) => {
         try {
-            const response = await fetch(`http://127.0.0.1:5000/bookings/${id}`, {
+            const response = await fetch(`https://space-backend-10.onrender.com/bookings/${id}`, {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
             });
@@ -162,7 +162,7 @@ const fetchUserBookings = useCallback(async () => {
                 return;
             }
 
-            const response = await fetch("http://127.0.0.1:5000/bookings", {
+            const response = await fetch("https://space-backend-10.onrender.com/bookings", {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",

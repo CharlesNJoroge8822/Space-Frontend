@@ -112,7 +112,7 @@ const Spaces = () => {
                 user_id: current_user.id, // Use current user's ID
             };
 
-            const response = await fetch("http://127.0.0.1:5000/payments", {
+            const response = await fetch("https://space-backend-10.onrender.com/payments", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),

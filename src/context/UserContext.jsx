@@ -35,7 +35,7 @@ const fetchAllUsers = async () => {
 
     try {
         console.log("🔄 Fetching users...");
-        const response = await fetch("http://127.0.0.1:5000/users", {
+        const response = await fetch("https://space-backend-10.onrender.com/users", {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -125,7 +125,7 @@ const fetchAllUsers = async () => {
     const googleLogin = async (email) => {
         toast.loading("Logging you in ... ");
         try {
-            const response = await fetch("http://127.0.0.1:5000/googlelogin", {
+            const response = await fetch("https://space-backend-10.onrender.com/googlelogin", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email }),
@@ -138,7 +138,7 @@ const fetchAllUsers = async () => {
                 sessionStorage.setItem("token", data.access_token);
                 setAuthToken(data.access_token);
 
-                const userResponse = await fetch("http://127.0.0.1:5000/current_user", {
+                const userResponse = await fetch("https://space-backend-10.onrender.com/current_user", {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -172,7 +172,7 @@ const fetchAllUsers = async () => {
 const login = async (email, password, role) => {
     const loadingToast = toast.loading("Logging you in...");
     try {
-        const response = await fetch("http://127.0.0.1:5000/login", {
+        const response = await fetch("https://space-backend-10.onrender.com/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password, role }),
@@ -183,7 +183,7 @@ const login = async (email, password, role) => {
             sessionStorage.setItem("token", data.access_token);
             setAuthToken(data.access_token);
 
-            const userResponse = await fetch("http://127.0.0.1:5000/current_user", {
+            const userResponse = await fetch("https://space-backend-10.onrender.com/current_user", {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -214,7 +214,7 @@ const addUser = async (name, email, password, role = "Client") => {
     const loadingToast = toast.loading("Creating your account...");
 
     try {
-        const response = await fetch("http://127.0.0.1:5000/users", {
+        const response = await fetch("https://space-backend-10.onrender.com/users", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name, email, password, role }),
@@ -233,7 +233,7 @@ const addUser = async (name, email, password, role = "Client") => {
         toast.dismiss(loadingToast);
     }
 };
-
+z
 const updateProfile = async (userId, updatedData) => {
     const token = sessionStorage.getItem("token");
 
@@ -244,7 +244,7 @@ const updateProfile = async (userId, updatedData) => {
 
     try {
         console.log(`✏️ Updating user ${userId}...`, updatedData);
-        const response = await fetch(`http://127.0.0.1:5000/users/${userId}`, {
+        const response = await fetch(`https://space-backend-10.onrender.com/users/${userId}`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
@@ -282,7 +282,7 @@ const updateProfile = async (userId, updatedData) => {
 
         try {
             console.log(`🗑️ Deleting user with ID: ${userId}...`);
-            const response = await fetch(`http://127.0.0.1:5000/users/${userId}`, {
+            const response = await fetch(`https://space-backend-10.onrender.com/users/${userId}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
@@ -310,7 +310,7 @@ const updateProfile = async (userId, updatedData) => {
         console.log("🔴 Logging out...");
         const loadingToast = toast.loading("Logging out...");
 
-        fetch("http://127.0.0.1:5000/logout", {
+        fetch("https://space-backend-10.onrender.com/logout", {
             method: "DELETE",
             headers: {
                 "Content-type": "application/json",
